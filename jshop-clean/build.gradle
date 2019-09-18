@@ -1,0 +1,15 @@
+plugins {
+	id 'java'
+}
+group 'umd.cs'
+description 'shop'
+
+jar {
+    manifest {
+        attributes(
+                'Main-Class': 'umd.cs.shop.JSJshop'
+        )
+    }
+}
+
+version = "0.1"
