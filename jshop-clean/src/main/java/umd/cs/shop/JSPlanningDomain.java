@@ -116,6 +116,44 @@ public class JSPlanningDomain {
         return new JSPairPlanTSListNodes(pair, listNodes);
     }
 
+    public JSPairTStateTasks solveMCTS(JSPlanningProblem prob, int runs){
+        JSTState ts = new JSTState(prob.state(), new JSListLogicalAtoms(), new JSListLogicalAtoms());
+        JSTasks tasks = prob.tasks();
+        JSPlan plan = new JSPlan();
+        JSPairTStateTasks initial = new JSPairTStateTasks(ts, tasks, plan);
+        MCTSPolicy policy = new UCTPolicy();
+        for(int i = 1; i <= runs ; i++) {
+            //System.out.println(" !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!! Starting Run number : " + i);
+            tasks.runMCTS(initial, this, new Vector<Object>(), policy);
+            initial.setInTree();
+        }
+
+        JSPairTStateTasks current = initial;
+        while (current.children.size() != 0){
+            if(current.plan.isFailure()){
+                break;
+            }
+            JSPairTStateTasks bestChild = null;
+            Double bestReward = Double.NEGATIVE_INFINITY;
+            Double currentReward;
+            for (JSPairTStateTasks child : current.children){
+                currentReward = child.reward();
+                if(currentReward.compareTo(bestReward) > 0 && child.visited() > 0){
+                    bestChild = child;
+                    bestReward = child.reward();
+                }
+            }
+            if(bestChild == null){
+                System.out.println("bestChild is NULL!!!!");
+                //current.tState().print();
+                //current.taskNetwork().print();
+                break;
+            }
+            current = bestChild;
+        }
+
+        return current;
+    }
 
     public JSListPairPlanTStateNodes solveAll(JSPlanningProblem prob, boolean All) {
 

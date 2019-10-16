@@ -24,6 +24,67 @@ public final class JSJshop {
 
     private JSPlanningDomain dom;
 
+    public static void main(String[] args) {
+        if (args.length < 2 || args.length > 7) {
+            printUsage();
+            //   JSUtil.println("[verbose-level] can be integer from  0 to 10. The default verbose value is 0" );
+            return;
+        }
+
+        String all = "-a";
+        String mcts = "-m";
+        String detail = "-d";
+        int level, i;
+        boolean monteCarlo = false;
+        int runs = 0;
+        try {
+            for (i = 2; i < args.length; i++)
+
+                if (mcts.equalsIgnoreCase(args[i])) {
+                    monteCarlo = true;
+                    i++;
+                    if (i >= args.length) {
+                        printUsage();
+                        return;
+                    }
+                    runs = Integer.parseInt(args[i]);
+                } else if (all.equalsIgnoreCase(args[i]))
+                    JSJshopVars.allPlans = true;
+                else if(detail.equalsIgnoreCase(args[i])) {
+                    i++;
+                    if (i >= args.length) {
+                        printUsage();
+                        return;
+                    }
+                    level = Integer.parseInt(args[i]);
+                    JSJshopVars.flagLevel = level;
+       /*
+            JSUtil.println("Invalid parameter" );
+            return;*/
+                }
+        } catch (NumberFormatException e) {
+            JSUtil.println("Invalid parameter");
+            printUsage();
+            return;
+        }
+        if (monteCarlo) {
+            new JSJshop(args[0], args[1], runs);
+        } else {
+            new JSJshop(args[0], args[1]);
+        }
+
+    } // main
+
+    public static void printUsage() {
+        JSUtil.println("Usage :");
+        JSUtil.println(" java JSJshop <domainDef-file-name> <problemDef-file-name> [-a] [-d k] [-m n]");// [verbose-level]" );
+        JSUtil.println("[-a] will print all plans, but only works when using standard search");
+        JSUtil.println("[-d k] will print more details to the solution when using standard search. k should be an Integer in the range 1 to 10, the higher k the more details");
+        JSUtil.println("[-m n] will start Monte Carlo Tree Search with n runs");
+
+    }
+
+
     private JSPlanningProblem prob;
 
     private JSListPlanningProblem probSet = new JSListPlanningProblem();
@@ -35,52 +96,7 @@ public final class JSJshop {
     private JSPairPlanTSListNodes solution;
 
     /*HICAP:    private NeoEditor aNeoEditor;*/
-
     /*====  main ====*/
-    public static void main(String[] args) {
-        if (args.length < 2 || args.length > 4) {
-            JSUtil.println("Usage :");
-            JSUtil.println(" java JSJshop <domainDef-file-name> <problemDef-file-name> [number-of-plans]");// [verbose-level]" );
-            JSUtil.println("[number-of-plans] can be 'one' or 'all'. The default value is 'one'");
-            //   JSUtil.println("[verbose-level] can be integer from  0 to 10. The default verbose value is 0" );
-            return;
-        }
-        String one = "one";
-        String all = "all";
-        int level, i;
-        try {
-            for (i = 2; i < args.length; i++)
-
-                if (one.equalsIgnoreCase(args[i]))
-                    JSJshopVars.allPlans = false;
-                else if (all.equalsIgnoreCase(args[i]))
-                    JSJshopVars.allPlans = true;
-                else {
-                    level = Integer.valueOf(args[i]).intValue();
-                    JSJshopVars.flagLevel = level;
-       /*    
-            JSUtil.println("Invalid parameter" );
-            return;*/
-                }
-        } catch (NumberFormatException e) {
-            JSUtil.println("Invalid parameter");
-            return;
-        }
-        new JSJshop(args[0], args[1]);
-
-
-
-/*HICAP:
-      else if( args.length==1 && args[0].indexOf(".shp") >= 0)
-      {
-        new JSJshop(args[0]);
-      }
-      else 
-      {
-        System.err.println("USAGE: java JSJshop [<file-name>.shp]");
-      }
-*/
-    } // main
 
     /* constructors */
 
@@ -126,7 +142,7 @@ public final class JSJshop {
                 // Return the first solution to HICAP
                 solution = (JSPairPlanTSListNodes) allPlans.elementAt(0);
                 sol = solution.planS().plan();
-
+                //solution.print();
                 JSUtil.println(allPlans.size() + " plans found.");
                 if (JSJshopVars.flagLevel > 0) {
                     JSUtil.println("********* PLANS *******");
@@ -141,6 +157,54 @@ public final class JSJshop {
         }
         return;
     }
+
+    //MCTS
+    public JSJshop(String nameDomainFile, String nameProblemFile, int runs) {
+        final long startTime = System.currentTimeMillis();
+        JSPairPlanTSListNodes pair;
+        JSPairTStateTasks goalState;
+        JSUtil.println("Reading file " + nameDomainFile);
+        if (!parserFile(nameDomainFile))
+            if (JSJshopVars.flagExit)
+                System.exit(0);
+            else
+                return;
+        JSUtil.println("Domain file parsed successfully");
+        JSUtil.println("Reading file " + nameProblemFile);
+        if (!parserFile(nameProblemFile))
+            if (JSJshopVars.flagExit)
+                System.exit(0);
+            else
+                return;
+
+        JSUtil.println("Problem file parsed successfully");
+        final long parseTime = System.currentTimeMillis();
+        JSUtil.println("Parsing Time: " + (parseTime - startTime) );
+
+        for (int k = 0; k < probSet.size(); k++) {
+
+            prob = (JSPlanningProblem) probSet.elementAt(k);
+            JSUtil.println("Solving Problem :" + prob.Name());
+
+            goalState = dom.solveMCTS(prob, runs);
+            final long searchTime = System.currentTimeMillis();
+            JSUtil.println("Search Time: " + (searchTime - parseTime) );
+            JSUtil.println("Total Time: " + (searchTime - startTime) );
+            if (goalState.plan.isFailure()) {
+                JSUtil.println("0 plans found");
+            } else {
+                JSUtil.println("Plan found:");
+                JSUtil.println("********* PLAN *******");
+                goalState.plan.printPlan();
+                //goalState.tState().print();
+                //System.out.println("Task network: ");
+                //goalState.taskNetwork().print();
+                //System.out.println(goalState.visited());
+            }
+        }
+        return;
+    }
+
 
 /*HICAP:   
     public

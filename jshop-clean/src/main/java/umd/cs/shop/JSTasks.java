@@ -1,5 +1,6 @@
 package umd.cs.shop;
 
+import java.nio.file.FileSystemNotFoundException;
 import java.util.*;
 
 import java.io.*;
@@ -56,11 +57,90 @@ public class JSTasks extends JSListLogicalAtoms {
         //  JSUtil.flagParser("ListTasks parse succesful");
     }
 
+    public double runMCTS(JSPairTStateTasks tst, JSPlanningDomain dom, Vector<Object> listNodes, MCTSPolicy policy) {
+
+        JSPlan ans;
+        JSPairPlanTState pair;
+
+        if(tst.taskNetwork().isEmpty()){
+            tst.incVisited();
+            if(tst.visited() == 1){
+                policy.computeNewReward(tst);
+            }
+            return tst.reward();
+        }
+        JSTaskAtom t = (JSTaskAtom) tst.taskNetwork().firstElement();
+        JSTasks rest = tst.taskNetwork().cdr();
+        rest.removeElement(t);
+
+        if(tst.inTree){
+            JSPairTStateTasks child = policy.bestChild(tst);
+            double reward = runMCTS(child, dom, listNodes, policy);
+            tst.incVisited(); // check order with next line
+            policy.updateReward(tst, reward);
+            child.setInTree();
+            return tst.reward();
+        } else {
+            if(tst.children.size()==0) {
+                if (t.isPrimitive()) {
+                    pair = t.seekSimplePlan(dom, tst.tState());
+                    ans = pair.plan();
+                    if (ans.isFailure()) {
+                        tst.plan.assignFailure();
+                        return -200.0; // TODO fix reward for failure
+                    } else {
+                        JSPlan pl = new JSPlan();
+                        pl.addElements(tst.plan);
+                        pl.addElements(ans);
+                        //System.out.println(" \n ans Plan:");
+                        //ans.printPlan();
+                        //System.out.println("\n Saved Plan:");
+                        //pl.printPlan();
+                        listNodes.addElement(new JSJshopNode(t, new Vector<>()));
+                        //JSTaskAtom method = (JSTaskAtom) ans.get(0);
+                        JSPairTStateTasks child = new JSPairTStateTasks(pair.tState(), rest, pl);
+                        tst.addChild(child);
+                    }
+                } else {
+                    JSReduction red = new JSReduction();
+                    red = t.reduce(dom, tst.tState().state(), red);
+                    JSTasks newTasks;
+                    while (!red.isDummy()) {
+                        //red.selectedMethod().print();
+                        newTasks = red.reduction();
+                        newTasks.addElements(rest);
+                        //JSPlan pl = new JSPlan();
+                        //pl.addElements(tst.plan);
+                        JSPairTStateTasks child = new JSPairTStateTasks(tst.tState(), newTasks, tst.plan);
+                        tst.addChild(child);
+                        red = t.reduce(dom, tst.tState().state(), red);
+                    }
+                    if (tst.children.size() == 0) {
+                        assert (!tst.taskNetwork().isEmpty());
+                        tst.plan.assignFailure();
+                        System.out.println("NO METHOD APPLICABLE, ASSIGNING FAILURE!!!");
+                        tst.setReward(-200.0);
+                        return tst.reward(); //TODO reward for failure
+                    }
+                }
+            }
+
+            JSPairTStateTasks child = policy.randomChild(tst);
+            double reward = runMCTS(child, dom, listNodes, policy);
+            tst.incVisited();
+            policy.updateReward(tst, reward);
+            return tst.reward();
+        }
+
+
+    }
+
+
     public JSPairPlanTState seekPlan(JSTState ts, JSPlanningDomain dom, JSPlan pl, Vector<Object> listNodes) {
 
         JSPlan ans;
         JSPairPlanTState pair;
-        JSPlan sol;
+        //JSPlan sol;
 
         if (this.isEmpty()) {
             return new JSPairPlanTState(pl, ts);
