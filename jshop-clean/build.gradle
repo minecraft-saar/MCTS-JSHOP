@@ -1,15 +1,77 @@
 plugins {
 	id 'java'
+	id 'application'
+    // shadow builds jar with all dependencies
+    id 'com.github.johnrengelman.shadow' version '5.0.0'
+
+    // enables automatic version numbers from git tags
+    // and provides additional gradle tasks to create releases (optional)
+    id 'pl.allegro.tech.build.axion-release' version '1.10.1'
+
+    id 'maven-publish'
 }
 group 'umd.cs'
 description 'shop'
 
-jar {
-    manifest {
-        attributes(
-                'Main-Class': 'umd.cs.shop.JSJshop'
-        )
+// This defines releases as revisions
+// that have a tag of the form "release-X.Y.Z"
+scmVersion {
+    tag {
+        prefix = 'release'
     }
 }
+version = scmVersion.version
 
-version = "0.1"
+sourceCompatibility = 1.11
+
+repositories {
+    mavenLocal()
+    mavenCentral()
+    maven {url 'http://www.ling.uni-potsdam.de/tcl/maven2/external'}
+    maven {url 'http://www.ling.uni-potsdam.de/tcl/maven2/releases'}
+    maven { url 'https://jitpack.io' }
+}
+
+mainClassName = 'umd.cs.shop.JSJshop'
+
+//jar {
+//    manifest {
+//        attributes(
+//                'Main-Class': 'umd.cs.shop.JSJshop'
+//        )
+//    }
+//}
+
+// Define two additional tasks that build a sources jar and a javadoc
+// jar.  Both are published at the maven repository.
+task sourcesJar(type: Jar, dependsOn: classes) {
+    classifier = 'sources'
+    from sourceSets.main.allSource
+}
+
+task javadocJar(type: Jar, dependsOn: javadoc) {
+    classifier = 'javadoc'
+    from javadoc.destinationDir
+}
+
+// define the github package registry as the maven repository we push our software to.
+// this happens automatically thanks to the github actions settings.
+publishing {
+    repositories {
+        maven {
+            name = "GitHubPackages"
+            url = uri("https://maven.pkg.github.com/minecraft-saar/jshop")
+            credentials {
+                username = project.findProperty("gpr.user") ?: System.getenv("GPR_USER")
+                password = project.findProperty("gpr.key") ?: System.getenv("GPR_API_KEY")
+            }
+        }
+    }
+    publications {
+        gpr(MavenPublication) {
+            from(components.java)
+            artifact sourcesJar
+            artifact javadocJar
+        }
+    }
+}
