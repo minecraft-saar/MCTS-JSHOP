@@ -194,6 +194,7 @@ public final class JSJshop {
                 JSUtil.println("0 plans found");
             } else {
                 JSUtil.println("Plan found:");
+                JSUtil.println("Reward for Given Plan: " + goalState.reward());
                 JSUtil.println("********* PLAN *******");
                 goalState.plan.printPlan();
                 //goalState.tState().print();
@@ -202,7 +203,6 @@ public final class JSJshop {
                 //System.out.println(goalState.visited());
             }
         }
-        return;
     }
 
 
