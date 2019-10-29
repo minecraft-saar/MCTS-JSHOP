@@ -1,5 +1,6 @@
 package umd.cs.shop;
 
+import javax.naming.event.ObjectChangeListener;
 import java.util.Vector;
 
 public class JSPairTStateTasks {
@@ -10,6 +11,7 @@ public class JSPairTStateTasks {
     Vector<JSPairTStateTasks> children;
     boolean inTree  = false;
     JSPlan plan;
+    //private Vector listNodes;
     //private JSTaskAtom primitiveAction; // method that generated this state
     //private JSMethod method;
     //boolean primitive = false;
@@ -18,7 +20,7 @@ public class JSPairTStateTasks {
         this.tState = state;
         this.taskNetwork = tasks;
         this.visited = 0;
-        this.reward = 0;
+        this.reward = Double.NEGATIVE_INFINITY;
         this.plan = new JSPlan();
         this.plan.addElements(plan);
         this.children = new Vector<JSPairTStateTasks>();
@@ -43,6 +45,10 @@ public class JSPairTStateTasks {
     int visited(){
         return this.visited;
     }
+
+    //void setListNodes(Vector<Object> input){
+    //    listNodes =(Vector) input.clone();
+    //}
 
     void setReward(double r){
         this.reward = r;

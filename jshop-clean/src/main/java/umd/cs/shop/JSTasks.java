@@ -63,6 +63,7 @@ public class JSTasks extends JSListLogicalAtoms {
         JSPairPlanTState pair;
 
         if(tst.taskNetwork().isEmpty()){
+            //tst.setListNodes(listNodes);
             tst.incVisited();
             if(tst.visited() == 1){
                 policy.computeNewReward(tst);
@@ -74,6 +75,11 @@ public class JSTasks extends JSListLogicalAtoms {
         rest.removeElement(t);
 
         if(tst.inTree){
+            if(tst.children.size() == 0){
+                //System.out.println("Returned to dead end");
+                tst.incVisited();
+                return tst.reward();
+            }
             JSPairTStateTasks child = policy.bestChild(tst);
             double reward = runMCTS(child, dom, listNodes, policy);
             tst.incVisited(); // check order with next line
@@ -87,21 +93,23 @@ public class JSTasks extends JSListLogicalAtoms {
                     ans = pair.plan();
                     if (ans.isFailure()) {
                         tst.plan.assignFailure();
-                        return -200.0; // TODO fix reward for failure
+                        //System.out.println("New dead end");
+                        tst.setReward(-2000.0);
+                        tst.incVisited();
+                        return -2000.0; // TODO fix reward for failure
                     } else {
                         JSPlan pl = new JSPlan();
                         pl.addElements(tst.plan);
                         pl.addElements(ans);
-                        //System.out.println(" \n ans Plan:");
-                        //ans.printPlan();
-                        //System.out.println("\n Saved Plan:");
-                        //pl.printPlan();
-                        listNodes.addElement(new JSJshopNode(t, new Vector<>()));
+                        JSTaskAtom save = t.cloneTA();
+                        listNodes.addElement(new JSJshopNode(save, new Vector<>()));
                         //JSTaskAtom method = (JSTaskAtom) ans.get(0);
                         JSPairTStateTasks child = new JSPairTStateTasks(pair.tState(), rest, pl);
                         tst.addChild(child);
                     }
                 } else {
+                    JSTaskAtom save = t.cloneTA();
+                    listNodes.addElement(new JSJshopNode(save, new Vector<>()));
                     JSReduction red = new JSReduction();
                     red = t.reduce(dom, tst.tState().state(), red);
                     JSTasks newTasks;
@@ -119,7 +127,8 @@ public class JSTasks extends JSListLogicalAtoms {
                         assert (!tst.taskNetwork().isEmpty());
                         tst.plan.assignFailure();
                         System.out.println("NO METHOD APPLICABLE, ASSIGNING FAILURE!!!");
-                        tst.setReward(-200.0);
+                        tst.setReward(-2000.0);
+                        tst.incVisited();
                         return tst.reward(); //TODO reward for failure
                     }
                 }

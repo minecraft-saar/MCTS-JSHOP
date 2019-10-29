@@ -155,13 +155,11 @@ public final class JSJshop {
                 }
             }
         }
-        return;
     }
 
     //MCTS
     public JSJshop(String nameDomainFile, String nameProblemFile, int runs) {
         final long startTime = System.currentTimeMillis();
-        JSPairPlanTSListNodes pair;
         JSPairTStateTasks goalState;
         JSUtil.println("Reading file " + nameDomainFile);
         if (!parserFile(nameDomainFile))
