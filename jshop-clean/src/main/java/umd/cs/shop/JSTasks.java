@@ -63,10 +63,13 @@ public class JSTasks extends JSListLogicalAtoms {
         JSPairPlanTState pair;
 
         if (tst.taskNetwork().isEmpty()) {
-            System.out.println("Goal found");
+            //System.out.println("Goal found");
+            JSJshopVars.FoundPlan();
             //tst.setListNodes(listNodes);
-            tst.incVisited();
-            if (tst.visited() == 1) {
+            if(tst.inTree) {
+                tst.incVisited();
+            }
+            if (tst.visited() == 1 || !tst.inTree) {
                 policy.computeNewReward(tst);
             }
             return tst.reward();
@@ -93,6 +96,9 @@ public class JSTasks extends JSListLogicalAtoms {
             double reward = runMCTS(child, dom, listNodes, policy);
             tst.incVisited(); // check order with next line
             policy.updateReward(tst, reward);
+            if(!child.inTree){
+                child.incVisited();
+            }
             child.setInTree();
             return tst.reward();
         }
@@ -106,7 +112,7 @@ public class JSTasks extends JSListLogicalAtoms {
                     //t.print();
                     tst.setDeadEnd();
                     tst.setReward(-2000.0);
-                    tst.incVisited();
+                    //tst.incVisited();
                     return -2000.0; // TODO fix reward for failure
                 } else {
                     JSPlan pl = new JSPlan();
@@ -129,7 +135,7 @@ public class JSTasks extends JSListLogicalAtoms {
                     tst.plan.assignFailure();
                     System.out.println("NO METHOD APPLICABLE, ASSIGNING FAILURE!!!");
                     tst.setReward(-2000.0);
-                    tst.incVisited();
+                    //tst.incVisited();
                     return tst.reward(); //TODO reward for failure
                 }
                 /*
@@ -182,7 +188,7 @@ public class JSTasks extends JSListLogicalAtoms {
 
         JSPairTStateTasks child = policy.randomChild(tst);
         double reward = runMCTS(child, dom, listNodes, policy);
-        tst.incVisited();
+        //tst.incVisited();
         policy.updateReward(tst, reward);
         return tst.reward();
 

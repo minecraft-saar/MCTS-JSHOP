@@ -128,6 +128,11 @@ public class JSPlanningDomain {
             initial.setInTree();
         }
 
+        if(!JSJshopVars.planFound){
+            initial.plan.assignFailure();
+            return initial;
+        }
+
         JSPairTStateTasks current = initial;
         while (current.children.size() != 0){
             if(current.plan.isFailure()){

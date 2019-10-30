@@ -8,6 +8,7 @@ public class UCTPolicy implements MCTSPolicy {
 
     @Override
     public JSPairTStateTasks randomChild(JSPairTStateTasks parent) {
+        //JSUtil.println("RANDOM");
         int rand = this.randgen.nextInt(parent.children.size());
         return parent.children.get(rand);
     }
@@ -17,10 +18,12 @@ public class UCTPolicy implements MCTSPolicy {
         Double maxValue = Double.NEGATIVE_INFINITY;
         JSPairTStateTasks bestChild = null;
         boolean allDeadEnd = true;
+        //JSUtil.println(("Number of children to choose from: " + parent.children.size()));
         for (JSPairTStateTasks child : parent.children) {
             allDeadEnd = allDeadEnd && child.deadEnd;
             if (child.visited() == 0) {
-                /*JSUtil.println("NEW CHILD visited: ");
+                /*
+                JSUtil.println("NEW CHILD UCT");
                 JSTaskAtom t = (JSTaskAtom) (child.taskNetwork().get(0));
                 t.print();
                 JSUtil.println("");*/
@@ -53,10 +56,12 @@ public class UCTPolicy implements MCTSPolicy {
         if (allDeadEnd){
             parent.setDeadEnd();
         }
-        /*JSUtil.println("Best child: ");
+        /*
+        JSUtil.println("UCT");
         JSTaskAtom t = (JSTaskAtom) (bestChild.taskNetwork().get(0));
         t.print();
         JSUtil.println("");*/
+
         return bestChild;
     }
 

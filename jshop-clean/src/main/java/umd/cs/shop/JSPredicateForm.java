@@ -144,7 +144,7 @@ public class JSPredicateForm extends Vector<Object> {
                 el.print();
             }
         }
-        JSUtil.print(" ) ");
+        JSUtil.print(" )");
     }
 
     public StringBuffer toStr() {

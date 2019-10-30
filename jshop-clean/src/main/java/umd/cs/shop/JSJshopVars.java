@@ -44,6 +44,13 @@ public final class JSJshopVars {
     // in the following methods in JSUtil:
     // stringTokenizer/1, initParseTable/1 and printTokenizer/1
 
+    static boolean planFound = false;
+
+    static void FoundPlan(){
+        planFound = true;
+    }
+
+
     static void SetAllPlans(boolean val) {
 
         allPlans = val;
