@@ -62,10 +62,11 @@ public class JSTasks extends JSListLogicalAtoms {
         JSPlan ans;
         JSPairPlanTState pair;
 
-        if(tst.taskNetwork().isEmpty()){
+        if (tst.taskNetwork().isEmpty()) {
+            System.out.println("Goal found");
             //tst.setListNodes(listNodes);
             tst.incVisited();
-            if(tst.visited() == 1){
+            if (tst.visited() == 1) {
                 policy.computeNewReward(tst);
             }
             return tst.reward();
@@ -74,9 +75,17 @@ public class JSTasks extends JSListLogicalAtoms {
         JSTasks rest = tst.taskNetwork().cdr();
         rest.removeElement(t);
 
-        if(tst.inTree){
-            if(tst.children.size() == 0){
-                //System.out.println("Returned to dead end");
+        if (tst.inTree) {
+            if(tst.deadEnd){
+                /*System.out.println("Returned to dead end");
+                t.print();
+                JSUtil.println("\n");*/
+                tst.incVisited();
+                return tst.reward();
+            }
+            if (tst.children.size() == 0) {
+                //System.out.println("\n " + tst.reward() );
+                //tst.tState().print();
                 tst.incVisited();
                 return tst.reward();
             }
@@ -86,35 +95,71 @@ public class JSTasks extends JSListLogicalAtoms {
             policy.updateReward(tst, reward);
             child.setInTree();
             return tst.reward();
-        } else {
-            if(tst.children.size()==0) {
-                if (t.isPrimitive()) {
-                    pair = t.seekSimplePlan(dom, tst.tState());
-                    ans = pair.plan();
-                    if (ans.isFailure()) {
-                        tst.plan.assignFailure();
-                        //System.out.println("New dead end");
-                        tst.setReward(-2000.0);
-                        tst.incVisited();
-                        return -2000.0; // TODO fix reward for failure
-                    } else {
-                        JSPlan pl = new JSPlan();
-                        pl.addElements(tst.plan);
-                        pl.addElements(ans);
-                        JSTaskAtom save = t.cloneTA();
-                        listNodes.addElement(new JSJshopNode(save, new Vector<>()));
-                        //JSTaskAtom method = (JSTaskAtom) ans.get(0);
-                        JSPairTStateTasks child = new JSPairTStateTasks(pair.tState(), rest, pl);
-                        tst.addChild(child);
-                    }
+        }
+        if (tst.children.size() == 0) {
+            if (t.isPrimitive()) {
+                pair = t.seekSimplePlan(dom, tst.tState());
+                ans = pair.plan();
+                if (ans.isFailure()) {
+                    tst.plan.assignFailure();
+                    //System.out.println("\n New dead end ");
+                    //t.print();
+                    tst.setDeadEnd();
+                    tst.setReward(-2000.0);
+                    tst.incVisited();
+                    return -2000.0; // TODO fix reward for failure
                 } else {
+                    JSPlan pl = new JSPlan();
+                    pl.addElements(tst.plan);
+                    pl.addElements(ans);
                     JSTaskAtom save = t.cloneTA();
                     listNodes.addElement(new JSJshopNode(save, new Vector<>()));
+                    //JSTaskAtom method = (JSTaskAtom) ans.get(0);
+                    JSPairTStateTasks child = new JSPairTStateTasks(pair.tState(), rest, pl);
+                    tst.addChild(child);
+                }
+            } else {
+
+                JSAllReduction red = new JSAllReduction();
+                red = dom.methods().findAllReduction(t, tst.tState().state(), red, dom.axioms());
+                JSTasks newTasks;
+                JSMethod selMet = red.selectedMethod();
+                if (red.isDummy()) {
+                    assert (!tst.taskNetwork().isEmpty());
+                    tst.plan.assignFailure();
+                    System.out.println("NO METHOD APPLICABLE, ASSIGNING FAILURE!!!");
+                    tst.setReward(-2000.0);
+                    tst.incVisited();
+                    return tst.reward(); //TODO reward for failure
+                }
+                /*
+                JSUtil.println("Task to reduce: ");
+                t.print();
+                JSUtil.println("Reduction,i.e. new tasks: ");
+                red.print(); */
+                while (!red.isDummy()) {
+                    for (int k = 0; k < red.reductions().size(); k++) {
+                        newTasks = (JSTasks) red.reductions().elementAt(k);
+                        newTasks.addElements(rest);
+                        JSPairTStateTasks child = new JSPairTStateTasks(tst.tState(), newTasks, tst.plan);
+                        tst.addChild(child);
+                    }
+                    red = dom.methods().findAllReduction(t, tst.tState().state(), red, dom.axioms());
+                }
+
+                    /*
+                    //JSTaskAtom save = t.cloneTA();
+                    //listNodes.addElement(new JSJshopNode(save, new Vector<>()));
+                    JSUtil.println("Task to reduce: ");
+                    t.print();
                     JSReduction red = new JSReduction();
                     red = t.reduce(dom, tst.tState().state(), red);
+                    JSUtil.println("Reduction,i.e. new tasks: ");
+                    red.reduction().print();
                     JSTasks newTasks;
                     while (!red.isDummy()) {
-                        //red.selectedMethod().print();
+                        JSUtil.println("Selected Method: ");
+                        red.selectedMethod().print();
                         newTasks = red.reduction();
                         newTasks.addElements(rest);
                         //JSPlan pl = new JSPlan();
@@ -131,15 +176,15 @@ public class JSTasks extends JSListLogicalAtoms {
                         tst.incVisited();
                         return tst.reward(); //TODO reward for failure
                     }
-                }
+                    */
             }
-
-            JSPairTStateTasks child = policy.randomChild(tst);
-            double reward = runMCTS(child, dom, listNodes, policy);
-            tst.incVisited();
-            policy.updateReward(tst, reward);
-            return tst.reward();
         }
+
+        JSPairTStateTasks child = policy.randomChild(tst);
+        double reward = runMCTS(child, dom, listNodes, policy);
+        tst.incVisited();
+        policy.updateReward(tst, reward);
+        return tst.reward();
 
 
     }

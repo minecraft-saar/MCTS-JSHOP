@@ -145,7 +145,7 @@ public class JSPlanningDomain {
             }
             if(bestChild == null){
                 System.out.println("bestChild is NULL!!!!");
-                System.out.println("NUmber of children of current state: " + current.children.size());
+                System.out.println("Number of children of current state: " + current.children.size());
                 //current.tState().print();
                 //current.taskNetwork().print();
                 break;

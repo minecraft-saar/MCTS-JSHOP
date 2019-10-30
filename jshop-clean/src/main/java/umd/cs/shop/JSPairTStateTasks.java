@@ -11,6 +11,7 @@ public class JSPairTStateTasks {
     Vector<JSPairTStateTasks> children;
     boolean inTree  = false;
     JSPlan plan;
+    boolean deadEnd = false;
     //private Vector listNodes;
     //private JSTaskAtom primitiveAction; // method that generated this state
     //private JSMethod method;
@@ -49,6 +50,8 @@ public class JSPairTStateTasks {
     //void setListNodes(Vector<Object> input){
     //    listNodes =(Vector) input.clone();
     //}
+
+    void setDeadEnd() {this.deadEnd = true;}
 
     void setReward(double r){
         this.reward = r;
