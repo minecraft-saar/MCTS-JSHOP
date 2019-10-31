@@ -143,7 +143,7 @@ public class JSPlanningDomain {
             Double currentReward;
             for (JSPairTStateTasks child : current.children){
                 currentReward = child.reward();
-                if(currentReward.compareTo(bestReward) > 0 && child.visited() > 0){
+                if(currentReward.compareTo(bestReward) > 0){
                     bestChild = child;
                     bestReward = child.reward();
                 }

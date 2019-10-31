@@ -192,6 +192,7 @@ public final class JSJshop {
                 JSUtil.println("0 plans found");
             } else {
                 JSUtil.println("Plan found:");
+                JSUtil.println("Solution in Tree: " + goalState.inTree);
                 JSUtil.println("Reward for Given Plan: " + goalState.reward());
                 JSUtil.println("********* PLAN *******");
                 goalState.plan.printPlan();
