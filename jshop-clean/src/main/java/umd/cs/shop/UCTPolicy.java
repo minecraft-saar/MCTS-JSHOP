@@ -21,6 +21,7 @@ public class UCTPolicy implements MCTSPolicy {
         //JSUtil.println(("Number of children to choose from: " + parent.children.size()));
         for (JSPairTStateTasks child : parent.children) {
             allDeadEnd = allDeadEnd && child.deadEnd;
+            if (child.deadEnd) continue;
             if (child.visited() == 0) {
                 /*
                 JSUtil.println("NEW CHILD UCT");
@@ -41,10 +42,11 @@ public class UCTPolicy implements MCTSPolicy {
                 maxValue = childValue;
             }
         }
-        if (bestChild == null) {
-            System.out.println("NO CHILD SELECTED \n");
+        if (bestChild == null && !allDeadEnd) {
+            System.out.println("NO CHILD SELECTED ");
             System.out.println(maxValue);
             for (JSPairTStateTasks child : parent.children) {
+                System.out.println(child.deadEnd);
                 System.out.println(child.reward());
             }
         }
@@ -55,6 +57,7 @@ public class UCTPolicy implements MCTSPolicy {
         //System.out.println("Chosen reward: " + bestChild.reward());
         if (allDeadEnd){
             parent.setDeadEnd();
+            return parent;
         }
         /*
         JSUtil.println("UCT");

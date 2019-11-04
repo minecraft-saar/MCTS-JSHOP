@@ -46,6 +46,8 @@ public final class JSJshopVars {
 
     static boolean planFound = false;
 
+    static JSPairTStateTasks statebestplan;
+
     static void FoundPlan(){
         planFound = true;
     }

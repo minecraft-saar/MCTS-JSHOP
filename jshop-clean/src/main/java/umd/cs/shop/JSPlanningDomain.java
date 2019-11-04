@@ -124,41 +124,18 @@ public class JSPlanningDomain {
         MCTSPolicy policy = new UCTPolicy();
         for(int i = 1; i <= runs ; i++) {
             //System.out.println(" !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!! Starting Run number : " + i);
-            tasks.runMCTS(initial, this, new Vector<Object>(), policy);
+            tasks.runMCTS(initial, this, new Vector<Object>(), policy,0);
             initial.setInTree();
         }
 
+
+        JSUtil.println("found Plan: " + JSJshopVars.planFound);
         if(!JSJshopVars.planFound){
             initial.plan.assignFailure();
             return initial;
         }
 
-        JSPairTStateTasks current = initial;
-        while (current.children.size() != 0){
-            if(current.plan.isFailure()){
-                break;
-            }
-            JSPairTStateTasks bestChild = null;
-            Double bestReward = Double.NEGATIVE_INFINITY;
-            Double currentReward;
-            for (JSPairTStateTasks child : current.children){
-                currentReward = child.reward();
-                if(currentReward.compareTo(bestReward) > 0){
-                    bestChild = child;
-                    bestReward = child.reward();
-                }
-            }
-            if(bestChild == null){
-                System.out.println("bestChild is NULL!!!!");
-                System.out.println("Number of children of current state: " + current.children.size());
-                //current.tState().print();
-                //current.taskNetwork().print();
-                break;
-            }
-            current = bestChild;
-        }
-
-        return current;
+        return JSJshopVars.statebestplan;
     }
 
     public JSListPairPlanTStateNodes solveAll(JSPlanningProblem prob, boolean All) {
