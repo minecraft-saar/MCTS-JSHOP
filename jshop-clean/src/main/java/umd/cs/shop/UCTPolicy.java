@@ -4,7 +4,7 @@ import java.util.Random;
 
 public class UCTPolicy implements MCTSPolicy {
 
-    Random randgen = new Random();
+    Random randgen = new Random(42);
 
     @Override
     public JSPairTStateTasks randomChild(JSPairTStateTasks parent) {
