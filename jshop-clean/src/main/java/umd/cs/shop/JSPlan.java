@@ -65,5 +65,14 @@ public class JSPlan extends JSTasks {
     public double elementCost(int i) {
         return Double.parseDouble((String) costs.elementAt(i));
     }
+
+    public double planCost() {
+        double sum = 0.0;
+        for (int i = 0; i< costs.size(); i++){
+            sum = sum +  this.elementCost(i);
+        }
+        return sum;
+    }
+
 }
 
