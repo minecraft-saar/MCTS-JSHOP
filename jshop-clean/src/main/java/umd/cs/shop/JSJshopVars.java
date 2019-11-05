@@ -43,7 +43,8 @@ public final class JSJshopVars {
     //Any addition/change of a character implies a change
     // in the following methods in JSUtil:
     // stringTokenizer/1, initParseTable/1 and printTokenizer/1
-
+    static long startTime;
+    static int treeDepth;
     static boolean planFound = false;
 
     static JSPairTStateTasks statebestplan;

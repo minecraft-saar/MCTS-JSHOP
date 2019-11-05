@@ -66,13 +66,6 @@ public class JSTasks extends JSListLogicalAtoms {
             //System.out.println("Goal found");
             //JSUtil.println("Found Goal at depth: "+ depth);
 
-            //Get current best reward if it exist
-            Double currentReward = Double.NEGATIVE_INFINITY;
-            if(JSJshopVars.planFound){
-                currentReward = JSJshopVars.statebestplan.reward();
-            }
-            JSJshopVars.FoundPlan();
-
             //compute reward for found goal or increase count
             if(tst.inTree) {
                 tst.incVisited();
@@ -81,12 +74,27 @@ public class JSTasks extends JSListLogicalAtoms {
                 policy.computeNewReward(tst);
             }
 
+            //Get current best reward if it exist
+            Double currentReward = Double.NEGATIVE_INFINITY;
+            if(JSJshopVars.planFound){
+                currentReward = JSJshopVars.statebestplan.reward();
+            } else {
+                long currentTime = System.currentTimeMillis();
+                JSUtil.println("Found first plan of reward " + tst.reward() +" in run " + dom.mctsRuns +" after " + (currentTime - JSJshopVars.startTime) + " ms at depth " + depth);
+            }
+
+
             Double foundReward = tst.reward();
 
             if(foundReward.compareTo(currentReward) > 0){
                 JSJshopVars.statebestplan = tst;
+                if(JSJshopVars.planFound) {
+                    long currentTime = System.currentTimeMillis();
+                    JSUtil.println("Found better plan of reward " + tst.reward() + " in run " + dom.mctsRuns + " after " + (currentTime - JSJshopVars.startTime) + " ms at depth " + depth);
+                }
             }
 
+            JSJshopVars.FoundPlan();
             return tst.reward();
         }
         JSTaskAtom t = (JSTaskAtom) tst.taskNetwork().firstElement();
@@ -116,9 +124,15 @@ public class JSTasks extends JSListLogicalAtoms {
             tst.incVisited(); // check order with next line
             policy.updateReward(tst, reward);
             if(!child.inTree){
+                //JSUtil.println("Adding new node to tree in run " + dom.mctsRuns + "at depth " + depth);
                 child.incVisited();
             }
             child.setInTree();
+            if(depth > JSJshopVars.treeDepth){
+                JSJshopVars.treeDepth = depth;
+                long currentTime = System.currentTimeMillis();
+                JSUtil.println("Increased tree depth to " + depth +" at run "+ dom.mctsRuns + " after " + (currentTime - JSJshopVars.startTime) + " ms" );
+            }
             return tst.reward();
         }
         if (tst.children.size() == 0) {
@@ -127,7 +141,7 @@ public class JSTasks extends JSListLogicalAtoms {
                 ans = pair.plan();
                 if (ans.isFailure()) {
                     tst.plan.assignFailure();
-                    //System.out.println("New dead end at depth: " + depth);
+                    //JSUtil.println("New dead end at depth: " + depth);
                     //t.print();
                     tst.setDeadEnd();
                     tst.setReward(-2000.0);

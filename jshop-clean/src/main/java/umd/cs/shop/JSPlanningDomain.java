@@ -17,6 +17,9 @@ public class JSPlanningDomain {
 
     private JSListMethods methods = new JSListMethods();
 
+    int mctsRuns;
+
+
     /*==== constructor ====*/
     public JSPlanningDomain() {
     }
@@ -116,26 +119,29 @@ public class JSPlanningDomain {
         return new JSPairPlanTSListNodes(pair, listNodes);
     }
 
-    public JSPairTStateTasks solveMCTS(JSPlanningProblem prob, int runs){
+    public void solveMCTS(JSPlanningProblem prob, int runs){
         JSTState ts = new JSTState(prob.state(), new JSListLogicalAtoms(), new JSListLogicalAtoms());
         JSTasks tasks = prob.tasks();
         JSPlan plan = new JSPlan();
         JSPairTStateTasks initial = new JSPairTStateTasks(ts, tasks, plan);
+        JSJshopVars.statebestplan = initial;
         MCTSPolicy policy = new UCTPolicy();
+        JSJshopVars.treeDepth = 0;
+        this.mctsRuns = 1;
         for(int i = 1; i <= runs ; i++) {
-            //System.out.println(" !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!! Starting Run number : " + i);
-            tasks.runMCTS(initial, this, new Vector<Object>(), policy,0);
+            long currentTime = System.currentTimeMillis();
+            //System.out.println(" !!!!!!! Starting Run number : " + i + " after " + (currentTime - JSJshopVars.startTime) + " ms");
+            tasks.runMCTS(initial, this, new Vector<Object>(), policy, 1);
             initial.setInTree();
+            this.mctsRuns ++;
         }
 
 
-        JSUtil.println("found Plan: " + JSJshopVars.planFound);
+        JSUtil.println("Found Plan: " + JSJshopVars.planFound);
         if(!JSJshopVars.planFound){
-            initial.plan.assignFailure();
-            return initial;
+            JSJshopVars.statebestplan.plan.assignFailure();
         }
 
-        return JSJshopVars.statebestplan;
     }
 
     public JSListPairPlanTStateNodes solveAll(JSPlanningProblem prob, boolean All) {

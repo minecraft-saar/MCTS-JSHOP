@@ -50,7 +50,7 @@ public final class JSJshop {
                     runs = Integer.parseInt(args[i]);
                 } else if (all.equalsIgnoreCase(args[i]))
                     JSJshopVars.allPlans = true;
-                else if(detail.equalsIgnoreCase(args[i])) {
+                else if (detail.equalsIgnoreCase(args[i])) {
                     i++;
                     if (i >= args.length) {
                         printUsage();
@@ -159,8 +159,7 @@ public final class JSJshop {
 
     //MCTS
     public JSJshop(String nameDomainFile, String nameProblemFile, int runs) {
-        final long startTime = System.currentTimeMillis();
-        JSPairTStateTasks goalState;
+        JSJshopVars.startTime = System.currentTimeMillis();
         JSUtil.println("Reading file " + nameDomainFile);
         if (!parserFile(nameDomainFile))
             if (JSJshopVars.flagExit)
@@ -177,30 +176,34 @@ public final class JSJshop {
 
         JSUtil.println("Problem file parsed successfully");
         final long parseTime = System.currentTimeMillis();
-        JSUtil.println("Parsing Time: " + (parseTime - startTime) );
+        JSUtil.println("Parsing Time: " + (parseTime - JSJshopVars.startTime));
 
         for (int k = 0; k < probSet.size(); k++) {
 
             prob = (JSPlanningProblem) probSet.elementAt(k);
             JSUtil.println("Solving Problem :" + prob.Name());
-
-            goalState = dom.solveMCTS(prob, runs);
+            //try {
+            dom.solveMCTS(prob, runs);
+            //} catch (OutOfMemoryError ignored){
+            //  JSUtil.println("Error: Out Of Memory");
+            //} finally {
             final long searchTime = System.currentTimeMillis();
-            JSUtil.println("Search Time: " + (searchTime - parseTime) );
-            JSUtil.println("Total Time: " + (searchTime - startTime) );
-            if (goalState.plan.isFailure()) {
+            JSUtil.println("Search Time: " + (searchTime - parseTime));
+            JSUtil.println("Total Time: " + (searchTime - JSJshopVars.startTime));
+            if (JSJshopVars.statebestplan.plan.isFailure()) {
                 JSUtil.println("0 plans found");
             } else {
                 JSUtil.println("Plan found:");
-                JSUtil.println("Solution in Tree: " + goalState.inTree);
-                JSUtil.println("Reward for Given Plan: " + goalState.reward());
+                JSUtil.println("Solution in Tree: " + JSJshopVars.statebestplan.inTree);
+                JSUtil.println("Reward for Given Plan: " + JSJshopVars.statebestplan.reward());
                 JSUtil.println("********* PLAN *******");
-                goalState.plan.printPlan();
+                JSJshopVars.statebestplan.plan.printPlan();
                 //goalState.tState().print();
                 //System.out.println("Task network: ");
                 //goalState.taskNetwork().print();
                 //System.out.println(goalState.visited());
             }
+            //}
         }
     }
 
