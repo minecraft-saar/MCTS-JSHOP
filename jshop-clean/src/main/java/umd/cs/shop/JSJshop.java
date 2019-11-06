@@ -107,7 +107,7 @@ public final class JSJshop {
     /******** main constructor **********/
 
     public JSJshop(String nameDomainFile, String nameProblemFile) {
-
+        JSJshopVars.startTime = System.currentTimeMillis();
         JSPairPlanTSListNodes pair;
         JSListPairPlanTStateNodes allPlans;
         JSUtil.println("Reading file " + nameDomainFile);
@@ -132,6 +132,8 @@ public final class JSJshop {
             prob = (JSPlanningProblem) probSet.elementAt(k);
             JSUtil.println("Solving Problem :" + prob.Name());
             allPlans = dom.solveAll(prob, JSJshopVars.allPlans);
+            final long totalTime = System.currentTimeMillis();
+            JSUtil.println("Total Time: " + (totalTime - JSJshopVars.startTime));
             if (allPlans.isEmpty()) {
                 // Return the failing solution to HICAP
                 sol = new JSPlan();
@@ -149,7 +151,7 @@ public final class JSJshop {
                     for (int i = 0; i < allPlans.size(); i++) {
                         JSUtil.println("Plan # " + (i + 1));
                         pair = (JSPairPlanTSListNodes) allPlans.elementAt(i);
-                        double planCost = pair.planS().plan.planCost();
+                        double planCost = pair.planS().plan().planCost();
                         System.out.printf("Plan cost: %f \n", planCost );
                         pair.planS().plan().printPlan();//.print();
                         // pair.print();

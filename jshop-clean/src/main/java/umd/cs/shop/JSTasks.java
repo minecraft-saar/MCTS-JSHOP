@@ -271,6 +271,9 @@ public class JSTasks extends JSListLogicalAtoms {
 
             pair = new JSPairPlanTState((new JSPlan()), ts);
             ptl = new JSPairPlanTSListNodes(pair, new Vector<>());
+            double cost = ptl.planS().plan().planCost();
+            long currentTime = System.currentTimeMillis();
+            JSUtil.println("Found plan after " + (currentTime - JSJshopVars.startTime) + " ms");
             plans.addElement(ptl);
             return plans;
         }
