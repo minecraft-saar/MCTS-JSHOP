@@ -147,15 +147,24 @@ public final class JSJshop {
                 //solution.print();
                 JSUtil.println(allPlans.size() + " plans found.");
                 if (JSJshopVars.flagLevel > 0) {
+                    int bestplanIndex = 0;
+                    Double bestPlanValue = Double.NEGATIVE_INFINITY;
                     JSUtil.println("********* PLANS *******");
                     for (int i = 0; i < allPlans.size(); i++) {
                         JSUtil.println("Plan # " + (i + 1));
                         pair = (JSPairPlanTSListNodes) allPlans.elementAt(i);
                         double planCost = pair.planS().plan().planCost();
                         JSUtil.println("Plan cost: "+ planCost );
-                        pair.planS().plan().printPlan();//.print();
+                        if (bestPlanValue.compareTo(planCost) > 0){
+                            bestPlanValue = planCost;
+                            bestplanIndex = i;
+                        }
+                        //pair.planS().plan().printPlan();//.print();
                         // pair.print();
                     }
+                    JSUtil.println("Best Plan: ");
+                    pair = (JSPairPlanTSListNodes) allPlans.elementAt(bestplanIndex);
+                    pair.planS().plan().printPlan();
                 }
             }
         }
