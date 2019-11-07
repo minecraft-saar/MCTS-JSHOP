@@ -241,7 +241,7 @@ public class JSTasks extends JSListLogicalAtoms {
     }
 
     /*   Multi plan generator */
-    public JSListPairPlanTStateNodes seekPlanAll(JSTState ts, JSPlanningDomain dom, boolean All) {
+    public JSListPairPlanTStateNodes seekPlanAll(JSPairTStateTasks ts, JSPlanningDomain dom, boolean All) {
         JSListPairPlanTStateNodes results, plans = new JSListPairPlanTStateNodes();
         JSPairPlanTSListNodes ptl;
         JSPlan ans;
@@ -256,11 +256,12 @@ public class JSTasks extends JSListLogicalAtoms {
             if (JSJshopVars.flagLevel > 1)
                 JSUtil.println("Returning successfully from find-plan : No more tasks to plan");
 
-            pair = new JSPairPlanTState((new JSPlan()), ts);
+            //pair = new JSPairPlanTState((new JSPlan()), ts.tState());
+            pair = new JSPairPlanTState(ts.plan, ts.tState());
             ptl = new JSPairPlanTSListNodes(pair, new Vector<>());
-            double cost = ptl.planS().plan().planCost();
+            double cost = ts.plan.planCost();
             long currentTime = System.currentTimeMillis();
-            JSUtil.println("Found plan after " + (currentTime - JSJshopVars.startTime) + " ms");
+            JSUtil.println("Found plan after " + (currentTime - JSJshopVars.startTime) + " ms of cost " + cost);
             plans.addElement(ptl);
             return plans;
         }
@@ -274,15 +275,17 @@ public class JSTasks extends JSListLogicalAtoms {
         JSTasks rest = this.cdr();
 
         if (t.isPrimitive()) {
-            pair = t.seekSimplePlan(dom, ts);
+            pair = t.seekSimplePlan(dom, ts.tState());
             ans = pair.plan();
             if (ans.isFailure()) {
                 if (JSJshopVars.flagLevel > 1)
                     JSUtil.println("Returning failure from find-plan: Can not find an operator");
                 return plans; // failure - empty list
             }
-
-            results = rest.seekPlanAll(pair.tState(), dom, All);
+            JSPairTStateTasks tst = new JSPairTStateTasks(pair.tState(), new JSPlan() );
+            tst.plan.addElements(ts.plan);
+            tst.plan.addElements(ans);
+            results = rest.seekPlanAll(tst, dom, All);
 
             if (results.isEmpty())
                 return plans;
@@ -292,7 +295,7 @@ public class JSTasks extends JSListLogicalAtoms {
 
             for (int i = 0; i < results.size(); i++) {
                 ptl = (JSPairPlanTSListNodes) results.elementAt(i);
-                ptl.planS().plan().insertWithCost(0, ta, ans.elementCost(0));
+                //ptl.planS().plan().insertWithCost(0, ta, ans.elementCost(0));
                 ptl.listNodes().insertElementAt(node, 0);
                 plans.addElement(ptl);
             }
@@ -301,7 +304,7 @@ public class JSTasks extends JSListLogicalAtoms {
         }
 
         JSAllReduction red = new JSAllReduction();
-        red = dom.methods().findAllReduction(t, ts.state(), red, dom.axioms());
+        red = dom.methods().findAllReduction(t, ts.tState().state(), red, dom.axioms());
         JSTasks newTasks;
         JSMethod selMet = red.selectedMethod();
         if (JSJshopVars.flagLevel > 1 && red.isDummy())
@@ -317,7 +320,10 @@ public class JSTasks extends JSListLogicalAtoms {
                 newTasks = (JSTasks) red.reductions().elementAt(k);
                 node = new JSJshopNode((JSTaskAtom) t.clone(), newTasks.cloneTasks());
                 newTasks.addElements(rest);
-                results = newTasks.seekPlanAll(new JSTState(ts), dom, All);
+                JSPlan tmp = new JSPlan();
+                tmp.addElements(ts.plan);
+                JSPairTStateTasks tst = new JSPairTStateTasks(new JSTState(ts.tState()),tmp );
+                results = newTasks.seekPlanAll(tst, dom, All);
 
                 if (results.isEmpty())
                     continue;
@@ -330,7 +336,7 @@ public class JSTasks extends JSListLogicalAtoms {
                         return plans;
                 }
             }
-            red = dom.methods().findAllReduction(t, ts.state(), red, dom.axioms());
+            red = dom.methods().findAllReduction(t, ts.tState().state(), red, dom.axioms());
             selMet = red.selectedMethod();
 
         }

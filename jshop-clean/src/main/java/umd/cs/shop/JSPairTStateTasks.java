@@ -27,6 +27,12 @@ public class JSPairTStateTasks {
         this.children = new Vector<JSPairTStateTasks>();
     }
 
+    JSPairTStateTasks(JSTState state , JSPlan plan) {
+        this.tState = state;
+        this.plan = new JSPlan();
+        this.plan.addElements(plan);
+    }
+
     JSTState tState(){
         return this.tState;
     }

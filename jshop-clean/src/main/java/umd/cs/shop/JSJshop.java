@@ -152,7 +152,7 @@ public final class JSJshop {
                         JSUtil.println("Plan # " + (i + 1));
                         pair = (JSPairPlanTSListNodes) allPlans.elementAt(i);
                         double planCost = pair.planS().plan().planCost();
-                        System.out.printf("Plan cost: %f \n", planCost );
+                        JSUtil.println("Plan cost: "+ planCost );
                         pair.planS().plan().printPlan();//.print();
                         // pair.print();
                     }

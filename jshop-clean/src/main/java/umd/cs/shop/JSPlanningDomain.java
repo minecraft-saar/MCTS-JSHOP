@@ -148,7 +148,10 @@ public class JSPlanningDomain {
 
         JSListPairPlanTStateNodes allPlans;
         JSTasks tasks = prob.tasks();
-        allPlans = tasks.seekPlanAll(new JSTState(prob.state(), new JSListLogicalAtoms(), new JSListLogicalAtoms()), this, All);
+        JSTState ts = new JSTState(prob.state(), new JSListLogicalAtoms(), new JSListLogicalAtoms());
+        JSPlan plan = new JSPlan();
+        JSPairTStateTasks initial = new JSPairTStateTasks(ts, plan);
+        allPlans = tasks.seekPlanAll(initial , this, All);
 
         return allPlans;
     }
