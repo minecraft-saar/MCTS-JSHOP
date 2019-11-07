@@ -10,7 +10,7 @@ plugins {
 
     id 'maven-publish'
 }
-group 'umd.cs'
+group 'de.saar.minecraft'
 description 'shop'
 
 // This defines releases as revisions
@@ -60,7 +60,7 @@ publishing {
     repositories {
         maven {
             name = "GitHubPackages"
-            url = uri("https://maven.pkg.github.com/minecraft-saar")
+            url = uri("https://maven.pkg.github.com/minecraft-saar/jshop")
             credentials {
                 username = project.findProperty("gpr.user") ?: System.getenv("GPR_USER")
                 password = project.findProperty("gpr.key") ?: System.getenv("GPR_API_KEY")
