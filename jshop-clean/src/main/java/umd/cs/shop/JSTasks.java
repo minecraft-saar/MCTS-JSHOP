@@ -63,9 +63,6 @@ public class JSTasks extends JSListLogicalAtoms {
         JSPairPlanTState pair;
 
         if (tst.taskNetwork().isEmpty()) {
-            //System.out.println("Goal found");
-            //JSUtil.println("Found Goal at depth: "+ depth);
-
             //compute reward for found goal or increase count
             if(tst.inTree) {
                 tst.incVisited();
@@ -83,9 +80,7 @@ public class JSTasks extends JSListLogicalAtoms {
                 JSUtil.println("Found first plan of reward " + tst.reward() +" in run " + dom.mctsRuns +" after " + (currentTime - JSJshopVars.startTime) + " ms at depth " + depth);
             }
 
-
             Double foundReward = tst.reward();
-
             if(foundReward.compareTo(currentReward) > 0){
                 JSJshopVars.statebestplan = tst;
                 if(JSJshopVars.planFound) {
@@ -103,16 +98,13 @@ public class JSTasks extends JSListLogicalAtoms {
 
         if (tst.inTree) {
             if(tst.deadEnd){
-                //System.out.println("Returned to dead end at depth:"+ depth );
-                /*t.print();
-                JSUtil.println("\n");*/
+                System.out.println("Returned to dead end at depth: "+ depth ); //t.print(); JSUtil.println("\n");
                 tst.incVisited();
                 return tst.reward();
             }
+            //Should never happen since either the state is a goal or a dead and should not arrive here
             if (tst.children.size() == 0) {
                 //JSUtil.println("No children depth: " + depth);
-                //System.out.println("\n " + tst.reward() );
-                //tst.tState().print();
                 tst.incVisited();
                 return tst.reward();
             }
@@ -121,7 +113,7 @@ public class JSTasks extends JSListLogicalAtoms {
                 return tst.reward();
             }
             double reward = runMCTS(child, dom, listNodes, policy, depth+1);
-            tst.incVisited(); // check order with next line
+            tst.incVisited();
             policy.updateReward(tst, reward);
             if(!child.inTree){
                 //JSUtil.println("Adding new node to tree in run " + dom.mctsRuns + "at depth " + depth);
@@ -137,6 +129,7 @@ public class JSTasks extends JSListLogicalAtoms {
         }
         if (tst.children.size() == 0) {
             if (t.isPrimitive()) {
+                //task is primitive, so find applicable operators
                 pair = t.seekSimplePlan(dom, tst.tState());
                 ans = pair.plan();
                 if (ans.isFailure()) {
@@ -144,9 +137,8 @@ public class JSTasks extends JSListLogicalAtoms {
                     //JSUtil.println("New dead end at depth: " + depth);
                     //t.print();
                     tst.setDeadEnd();
-                    tst.setReward(-2000.0);
-                    //tst.incVisited();
-                    return -2000.0; // TODO fix reward for failure
+                    tst.setReward(-2000.0); // TODO fix reward for failure
+                    return tst.reward();
                 } else {
                     JSPlan pl = new JSPlan();
                     pl.addElements(tst.plan);
@@ -158,7 +150,7 @@ public class JSTasks extends JSListLogicalAtoms {
                     tst.addChild(child);
                 }
             } else {
-
+                //Reduce task to find all applicable methods
                 JSAllReduction red = new JSAllReduction();
                 red = dom.methods().findAllReduction(t, tst.tState().state(), red, dom.axioms());
                 JSTasks newTasks;
@@ -166,16 +158,11 @@ public class JSTasks extends JSListLogicalAtoms {
                 if (red.isDummy()) {
                     assert (!tst.taskNetwork().isEmpty());
                     tst.plan.assignFailure();
-                    System.out.println("NO METHOD APPLICABLE, ASSIGNING FAILURE!!!");
-                    tst.setReward(-2000.0);
-                    //tst.incVisited();
-                    return tst.reward(); //TODO reward for failure
+                    tst.setDeadEnd();
+                    //System.out.println("NO METHOD APPLICABLE, ASSIGNING FAILURE!!!");
+                    tst.setReward(-2000.0); // TODO fix reward for failure
+                    return tst.reward();
                 }
-                /*
-                JSUtil.println("Task to reduce: ");
-                t.print();
-                JSUtil.println("Reduction,i.e. new tasks: ");
-                red.print(); */
                 while (!red.isDummy()) {
                     for (int k = 0; k < red.reductions().size(); k++) {
                         newTasks = (JSTasks) red.reductions().elementAt(k);

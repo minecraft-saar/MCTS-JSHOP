@@ -1,6 +1,7 @@
 package umd.cs.shop;
 
 import java.util.Random;
+import java.util.Vector;
 
 public class UCTPolicy implements MCTSPolicy {
 
@@ -57,6 +58,7 @@ public class UCTPolicy implements MCTSPolicy {
         //System.out.println("Chosen reward: " + bestChild.reward());
         if (allDeadEnd){
             parent.setDeadEnd();
+            parent.children = new Vector<>();
             return parent;
         }
         /*
