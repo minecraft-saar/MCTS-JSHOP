@@ -36,7 +36,7 @@ public class JSOperator {
         if (!JSUtil.readToken(tokenizer, "Expecting ) or operator cost"))
             throw new JSParserError(); //return;
 
-        if (tokenizer.ttype == tokenizer.TT_NUMBER)
+        if (tokenizer.ttype == StreamTokenizer.TT_NUMBER)
             cost = tokenizer.nval;
         else
             tokenizer.pushBack();

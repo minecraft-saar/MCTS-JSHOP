@@ -6,6 +6,11 @@ import java.net.MalformedURLException;
 import java.net.URL;
 import java.util.Vector;
 
+import picocli.CommandLine;
+import picocli.CommandLine.Option;
+import picocli.CommandLine.Parameters;
+
+
 /*HICAP import nrl.aic.hicap.*;*/
 
 //The main constructor of this class is JSJshop(String nameFile). This
@@ -15,75 +20,55 @@ import java.util.Vector;
 // domains and problems are given it will parse all of them and solve the
 // last problem for the last domain.
 
-public final class JSJshop {
+public final class JSJshop implements Runnable{
     /*HICAP*//*==== class variables ====*/
     /*HICAP*/public static boolean corbaToHicap = false;
     /*HICAP*/public static JApplet applet;
 
     /* instance variables */
-
     private JSPlanningDomain dom;
 
-    public static void main(String[] args) {
-        if (args.length < 2 || args.length > 7) {
-            printUsage();
-            //   JSUtil.println("[verbose-level] can be integer from  0 to 10. The default verbose value is 0" );
-            return;
-        }
+    @Parameters(index = "0", description = "The domain file")
+    String nameDomainFile;
 
-        String all = "-a";
-        String mcts = "-m";
-        String detail = "-d";
-        int level, i;
-        boolean monteCarlo = false;
-        int runs = 0;
-        try {
-            for (i = 2; i < args.length; i++)
+    @Parameters(index = "1", description = "The problem file")
+    String nameProblemFile;
 
-                if (mcts.equalsIgnoreCase(args[i])) {
-                    monteCarlo = true;
-                    i++;
-                    if (i >= args.length) {
-                        printUsage();
-                        return;
-                    }
-                    runs = Integer.parseInt(args[i]);
-                } else if (all.equalsIgnoreCase(args[i]))
-                    JSJshopVars.allPlans = true;
-                else if (detail.equalsIgnoreCase(args[i])) {
-                    i++;
-                    if (i >= args.length) {
-                        printUsage();
-                        return;
-                    }
-                    level = Integer.parseInt(args[i]);
-                    JSJshopVars.flagLevel = level;
-       /*
-            JSUtil.println("Invalid parameter" );
-            return;*/
-                }
-        } catch (NumberFormatException e) {
-            JSUtil.println("Invalid parameter");
-            printUsage();
-            return;
-        }
-        if (monteCarlo) {
-            new JSJshop(args[0], args[1], runs);
+    @Option(names = {"-s"}, defaultValue = "false")
+    boolean standardSearch;
+
+    @Option(names = {"-m", "--monteCarloRuns"}, description = "Number of runs for the monte carlo search")
+    int mctsruns;
+
+    @Option(names = {"-p", "--policy"}, defaultValue = "UCT", description = "UCT")
+    String policy;
+
+    @Option(names = {"-t", "--timeout"}, defaultValue = "10000", description = "Timeout in milliseconds")
+    long timeout;
+
+    @Option(names = {"-c", "--costFunction"}, defaultValue = "basic", description = "basic or nlg")
+    String costFunction;
+
+    @Option(names = {"-d", "--detail"}, defaultValue = "1", description = "Integer from 1 to 10 for more details during standard search")
+    int detail;
+
+    @Option(names = {"-a", "--all"}, defaultValue = "false", description = "Find all plans in standard search")
+    boolean allPlans;
+
+    @Override
+    public void run() {
+        if(standardSearch){
+            standardSearch();
         } else {
-            new JSJshop(args[0], args[1]);
+            mctsSearch();
         }
-
-    } // main
-
-    public static void printUsage() {
-        JSUtil.println("Usage :");
-        JSUtil.println(" java JSJshop <domainDef-file-name> <problemDef-file-name> [-a] [-d k] [-m n]");// [verbose-level]" );
-        JSUtil.println("[-a] will print all plans, but only works when using standard search");
-        JSUtil.println("[-d k] will print more details to the solution when using standard search. k should be an Integer in the range 1 to 10, the higher k the more details");
-        JSUtil.println("[-m n] will start Monte Carlo Tree Search with n runs");
 
     }
 
+    public static void main(String[] args) {
+        CommandLine.run(new JSJshop(), args);
+
+    }
 
     private JSPlanningProblem prob;
 
@@ -106,7 +91,9 @@ public final class JSJshop {
 
     /******** main constructor **********/
 
-    public JSJshop(String nameDomainFile, String nameProblemFile) {
+    public  void standardSearch() {
+        JSJshopVars.allPlans = allPlans;
+        JSJshopVars.flagLevel = detail;
         JSJshopVars.startTime = System.currentTimeMillis();
         JSPairPlanTSListNodes pair;
         JSListPairPlanTStateNodes allPlans;
@@ -171,7 +158,8 @@ public final class JSJshop {
     }
 
     //MCTS
-    public JSJshop(String nameDomainFile, String nameProblemFile, int runs) {
+    public void mctsSearch() {
+        JSJshopVars.policy = new UCTPolicy(); //TODO adapt to parameter
         JSJshopVars.startTime = System.currentTimeMillis();
         JSUtil.println("Reading file " + nameDomainFile);
         if (!parserFile(nameDomainFile))
@@ -196,21 +184,21 @@ public final class JSJshop {
             prob = (JSPlanningProblem) probSet.elementAt(k);
             JSUtil.println("Solving Problem :" + prob.Name());
             //try {
-            dom.solveMCTS(prob, runs);
+            dom.solveMCTS(prob, mctsruns, timeout);
             //} catch (OutOfMemoryError ignored){
             //  JSUtil.println("Error: Out Of Memory");
             //} finally {
             final long searchTime = System.currentTimeMillis();
             JSUtil.println("Search Time: " + (searchTime - parseTime));
             JSUtil.println("Total Time: " + (searchTime - JSJshopVars.startTime));
-            if (JSJshopVars.statebestplan.plan.isFailure()) {
+            if (JSJshopVars.stateBestPlan.plan.isFailure()) {
                 JSUtil.println("0 plans found");
             } else {
                 JSUtil.println("Plan found:");
-                JSUtil.println("Solution in Tree: " + JSJshopVars.statebestplan.inTree);
-                JSUtil.println("Reward for Given Plan: " + JSJshopVars.statebestplan.reward());
+                JSUtil.println("Solution in Tree: " + JSJshopVars.stateBestPlan.inTree);
+                JSUtil.println("Reward for Given Plan: " + JSJshopVars.stateBestPlan.reward());
                 JSUtil.println("********* PLAN *******");
-                JSJshopVars.statebestplan.plan.printPlan();
+                JSJshopVars.stateBestPlan.plan.printPlan();
                 //goalState.tState().print();
                 //System.out.println("Task network: ");
                 //goalState.taskNetwork().print();
@@ -231,10 +219,10 @@ public final class JSJshop {
     }
 */
 
-    public JSJshop(String nameFile, JSTaskAtom pred) {
-        setFile(nameFile, pred);
+    //public JSJshop(String nameFile, JSTaskAtom pred) {
+    //    setFile(nameFile, pred);
 
-    }
+    //}
 
     public JSJshopNode getTree() {
         return tree;
@@ -544,6 +532,7 @@ public final class JSJshop {
     public JSJshopNode tree() {
         return tree;
     }
+
 
 
 }

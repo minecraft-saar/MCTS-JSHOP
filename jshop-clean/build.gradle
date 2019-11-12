@@ -11,7 +11,7 @@ plugins {
     id 'maven-publish'
 }
 group 'de.saar.minecraft'
-description 'shop'
+description 'jshop'
 
 // This defines releases as revisions
 // that have a tag of the form "release-X.Y.Z"
@@ -30,6 +30,10 @@ repositories {
     maven {url 'http://www.ling.uni-potsdam.de/tcl/maven2/external'}
     maven {url 'http://www.ling.uni-potsdam.de/tcl/maven2/releases'}
     maven { url 'https://jitpack.io' }
+}
+
+dependencies {
+	compile 'info.picocli:picocli:3.9.3'
 }
 
 mainClassName = 'umd.cs.shop.JSJshop'

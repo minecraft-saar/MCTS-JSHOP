@@ -119,30 +119,35 @@ public class JSPlanningDomain {
         return new JSPairPlanTSListNodes(pair, listNodes);
     }
 
-    public void solveMCTS(JSPlanningProblem prob, int runs){
+    public void solveMCTS(JSPlanningProblem prob, int runs, long timeout){
         JSTState ts = new JSTState(prob.state(), new JSListLogicalAtoms(), new JSListLogicalAtoms());
         JSTasks tasks = prob.tasks();
         JSPlan plan = new JSPlan();
         JSPairTStateTasks initial = new JSPairTStateTasks(ts, tasks, plan);
-        JSJshopVars.statebestplan = initial;
-        MCTSPolicy policy = new UCTPolicy();
+        JSJshopVars.stateBestPlan = initial;
         JSJshopVars.treeDepth = 0;
         this.mctsRuns = 1;
         for(int i = 1; i <= runs ; i++) {
             long currentTime = System.currentTimeMillis();
+            long runningTime = currentTime - JSJshopVars.startTime;
+            if(runningTime >= timeout){
+                JSUtil.println("Timeout");
+                break;
+            }
             //System.out.println(" !!!!!!! Starting Run number : " + i + " after " + (currentTime - JSJshopVars.startTime) + " ms");
-            tasks.runMCTS(initial, this, new Vector<Object>(), policy, 1);
+            tasks.runMCTS(initial, this, 1);
             initial.setInTree();
             this.mctsRuns ++;
         }
 
-
         JSUtil.println("Found Plan: " + JSJshopVars.planFound);
         if(!JSJshopVars.planFound){
-            JSJshopVars.statebestplan.plan.assignFailure();
+            JSJshopVars.stateBestPlan.plan.assignFailure();
         }
 
     }
+
+
 
     public JSListPairPlanTStateNodes solveAll(JSPlanningProblem prob, boolean All) {
 

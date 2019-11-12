@@ -46,8 +46,9 @@ public final class JSJshopVars {
     static long startTime;
     static int treeDepth;
     static boolean planFound = false;
-
-    static JSPairTStateTasks statebestplan;
+    static CostFunction costFunction;
+    static MCTSPolicy policy;
+    static JSPairTStateTasks stateBestPlan;
 
     static void FoundPlan(){
         planFound = true;
