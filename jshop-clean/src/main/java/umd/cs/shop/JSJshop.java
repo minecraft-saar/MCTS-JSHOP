@@ -57,6 +57,29 @@ public final class JSJshop implements Runnable{
 
     @Override
     public void run() {
+        JSJshopVars.startTime = System.currentTimeMillis();
+//        nlgSearch(mctsruns, timeout);
+//        return;
+
+
+        JSUtil.println("Reading file " + nameDomainFile);
+        if (!parserFile(nameDomainFile))
+            if (JSJshopVars.flagExit)
+                System.exit(0);
+            else
+                return;
+        JSUtil.println("Domain file parsed successfully");
+        JSUtil.println("Reading file " + nameProblemFile);
+        if (!parserFile(nameProblemFile))
+            if (JSJshopVars.flagExit)
+                System.exit(0);
+            else
+                return;
+
+        JSUtil.println("Problem file parsed successfully");
+        final long parseTime = System.currentTimeMillis();
+        JSUtil.println("Parsing Time: " + (parseTime - JSJshopVars.startTime));
+
         if(standardSearch){
             standardSearch();
         } else {
@@ -94,25 +117,8 @@ public final class JSJshop implements Runnable{
     public  void standardSearch() {
         JSJshopVars.allPlans = allPlans;
         JSJshopVars.flagLevel = detail;
-        JSJshopVars.startTime = System.currentTimeMillis();
         JSPairPlanTSListNodes pair;
         JSListPairPlanTStateNodes allPlans;
-        JSUtil.println("Reading file " + nameDomainFile);
-        if (!parserFile(nameDomainFile))
-            if (JSJshopVars.flagExit)
-                System.exit(0);
-            else
-                return;
-        JSUtil.println("Domain file parsed successfully");
-        JSUtil.println("Reading file " + nameProblemFile);
-        if (!parserFile(nameProblemFile))
-            if (JSJshopVars.flagExit)
-                System.exit(0);
-            else
-                return;
-
-        JSUtil.println("Problem file parsed successfully");
-
 
         for (int k = 0; k < probSet.size(); k++) {
 
@@ -160,36 +166,15 @@ public final class JSJshop implements Runnable{
     //MCTS
     public void mctsSearch() {
         JSJshopVars.policy = new UCTPolicy(); //TODO adapt to parameter
-        JSJshopVars.startTime = System.currentTimeMillis();
-        JSUtil.println("Reading file " + nameDomainFile);
-        if (!parserFile(nameDomainFile))
-            if (JSJshopVars.flagExit)
-                System.exit(0);
-            else
-                return;
-        JSUtil.println("Domain file parsed successfully");
-        JSUtil.println("Reading file " + nameProblemFile);
-        if (!parserFile(nameProblemFile))
-            if (JSJshopVars.flagExit)
-                System.exit(0);
-            else
-                return;
-
-        JSUtil.println("Problem file parsed successfully");
-        final long parseTime = System.currentTimeMillis();
-        JSUtil.println("Parsing Time: " + (parseTime - JSJshopVars.startTime));
-
         for (int k = 0; k < probSet.size(); k++) {
-
             prob = (JSPlanningProblem) probSet.elementAt(k);
-            JSUtil.println("Solving Problem :" + prob.Name());
+            JSUtil.println("Solving Problem :" + prob.Name() + " with mcts");
             //try {
             dom.solveMCTS(prob, mctsruns, timeout);
             //} catch (OutOfMemoryError ignored){
             //  JSUtil.println("Error: Out Of Memory");
             //} finally {
             final long searchTime = System.currentTimeMillis();
-            JSUtil.println("Search Time: " + (searchTime - parseTime));
             JSUtil.println("Total Time: " + (searchTime - JSJshopVars.startTime));
             if (JSJshopVars.stateBestPlan.plan.isFailure()) {
                 JSUtil.println("0 plans found");
@@ -199,15 +184,29 @@ public final class JSJshop implements Runnable{
                 JSUtil.println("Reward for Given Plan: " + JSJshopVars.stateBestPlan.reward());
                 JSUtil.println("********* PLAN *******");
                 JSJshopVars.stateBestPlan.plan.printPlan();
-                //goalState.tState().print();
-                //System.out.println("Task network: ");
-                //goalState.taskNetwork().print();
-                //System.out.println(goalState.visited());
             }
             //}
         }
     }
 
+    //MCTS
+    public JSPlan nlgSearch(int mctsruns, long timeout) {
+        InputStream domain = JSJshop.class.getResourceAsStream("domain.shp");
+        InputStream problem = JSJshop.class.getResourceAsStream("problem.lisp");
+        boolean parseSuccess = parserFile(domain);
+        if(!parseSuccess){
+            JSUtil.println("Domain File not parsed correctly");
+        }
+        parseSuccess = parserFile(problem);
+        if(!parseSuccess){
+            JSUtil.println("Problem File not parsed correctly");
+        }
+        JSJshopVars.startTime = System.currentTimeMillis();
+        this.mctsruns = mctsruns;
+        this.timeout = timeout;
+        mctsSearch();
+        return JSJshopVars.stateBestPlan.plan;
+    }
 
 /*HICAP:   
     public
@@ -399,6 +398,27 @@ public final class JSJshop implements Runnable{
             System.exit(1);
         }
 
+    }
+
+    public boolean parserFile(InputStream input) {
+        String libraryDirectory = ".";
+
+        try {
+            Reader fr = new InputStreamReader(input);
+            StreamTokenizer tokenizer = new StreamTokenizer(fr);
+            tokenizer.lowerCaseMode(true);
+            JSUtil.initParseTable(tokenizer);
+            while (tokenizer.nextToken() != StreamTokenizer.TT_EOF)
+                processToken(tokenizer);
+            fr.close();
+        } catch (IOException e) {
+            System.out.println("Error in readFile() : " + e);
+            return false;
+        } catch (JSParserError parserError) {
+            System.out.println("Error in parsing file");
+            return false;
+        }
+        return true;
     }
 
     public boolean parserFile(String libraryFile) {
