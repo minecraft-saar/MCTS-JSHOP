@@ -1,19 +1,20 @@
-name: Java CI
+name: publish
 
-on: [push]
+on:
+  push:
+    tags:
+     - 'release-*'
 
 jobs:
   build:
-
     runs-on: ubuntu-latest
-
     steps:
     - uses: actions/checkout@v1
     - name: Set up JDK 1.11
       uses: actions/setup-java@v1
       with:
         java-version: 1.11
-    - name: Build with Gradle
+    - name: publish a release
       env:
         GPR_USER: x-access-token
         GPR_API_KEY: ${{ secrets.GITHUB_TOKEN }}
