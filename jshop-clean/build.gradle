@@ -16,6 +16,10 @@ description 'jshop'
 // This defines releases as revisions
 // that have a tag of the form "release-X.Y.Z"
 scmVersion {
+	// the git repository in in the parent directory
+    repository {
+        directory = project.rootProject.file('../')
+    }
     tag {
         prefix = 'release'
     }
