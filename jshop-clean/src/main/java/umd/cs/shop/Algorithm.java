@@ -1,8 +1,8 @@
 package umd.cs.shop;
 
-public class Algorithm {
+public  class Algorithm {
 
-    public double runApprox(JSPairTStateTasks tst, JSPlanningDomain dom, int depth) {
+    public static double runApprox(JSPairTStateTasks tst, JSPlanningDomain dom, int depth) {
 
         JSPlan ans;
         JSPairPlanTState pair;
@@ -19,7 +19,7 @@ public class Algorithm {
             //Get current best reward if it exist
             Double currentReward = Double.NEGATIVE_INFINITY;
             if(JSJshopVars.planFound){
-                currentReward = JSJshopVars.stateBestPlan.reward();
+                currentReward = JSJshopVars.bestPlans.lastElement().reward();
             } else {
                 long currentTime = System.currentTimeMillis();
                 JSUtil.println("Found first plan of reward " + tst.reward() +" in run " + dom.mctsRuns +" after " + (currentTime - JSJshopVars.startTime) + " ms at depth " + depth);
@@ -27,7 +27,7 @@ public class Algorithm {
 
             Double foundReward = tst.reward();
             if(foundReward.compareTo(currentReward) > 0){
-                JSJshopVars.stateBestPlan = tst;
+                JSJshopVars.bestPlans.addElement(tst);
                 if(JSJshopVars.planFound) {
                     long currentTime = System.currentTimeMillis();
                     JSUtil.println("Found better plan of reward " + tst.reward() + " in run " + dom.mctsRuns + " after " + (currentTime - JSJshopVars.startTime) + " ms at depth " + depth);
@@ -75,7 +75,7 @@ public class Algorithm {
         if (tst.children.size() == 0) {
             if (t.isPrimitive()) {
                 //task is primitive, so find applicable operators
-                pair = t.seekSimplePlan(dom, tst.tState());
+                pair = t.seekSimplePlanCostFunction(dom, tst.tState(), false);
                 ans = pair.plan();
                 if (ans.isFailure()) {
                     tst.plan.assignFailure();

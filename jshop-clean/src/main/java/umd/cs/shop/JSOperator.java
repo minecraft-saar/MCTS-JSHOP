@@ -93,5 +93,37 @@ public class JSOperator {
         newOp.cost = cost;
         return newOp;
     }
+
+    public boolean equals(Object o) {
+        if (!(o instanceof JSOperator))
+            return false;
+
+        JSOperator op = (JSOperator) o;
+
+        if (!precondition.equals(op.precondition))
+            return false;
+
+        if (!addList.equals(op.addList)) {
+            return false;
+        }
+
+        if (!deleteList.equals(op.deleteList)) {
+            return false;
+        }
+
+        if (!head.equals(op.head))
+            return false;
+
+        Double thisCost = cost;
+        Double otherCost = op.cost;
+        return thisCost.equals(otherCost);
+    }
+
+    public int hashCode() {
+        return Objects.hash(precondition, addList, deleteList, head, cost);
+    }
+
 }
+
+
 

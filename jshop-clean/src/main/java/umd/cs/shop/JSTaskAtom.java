@@ -85,6 +85,46 @@ public class JSTaskAtom extends JSPredicateForm {
 
     }
 
+    public JSPairPlanTState seekSimplePlanCostFunction(JSPlanningDomain dom, JSTState ts,  boolean inTree) {
+        //JSPairPlanTState pair;
+        JSSubstitution alpha;
+        JSOperator op;
+        JSListOperators list = dom.operators();
+        JSTaskAtom top;
+        //JSState ns;
+        JSTState tState;
+        JSPlan pl = new JSPlan();
+        boolean thisIsGround = this.isGround();
+
+        for (short i = 0; i < list.size(); i++) {
+            op = (JSOperator) list.elementAt(i);
+            top = op.head();
+            if (!thisIsGround) {
+                top = top.standarizerTA();
+            }
+            alpha = top.matches(this);
+            if (!alpha.fail()) {
+                op = op.standarizerOp();
+                alpha = alpha.standarizerSubs();
+                JSJshopVars.VarCounter++;
+
+                JSListSubstitution satisfiers = dom.axioms().TheoremProver(op.precondition(), ts.state(), alpha, true);
+                if (!satisfiers.isEmpty()) {
+                    tState = ts.state().applyOp(op, alpha, ts.addList(), ts.deleteList());
+                    //ns = tState.state();
+                    top = op.head();
+                    double cost = JSJshopVars.costFunction.realCost(ts, op);
+                    JSJshopVars.realCostUses++;
+                    pl.addWithCost(top.applySubstitutionTA(alpha), cost);
+                    return new JSPairPlanTState(pl, tState);
+                }
+            }
+        }
+        pl.assignFailure();
+        return new JSPairPlanTState(pl, new JSTState());
+
+    }
+
     public JSReduction reduce(JSPlanningDomain dom, JSState s, JSReduction red) {
         //JSUtil.flag("reduce(PlanningDomain dom,State s,Reduction red)");
 
@@ -232,6 +272,28 @@ public class JSTaskAtom extends JSPredicateForm {
         isCompound = true;
     }
 
+    public boolean equals(JSTaskAtom a) {
+
+        if (isCompound != a.isCompound || isPrimitive != a.isPrimitive)
+            return false;
+
+        if (this.size() != a.size())
+            return false;
+
+        String name = (String) this.elementAt(0);
+        String otherName = (String) a.elementAt(0);
+        if (!name.equals(otherName))
+            return false;
+
+        for (int i = 1; i < this.size(); i++) {
+            JSTerm term = (JSTerm) this.elementAt(i);
+            JSTerm otherTerm = (JSTerm) a.elementAt(i);
+            if (!term.equals(otherTerm)) {
+                return false;
+            }
+        }
+        return true;
+    }
 
 }
 

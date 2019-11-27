@@ -101,7 +101,7 @@ public final class JSUtil {
     static boolean readToken(StreamTokenizer tokenizer, String name) {
         try {
             tokenizer.nextToken();
-            if (tokenizer.ttype == tokenizer.TT_EOF) {
+            if (tokenizer.ttype == StreamTokenizer.TT_EOF) {
                 System.out.println("Line " + tokenizer.lineno() + " : " + name + ": unexpected EOF");
                 return false;
             }

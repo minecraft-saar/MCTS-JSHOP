@@ -93,7 +93,6 @@ public class UCTPolicy implements MCTSPolicy {
             cost = cost + child.plan.elementCost(i);
         }
         cost = cost * -1.0;
-        //System.out.println("New Reward : "+ cost);
         child.setReward(cost);
     }
 }

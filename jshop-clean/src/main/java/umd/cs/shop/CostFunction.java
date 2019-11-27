@@ -1,7 +1,8 @@
 package umd.cs.shop;
 
 public interface CostFunction {
-    double approximate();
+    double approximate(JSTState state, JSOperator op);
 
-    double realCost();
+
+    double realCost(JSTState state, JSOperator op);
 }

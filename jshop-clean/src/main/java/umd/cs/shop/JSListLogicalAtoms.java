@@ -215,5 +215,44 @@ public class JSListLogicalAtoms extends Vector<Object> {
         name = new String(val);
     }
 
+    public boolean equals(Object o) {
+        if (!(o instanceof JSListLogicalAtoms))
+            return false;
+
+        JSListLogicalAtoms otherList = (JSListLogicalAtoms) o;
+
+        if (!label.equals(otherList.label))
+            return false;
+
+        if (varlist != otherList.varlist)
+            return false;
+
+        if (!name.equals(otherList.name))
+            return false;
+
+        if (this.size() != otherList.size())
+            return false;
+
+        if (varlist) {
+            JSTerm term = (JSTerm) this.elementAt(0);
+            JSTerm otherTerm = (JSTerm) otherList.elementAt(0);
+            return term.equals(otherTerm);
+        }
+
+        for (int i = 0; i < this.size(); i++) {
+            JSPredicateForm pred = (JSPredicateForm) this.elementAt(i);
+            JSPredicateForm otherPred = (JSPredicateForm) otherList.elementAt(i);
+            if (!pred.equals(otherPred)) {
+                return false;
+            }
+        }
+
+        return true;
+    }
+
+    public int hashCode() {
+        return super.hashCode();
+    }
+
 }
 

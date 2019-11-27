@@ -119,12 +119,12 @@ public class JSPlanningDomain {
         return new JSPairPlanTSListNodes(pair, listNodes);
     }
 
-    public void solveMCTS(JSPlanningProblem prob, int runs, long timeout){
+    public void solveMCTS(JSPlanningProblem prob, int runs, long timeout, boolean costFunction){
         JSTState ts = new JSTState(prob.state(), new JSListLogicalAtoms(), new JSListLogicalAtoms());
         JSTasks tasks = prob.tasks();
         JSPlan plan = new JSPlan();
         JSPairTStateTasks initial = new JSPairTStateTasks(ts, tasks, plan);
-        JSJshopVars.stateBestPlan = initial;
+        JSJshopVars.bestPlans.addElement(initial);
         JSJshopVars.treeDepth = 0;
         this.mctsRuns = 1;
         for(int i = 1; i <= runs ; i++) {
@@ -135,14 +135,18 @@ public class JSPlanningDomain {
                 break;
             }
             //System.out.println(" !!!!!!! Starting Run number : " + i + " after " + (currentTime - JSJshopVars.startTime) + " ms");
-            tasks.runMCTS(initial, this, 1);
+            if(costFunction){
+                Algorithm.runApprox(initial, this, 1);
+            } else {
+                tasks.runMCTS(initial, this, 1);
+            }
             initial.setInTree();
             this.mctsRuns ++;
         }
 
         JSUtil.println("Found Plan: " + JSJshopVars.planFound);
         if(!JSJshopVars.planFound){
-            JSJshopVars.stateBestPlan.plan.assignFailure();
+            JSJshopVars.bestPlans.lastElement().plan.assignFailure();
         }
 
     }

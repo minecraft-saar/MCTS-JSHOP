@@ -12,9 +12,7 @@ public class JSPairTStateTasks {
     boolean inTree  = false;
     JSPlan plan;
     boolean deadEnd = false;
-    //private Vector listNodes;
     //private JSTaskAtom primitiveAction; // method that generated this state
-    //private JSMethod method;
     //boolean primitive = false;
 
     JSPairTStateTasks(JSTState state, JSTasks tasks, JSPlan plan) {
@@ -52,10 +50,6 @@ public class JSPairTStateTasks {
     int visited(){
         return this.visited;
     }
-
-    //void setListNodes(Vector<Object> input){
-    //    listNodes =(Vector) input.clone();
-    //}
 
     void setDeadEnd() {this.deadEnd = true;}
 

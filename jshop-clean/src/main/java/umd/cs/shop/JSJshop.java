@@ -20,10 +20,10 @@ import picocli.CommandLine.Parameters;
 // domains and problems are given it will parse all of them and solve the
 // last problem for the last domain.
 
-public final class JSJshop implements Runnable{
+public final class JSJshop implements Runnable {
     /*HICAP*//*==== class variables ====*/
-    /*HICAP*/public static boolean corbaToHicap = false;
-    /*HICAP*/public static JApplet applet;
+    // /*HICAP*/public static boolean corbaToHicap = false;
+    // /*HICAP*/public static JApplet applet;
 
     /* instance variables */
     private JSPlanningDomain dom;
@@ -34,10 +34,10 @@ public final class JSJshop implements Runnable{
     @Parameters(index = "1", description = "The problem file")
     String nameProblemFile;
 
-    @Option(names = {"-s"}, defaultValue = "false")
+    @Option(names = {"-s"}, defaultValue = "false", description = "Enables standard search")
     boolean standardSearch;
 
-    @Option(names = {"-m", "--monteCarloRuns"}, description = "Number of runs for the monte carlo search")
+    @Option(names = {"-m", "--monteCarloRuns"},defaultValue = "10000", description = "Number of runs for the monte carlo search")
     int mctsruns;
 
     @Option(names = {"-p", "--policy"}, defaultValue = "UCT", description = "UCT")
@@ -46,8 +46,8 @@ public final class JSJshop implements Runnable{
     @Option(names = {"-t", "--timeout"}, defaultValue = "10000", description = "Timeout in milliseconds")
     long timeout;
 
-    @Option(names = {"-c", "--costFunction"}, defaultValue = "basic", description = "basic or nlg")
-    String costFunction;
+    @Option(names = {"-c", "--costFunction"}, defaultValue = "false", description = "Enables use of cost funtion")
+    boolean costFunction;
 
     @Option(names = {"-d", "--detail"}, defaultValue = "1", description = "Integer from 1 to 10 for more details during standard search")
     int detail;
@@ -58,10 +58,6 @@ public final class JSJshop implements Runnable{
     @Override
     public void run() {
         JSJshopVars.startTime = System.currentTimeMillis();
-//        nlgSearch(mctsruns, timeout);
-//        return;
-
-
         JSUtil.println("Reading file " + nameDomainFile);
         if (!parserFile(nameDomainFile))
             if (JSJshopVars.flagExit)
@@ -80,7 +76,7 @@ public final class JSJshop implements Runnable{
         final long parseTime = System.currentTimeMillis();
         JSUtil.println("Parsing Time: " + (parseTime - JSJshopVars.startTime));
 
-        if(standardSearch){
+        if (standardSearch) {
             standardSearch();
         } else {
             mctsSearch();
@@ -114,7 +110,7 @@ public final class JSJshop implements Runnable{
 
     /******** main constructor **********/
 
-    public  void standardSearch() {
+    public void standardSearch() {
         JSJshopVars.allPlans = allPlans;
         JSJshopVars.flagLevel = detail;
         JSPairPlanTSListNodes pair;
@@ -147,8 +143,8 @@ public final class JSJshop implements Runnable{
                         JSUtil.println("Plan # " + (i + 1));
                         pair = (JSPairPlanTSListNodes) allPlans.elementAt(i);
                         double planCost = pair.planS().plan().planCost();
-                        JSUtil.println("Plan cost: "+ planCost );
-                        if (bestPlanValue.compareTo(planCost) > 0){
+                        JSUtil.println("Plan cost: " + planCost);
+                        if (bestPlanValue.compareTo(planCost) > 0) {
                             bestPlanValue = planCost;
                             bestplanIndex = i;
                         }
@@ -166,46 +162,44 @@ public final class JSJshop implements Runnable{
     //MCTS
     public void mctsSearch() {
         JSJshopVars.policy = new UCTPolicy(); //TODO adapt to parameter
+        if(costFunction)
+            JSJshopVars.costFunction = new BasicCost(); //TODO adapt to parameter
         for (int k = 0; k < probSet.size(); k++) {
             prob = (JSPlanningProblem) probSet.elementAt(k);
             JSUtil.println("Solving Problem :" + prob.Name() + " with mcts");
-            //try {
-            dom.solveMCTS(prob, mctsruns, timeout);
-            //} catch (OutOfMemoryError ignored){
-            //  JSUtil.println("Error: Out Of Memory");
-            //} finally {
+            dom.solveMCTS(prob, mctsruns, timeout, costFunction);
             final long searchTime = System.currentTimeMillis();
             JSUtil.println("Total Time: " + (searchTime - JSJshopVars.startTime));
-            if (JSJshopVars.stateBestPlan.plan.isFailure()) {
+            if (JSJshopVars.bestPlans.lastElement().plan.isFailure()) {
                 JSUtil.println("0 plans found");
             } else {
                 JSUtil.println("Plan found:");
-                JSUtil.println("Solution in Tree: " + JSJshopVars.stateBestPlan.inTree);
-                JSUtil.println("Reward for Given Plan: " + JSJshopVars.stateBestPlan.reward());
+                JSUtil.println("Solution in Tree: " + JSJshopVars.bestPlans.lastElement().inTree);
+                JSUtil.println("Reward for Given Plan: " + JSJshopVars.bestPlans.lastElement().reward());
                 JSUtil.println("********* PLAN *******");
-                JSJshopVars.stateBestPlan.plan.printPlan();
+                JSJshopVars.bestPlans.lastElement().plan.printPlan();
             }
             //}
         }
     }
 
-    //MCTS
+    //Calls mcts search but returns the plan insteasd of printing it for use in the NLG System
     public JSPlan nlgSearch(int mctsruns, long timeout) {
         InputStream domain = JSJshop.class.getResourceAsStream("domain.shp");
         InputStream problem = JSJshop.class.getResourceAsStream("problem.lisp");
         boolean parseSuccess = parserFile(domain);
-        if(!parseSuccess){
+        if (!parseSuccess) {
             JSUtil.println("Domain File not parsed correctly");
         }
         parseSuccess = parserFile(problem);
-        if(!parseSuccess){
+        if (!parseSuccess) {
             JSUtil.println("Problem File not parsed correctly");
         }
         JSJshopVars.startTime = System.currentTimeMillis();
         this.mctsruns = mctsruns;
         this.timeout = timeout;
         mctsSearch();
-        return JSJshopVars.stateBestPlan.plan;
+        return JSJshopVars.bestPlans.lastElement().plan;
     }
 
 /*HICAP:   
@@ -552,7 +546,6 @@ public final class JSJshop implements Runnable{
     public JSJshopNode tree() {
         return tree;
     }
-
 
 
 }

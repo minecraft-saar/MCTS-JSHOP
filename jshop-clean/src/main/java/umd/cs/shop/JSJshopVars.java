@@ -1,5 +1,7 @@
 package umd.cs.shop;
 
+import java.util.Vector;
+
 public final class JSJshopVars {
 
     /* class variables */
@@ -48,7 +50,10 @@ public final class JSJshopVars {
     static boolean planFound = false;
     static CostFunction costFunction;
     static MCTSPolicy policy;
-    static JSPairTStateTasks stateBestPlan;
+    //static JSPairTStateTasks stateBestPlan;
+    static Vector<JSPairTStateTasks> bestPlans = new Vector<>();
+    static int approxUses = 0;
+    static int realCostUses = 0;
 
     static void FoundPlan(){
         planFound = true;

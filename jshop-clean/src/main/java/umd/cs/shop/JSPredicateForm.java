@@ -296,8 +296,12 @@ public class JSPredicateForm extends Vector<Object> {
         return beta;
     }
 
-    public boolean equals(JSPredicateForm t)
-        /* t is a ground term*/ {
+    @Override
+    public boolean equals(Object o) {
+        /* t is a ground term*/
+        if (!(o instanceof JSPredicateForm))
+            return false;
+        JSPredicateForm t = (JSPredicateForm) o;
         if (t == null) return false;
 
         String functor = (String) this.elementAt(0);
@@ -329,6 +333,10 @@ public class JSPredicateForm extends Vector<Object> {
         }
 
         return true;
+    }
+
+    public int hashCode() {
+        return super.hashCode();
     }
 
     public JSPredicateForm standarizerPredicateForm() {

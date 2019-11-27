@@ -73,7 +73,7 @@ public class JSTasks extends JSListLogicalAtoms {
             //Get current best reward if it exist
             Double currentReward = Double.NEGATIVE_INFINITY;
             if(JSJshopVars.planFound){
-                currentReward = JSJshopVars.stateBestPlan.reward();
+                currentReward = JSJshopVars.bestPlans.lastElement().reward();
             } else {
                 long currentTime = System.currentTimeMillis();
                 JSUtil.println("Found first plan of reward " + tst.reward() +" in run " + dom.mctsRuns +" after " + (currentTime - JSJshopVars.startTime) + " ms at depth " + depth);
@@ -81,7 +81,7 @@ public class JSTasks extends JSListLogicalAtoms {
 
             Double foundReward = tst.reward();
             if(foundReward.compareTo(currentReward) > 0){
-                JSJshopVars.stateBestPlan = tst;
+                JSJshopVars.bestPlans.addElement(tst);
                 if(JSJshopVars.planFound) {
                     long currentTime = System.currentTimeMillis();
                     JSUtil.println("Found better plan of reward " + tst.reward() + " in run " + dom.mctsRuns + " after " + (currentTime - JSJshopVars.startTime) + " ms at depth " + depth);

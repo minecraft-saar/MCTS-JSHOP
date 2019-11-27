@@ -6,6 +6,8 @@ import java.io.*;
 
 public class JSState extends JSListLogicalAtoms {
 
+    // This is a Vector over JSPredicateForm (call terms count as JSPredicateForm but should not end up in the state)
+
     /*==== instance variables ====*/
 
     private String label;
@@ -138,10 +140,10 @@ public class JSState extends JSListLogicalAtoms {
 
     public JSListSubstitution satisfiesAll(JSListLogicalAtoms conds, JSSubstitution alpha,
                                            JSListAxioms axioms)
-    //Tests if  conds can be infered from this (the current state) and axioms
+    //Tests if  conds can be inferred from this (the current state) and axioms
     //modulo the substitution alpha.
     //
-    //If conds can be infered, it returns all of the matching substitutions
+    //If conds can be inferred, it returns all of the matching substitutions
     //
     //else it returns an empty list
     {
@@ -196,6 +198,26 @@ public class JSState extends JSListLogicalAtoms {
         if (JSJshopVars.flagLevel > 7 && answers.isEmpty())
             JSUtil.println(" Goal does not match any atom.");
         return answers;
+    }
+
+    public boolean equals(Object o) {
+        if (!(o instanceof JSState))
+            return false;
+        JSState state = (JSState) o;
+
+        if (state.size() != this.size())
+            return false;
+
+        for (int i = 0; i < this.size(); i++) {
+            if (!state.contains(this.elementAt(i))) {
+                return false;
+            }
+        }
+        return true;
+    }
+
+    public int hashCode() {
+        return super.hashCode();
     }
 
 }
