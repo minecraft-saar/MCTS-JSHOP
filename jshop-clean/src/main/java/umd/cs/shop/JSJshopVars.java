@@ -48,6 +48,8 @@ public final class JSJshopVars {
     static long startTime;
     static int treeDepth;
     static boolean planFound = false;
+    static boolean updateMaximum = false;
+    static boolean random = false;
     static CostFunction costFunction;
     static MCTSPolicy policy;
     //static JSPairTStateTasks stateBestPlan;

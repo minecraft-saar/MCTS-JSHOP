@@ -40,6 +40,12 @@ public final class JSJshop implements Runnable {
     @Option(names = {"-m", "--monteCarloRuns"},defaultValue = "10000", description = "Number of runs for the monte carlo search")
     int mctsruns;
 
+    @Option(names = {"-x","--max"}, defaultValue = "false", description = "take maximum when updating the reward")
+    boolean updateMaximum;
+
+    @Option(names = {"-r","--random"}, defaultValue = "false", description = "take random cost function")
+    boolean random;
+
     @Option(names = {"-p", "--policy"}, defaultValue = "UCT", description = "UCT")
     String policy;
 
@@ -162,6 +168,8 @@ public final class JSJshop implements Runnable {
     //MCTS
     public void mctsSearch() {
         JSJshopVars.policy = new UCTPolicy(); //TODO adapt to parameter
+        JSJshopVars.updateMaximum = updateMaximum;
+        JSJshopVars.random = random;
         if(costFunction)
             JSJshopVars.costFunction = new BasicCost(); //TODO adapt to parameter
         for (int k = 0; k < probSet.size(); k++) {
@@ -170,6 +178,11 @@ public final class JSJshop implements Runnable {
             dom.solveMCTS(prob, mctsruns, timeout, costFunction);
             final long searchTime = System.currentTimeMillis();
             JSUtil.println("Total Time: " + (searchTime - JSJshopVars.startTime));
+            if(random){
+                JSUtil.println("Random cost function uses: " + JSJshopVars.approxUses);
+            } else {
+                JSUtil.println("Real cost function uses: " + JSJshopVars.realCostUses);
+            }
             if (JSJshopVars.bestPlans.lastElement().plan.isFailure()) {
                 JSUtil.println("0 plans found");
             } else {

@@ -72,6 +72,14 @@ public class UCTPolicy implements MCTSPolicy {
 
     @Override
     public void updateReward(JSPairTStateTasks parent, double reward) { //Average over rewards
+        double newReward;
+        if(JSJshopVars.updateMaximum){
+            newReward = Math.max(parent.reward(), reward);
+        } else {
+            newReward= (reward + parent.reward()*parent.visited())/(parent.visited() + 1);
+        }
+        parent.setReward(newReward);
+        /*
         int numChildren = 0;
         double sum = 0.0;
         for (JSPairTStateTasks child : parent.children) {
@@ -80,10 +88,9 @@ public class UCTPolicy implements MCTSPolicy {
                 numChildren++;
             }
         }
-        double newReward = sum / numChildren;
+        double newReward = sum / numChildren; */
         //System.out.println("In Tree: " + parent.inTree);
         //System.out.println("Updated Reward: " + newReward);
-        parent.setReward(newReward);
     }
 
     @Override
