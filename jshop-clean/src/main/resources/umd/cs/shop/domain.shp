@@ -118,8 +118,7 @@
 (:method (build-wall-east ?x ?y ?z ?length ?height ?dir)
         height-one
         ((call equal ?height 1) (call equal ?dir 1))
-        ((build-row ?x ?y ?z ? length ?dir)
-        (!build-wall))
+        ((build-row ?x ?y ?z ? length ?dir))
 
         east-one
         ((call equal ?dir 1) (not (call equal ?height 1)))
@@ -132,8 +131,8 @@
 (:method (build-wall-east ?x ?y ?z ?length ?height ?dir)
         height-one
         ((call equal ?height 1) (call equal ?dir 1))
-        ((build-row (call - (call + ?x ?length) 1) ?y ?z ?length 2) 
-            (!build-wall))
+        ((build-row (call - (call + ?x ?length) 1) ?y ?z ?length 2))
+            
 
         east-two
         ((call equal ?dir 1) (not (call equal ?height 1)))
@@ -147,8 +146,7 @@
 (:method (build-wall-west ?x ?y ?z ?length ?height ?dir)
         height-one
         ((call equal ?height 1) (call equal ?dir 2))
-        ((build-row ?x ?y ?z ?length ?dir)
-            (!build-wall))
+        ((build-row ?x ?y ?z ?length ?dir))
 
         west-one
         ((call equal ?dir 2) (not (call equal ?height 1)))
@@ -161,8 +159,7 @@
 (:method (build-wall-west ?x ?y ?z ?length ?height ?dir)
         height-one
         ((call equal ?height 1) (call equal ?dir 2))
-        ((build-row (call + (call - ?x ?length) 1) ?y ?z ?length 1)
-            (!build-wall))
+        ((build-row (call + (call - ?x ?length) 1) ?y ?z ?length 1))
 
         west-two
         ((call equal ?dir 2) (not (call equal ?height 1)))
@@ -175,8 +172,7 @@
 (:method (build-wall-north ?x ?y ?z ?length ?height ?dir)
         height-one
         ((call equal ?height 1) (call equal ?dir 3))
-        ((build-row ?x ?y ?z ?length ?dir)
-            (!build-wall))
+        ((build-row ?x ?y ?z ?length ?dir))
 
         north-one
         ((call equal ?dir 3) (not (call equal ?height 1)))
@@ -189,8 +185,7 @@
 (:method (build-wall-north ?x ?y ?z ?length ?height ?dir)
         height-one
         ((call equal ?height 1) (call equal ?dir 3))
-        ((build-row ?x ?y (call - (call + ?z ?length) 1) ?length 4)
-            (!build-wall-west))
+        ((build-row ?x ?y (call - (call + ?z ?length) 1) ?length 4))
 
         north-two
         ((call equal ?dir 3) (not (call equal ?height 1)))
@@ -203,8 +198,7 @@
 (:method (build-wall-south ?x ?y ?z ?length ?height ?dir)
         height
         ((call equal ?height 1) (call equal ?dir 4))
-        ((build-row ?x ?y ?z ?length ?dir)
-            (!build-wall))
+        ((build-row ?x ?y ?z ?length ?dir))
 
         south-one
         ((call equal ?dir 4) (not (call equal ?height 1)))
@@ -218,8 +212,7 @@
 (:method (build-wall-south ?x ?y ?z ?length ?height ?dir)
         height-one
         ((call equal ?height 1) (call equal ?dir 4))
-        ((build-row ?x ?y (call + (call - ?z ?length) 1) ?length 3)
-            (!build-wall))
+        ((build-row ?x ?y (call + (call - ?z ?length) 1) ?length 3))
 
         south-two
         ((call equal ?dir 4) (not (call equal ?height 1)))
