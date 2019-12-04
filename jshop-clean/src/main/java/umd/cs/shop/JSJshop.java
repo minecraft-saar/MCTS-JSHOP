@@ -64,6 +64,11 @@ public final class JSJshop implements Runnable {
     @Override
     public void run() {
         JSJshopVars.startTime = System.currentTimeMillis();
+        /*JSPlan plan = nlgSearch(mctsruns, timeout);
+        if(plan != null){
+            return;
+        }*/
+
         JSUtil.println("Reading file " + nameDomainFile);
         if (!parserFile(nameDomainFile))
             if (JSJshopVars.flagExit)
@@ -175,6 +180,7 @@ public final class JSJshop implements Runnable {
         for (int k = 0; k < probSet.size(); k++) {
             prob = (JSPlanningProblem) probSet.elementAt(k);
             JSUtil.println("Solving Problem :" + prob.Name() + " with mcts");
+            JSUtil.println("time till timeout: " + timeout);
             dom.solveMCTS(prob, mctsruns, timeout, costFunction);
             final long searchTime = System.currentTimeMillis();
             JSUtil.println("Total Time: " + (searchTime - JSJshopVars.startTime));
@@ -197,9 +203,9 @@ public final class JSJshop implements Runnable {
     }
 
     //Calls mcts search but returns the plan insteasd of printing it for use in the NLG System
-    public JSPlan nlgSearch(int mctsruns, long timeout) {
+    public JSPlan nlgSearch(int mctsruns, long timeout, InputStream world) {
         InputStream domain = JSJshop.class.getResourceAsStream("domain.shp");
-        InputStream world = JSJshop.class.getResourceAsStream("/de/saar/minecraft/worlds/bridge.csv");
+        //InputStream world = JSJshop.class.getResourceAsStream("/de/saar/minecraft/worlds/artengis.csv");
 
         boolean parseSuccess = parserFile(domain);
         if (!parseSuccess) {
@@ -258,7 +264,7 @@ public final class JSJshop implements Runnable {
             e.printStackTrace();
         }
 
-        result = result.concat(") ((build-house 0 0 2 3 3 3)) )");
+        result = result.concat(") ((build-house 0 2 0 4 4 3)) )");
         JSUtil.println(result);
         return new ByteArrayInputStream(result.getBytes());
     }

@@ -34,10 +34,19 @@ repositories {
     maven {url 'http://www.ling.uni-potsdam.de/tcl/maven2/external'}
     maven {url 'http://www.ling.uni-potsdam.de/tcl/maven2/releases'}
     maven { url 'https://jitpack.io' }
+    maven {
+        name = "GitHubPackages"
+        url = uri("https://maven.pkg.github.com/minecraft-saar/jshop")
+        credentials {
+            username = project.findProperty("gpr.user") ?: System.getenv("GPR_USER")
+            password = project.findProperty("gpr.key") ?: System.getenv("GPR_API_KEY")
+        }
+    }
 }
 
 dependencies {
 	compile 'info.picocli:picocli:3.9.3'
+	//compile 'de.saar.minecraft:shared-resources:1.1.1'
 }
 
 mainClassName = 'umd.cs.shop.JSJshop'

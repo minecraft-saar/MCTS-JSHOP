@@ -22,7 +22,12 @@
         ((last-placed ?x ?y ?z) (block-at ?block-type ?x ?y ?z))
         0.1
     )
-
+(:operator (!build-wall)
+    ()
+    ()
+    ()
+    0
+    )
 ;; Methods can be decomposed into other methods or operators
 ;; Operators are marked with ! methods are just given by name 
 (:method (remove-block ?x ?y ?z)
@@ -113,7 +118,8 @@
 (:method (build-wall-east ?x ?y ?z ?length ?height ?dir)
         height-one
         ((call equal ?height 1) (call equal ?dir 1))
-        ((build-row ?x ?y ?z ? length ?dir))
+        ((build-row ?x ?y ?z ? length ?dir)
+        (!build-wall))
 
         east-one
         ((call equal ?dir 1) (not (call equal ?height 1)))
@@ -126,7 +132,8 @@
 (:method (build-wall-east ?x ?y ?z ?length ?height ?dir)
         height-one
         ((call equal ?height 1) (call equal ?dir 1))
-        ((build-row (call - (call + ?x ?length) 1) ?y ?z ?length 2))
+        ((build-row (call - (call + ?x ?length) 1) ?y ?z ?length 2) 
+            (!build-wall))
 
         east-two
         ((call equal ?dir 1) (not (call equal ?height 1)))
@@ -140,7 +147,8 @@
 (:method (build-wall-west ?x ?y ?z ?length ?height ?dir)
         height-one
         ((call equal ?height 1) (call equal ?dir 2))
-        ((build-row ?x ?y ?z ?length ?dir))
+        ((build-row ?x ?y ?z ?length ?dir)
+            (!build-wall))
 
         west-one
         ((call equal ?dir 2) (not (call equal ?height 1)))
@@ -153,7 +161,8 @@
 (:method (build-wall-west ?x ?y ?z ?length ?height ?dir)
         height-one
         ((call equal ?height 1) (call equal ?dir 2))
-        ((build-row (call + (call - ?x ?length) 1) ?y ?z ?length 1))
+        ((build-row (call + (call - ?x ?length) 1) ?y ?z ?length 1)
+            (!build-wall))
 
         west-two
         ((call equal ?dir 2) (not (call equal ?height 1)))
@@ -166,7 +175,8 @@
 (:method (build-wall-north ?x ?y ?z ?length ?height ?dir)
         height-one
         ((call equal ?height 1) (call equal ?dir 3))
-        ((build-row ?x ?y ?z ?length ?dir))
+        ((build-row ?x ?y ?z ?length ?dir)
+            (!build-wall))
 
         north-one
         ((call equal ?dir 3) (not (call equal ?height 1)))
@@ -179,7 +189,8 @@
 (:method (build-wall-north ?x ?y ?z ?length ?height ?dir)
         height-one
         ((call equal ?height 1) (call equal ?dir 3))
-        ((build-row ?x ?y (call - (call + ?z ?length) 1) ?length 4))
+        ((build-row ?x ?y (call - (call + ?z ?length) 1) ?length 4)
+            (!build-wall-west))
 
         north-two
         ((call equal ?dir 3) (not (call equal ?height 1)))
@@ -192,7 +203,8 @@
 (:method (build-wall-south ?x ?y ?z ?length ?height ?dir)
         height
         ((call equal ?height 1) (call equal ?dir 4))
-        ((build-row ?x ?y ?z ?length ?dir))
+        ((build-row ?x ?y ?z ?length ?dir)
+            (!build-wall))
 
         south-one
         ((call equal ?dir 4) (not (call equal ?height 1)))
@@ -206,7 +218,8 @@
 (:method (build-wall-south ?x ?y ?z ?length ?height ?dir)
         height-one
         ((call equal ?height 1) (call equal ?dir 4))
-        ((build-row ?x ?y (call + (call - ?z ?length) 1) ?length 3))
+        ((build-row ?x ?y (call + (call - ?z ?length) 1) ?length 3)
+            (!build-wall))
 
         south-two
         ((call equal ?dir 4) (not (call equal ?height 1)))
@@ -381,10 +394,10 @@
         (
             (build-wall ?x ?y ?z ?width ?height 1)
             (build-wall (call - (call + ?x ?width ) 1) ?y ?z ?length ?height 3)
-            (build-wall (call - (call + ?x ?width) 1) (call - (call + ?y ?length) 1) ?z ?width ?height 2)
-            (build-wall ?x (call - (call + ?y ?length) 1) ?z ?length ?height 4)
+            (build-wall (call - (call + ?x ?width) 1) ?y (call - (call + ?z ?length) 1) ?width ?height 2)
+            (build-wall ?x ?y (call - (call + ?z ?length) 1) ?length ?height 4)
             ;;(build-door ?x (call - (call + (call ceiling ?length 2) ?y) 1) ?z)
-            (build-roof ?x (call - (call + ?y ?length) 1) (call + ?z ?height) ?length ?width 4)
+            (build-roof ?x  (call + ?y ?height) (call - (call + ?z ?length) 1) ?length ?width 4)
         )
 )   
 
