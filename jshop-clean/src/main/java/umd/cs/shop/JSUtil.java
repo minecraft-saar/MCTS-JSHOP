@@ -220,6 +220,9 @@ public final class JSUtil {
         if (tokenizer.ttype == JSJshopVars.verticalL) {
             System.out.print("| ");
         }
+        if (tokenizer.ttype == JSJshopVars.lowLine) {
+            System.out.print("_");
+        }
         if (tokenizer.ttype == StreamTokenizer.TT_WORD) {
             System.out.print(tokenizer.sval + " ");
         }
@@ -272,6 +275,8 @@ public final class JSUtil {
             return "[";
         if (tokenizer.ttype == JSJshopVars.verticalL)
             return "|";
+        if (tokenizer.ttype == JSJshopVars.lowLine)
+            return "_";
         if (tokenizer.ttype == StreamTokenizer.TT_WORD)
             return tokenizer.sval;
         if (tokenizer.ttype == JSJshopVars.whiteSpace)
@@ -301,6 +306,7 @@ public final class JSUtil {
         tokenizer.ordinaryChar(JSJshopVars.plus);
         tokenizer.ordinaryChar(JSJshopVars.backquote);
         tokenizer.ordinaryChar(JSJshopVars.slash);
+        tokenizer.ordinaryChar(JSJshopVars.lowLine);
 
         tokenizer.commentChar(JSJshopVars.semicolon);
 

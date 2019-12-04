@@ -40,7 +40,8 @@ public final class JSJshopVars {
     static int whiteSpace = 0x0020;//
     static int percent = 0x0025;//  
     static int backquote = 96;//  
-    static int slash = 47;//  
+    static int slash = 47;//
+    static int lowLine = 0x005F;// _
 
     //Any addition/change of a character implies a change
     // in the following methods in JSUtil:

@@ -37,13 +37,13 @@ public final class JSJshop implements Runnable {
     @Option(names = {"-s"}, defaultValue = "false", description = "Enables standard search")
     boolean standardSearch;
 
-    @Option(names = {"-m", "--monteCarloRuns"},defaultValue = "10000", description = "Number of runs for the monte carlo search")
+    @Option(names = {"-m", "--monteCarloRuns"}, defaultValue = "10000", description = "Number of runs for the monte carlo search")
     int mctsruns;
 
-    @Option(names = {"-x","--max"}, defaultValue = "false", description = "take maximum when updating the reward")
+    @Option(names = {"-x", "--max"}, defaultValue = "false", description = "take maximum when updating the reward")
     boolean updateMaximum;
 
-    @Option(names = {"-r","--random"}, defaultValue = "false", description = "take random cost function")
+    @Option(names = {"-r", "--random"}, defaultValue = "false", description = "take random cost function")
     boolean random;
 
     @Option(names = {"-p", "--policy"}, defaultValue = "UCT", description = "UCT")
@@ -170,7 +170,7 @@ public final class JSJshop implements Runnable {
         JSJshopVars.policy = new UCTPolicy(); //TODO adapt to parameter
         JSJshopVars.updateMaximum = updateMaximum;
         JSJshopVars.random = random;
-        if(costFunction)
+        if (costFunction)
             JSJshopVars.costFunction = new BasicCost(); //TODO adapt to parameter
         for (int k = 0; k < probSet.size(); k++) {
             prob = (JSPlanningProblem) probSet.elementAt(k);
@@ -178,7 +178,7 @@ public final class JSJshop implements Runnable {
             dom.solveMCTS(prob, mctsruns, timeout, costFunction);
             final long searchTime = System.currentTimeMillis();
             JSUtil.println("Total Time: " + (searchTime - JSJshopVars.startTime));
-            if(random){
+            if (random) {
                 JSUtil.println("Random cost function uses: " + JSJshopVars.approxUses);
             } else {
                 JSUtil.println("Real cost function uses: " + JSJshopVars.realCostUses);
@@ -199,12 +199,14 @@ public final class JSJshop implements Runnable {
     //Calls mcts search but returns the plan insteasd of printing it for use in the NLG System
     public JSPlan nlgSearch(int mctsruns, long timeout) {
         InputStream domain = JSJshop.class.getResourceAsStream("domain.shp");
-        InputStream problem = JSJshop.class.getResourceAsStream("problem.lisp");
+        InputStream world = JSJshop.class.getResourceAsStream("/de/saar/minecraft/worlds/bridge.csv");
+
         boolean parseSuccess = parserFile(domain);
         if (!parseSuccess) {
             JSUtil.println("Domain File not parsed correctly");
         }
-        parseSuccess = parserFile(problem);
+        InputStream transformedProblem = transformWorld(world);
+        parseSuccess = parserFile(transformedProblem);
         if (!parseSuccess) {
             JSUtil.println("Problem File not parsed correctly");
         }
@@ -229,6 +231,37 @@ public final class JSJshop implements Runnable {
     //    setFile(nameFile, pred);
 
     //}
+
+    public InputStream transformWorld(InputStream world) {
+
+        BufferedReader reader = new BufferedReader(new InputStreamReader(world));
+        String line = "";
+        String result = "(defproblem problem-house build-house ( (last-placed dummy dummy dummy) ";
+        try {
+            while ((line = reader.readLine()) != null) {
+                String[] data = line.split(",");
+                int x = Integer.parseInt(data[0]);
+                int y = Integer.parseInt(data[1]);
+                int z = Integer.parseInt(data[2]);
+                if (x < 0 || y < 0 || z < 0) {
+                    continue;
+                }
+                String blockAt = "(block-at ";
+                //append block type
+                blockAt = blockAt.concat(data[3]).concat(" ");
+                //append x,y,z coordinates
+                blockAt = blockAt.concat(data[0]).concat(" ").concat(data[1]).concat(" ").concat(data[2]).concat(") ");
+                result = result.concat(blockAt);
+            }
+
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+
+        result = result.concat(") ((build-house 0 0 2 3 3 3)) )");
+        JSUtil.println(result);
+        return new ByteArrayInputStream(result.getBytes());
+    }
 
     public JSJshopNode getTree() {
         return tree;
