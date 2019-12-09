@@ -3,6 +3,7 @@ package umd.cs.shop.costs;
 import umd.cs.shop.JSOperator;
 import umd.cs.shop.JSPairOperatorState;
 import umd.cs.shop.JSTState;
+import umd.cs.shop.JSTaskAtom;
 
 import java.util.HashMap;
 import java.util.Random;
@@ -14,7 +15,7 @@ public class BasicCost implements CostFunction {
     Random noiseGen = new Random(42);*/
 
     @Override
-    public double approximate(JSTState state, JSOperator op) {
+    public double approximate(JSTState state, JSOperator op, JSTaskAtom grounded_operator) {
 
 /*        JSPairOperatorState pair = new JSPairOperatorState(op, state.state());
         if(this.approxCosts.containsKey(pair)){
@@ -36,7 +37,7 @@ public class BasicCost implements CostFunction {
     }
 
     @Override
-    public double realCost(JSTState state, JSOperator op) {
+    public double realCost(JSTState state, JSOperator op, JSTaskAtom grounded_operator) {
 /*
         JSPairOperatorState pair = new JSPairOperatorState(op, state.state());
         if(realCosts.containsKey(pair)){
