@@ -8,7 +8,6 @@ import java.util.*;
 public class JSPlanningDomain {
 
     /*==== instance variables ====*/
-
     private String name;
 
     private JSListAxioms axioms = new JSListAxioms();
@@ -188,5 +187,9 @@ public class JSPlanningDomain {
         return operators;
     }
 
+
+    public String getName() {
+        return name;
+    }
 }
 

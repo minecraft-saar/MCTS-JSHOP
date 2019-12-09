@@ -176,7 +176,7 @@ public final class JSJshop implements Runnable {
         JSJshopVars.policy = new UCTPolicy(); //TODO adapt to parameter
         JSJshopVars.updateMaximum = updateMaximum;
         JSJshopVars.useApproximatedCostFunction = useApproximatedCostFunction;
-        JSJshopVars.costFunction = CostFunctionFactory.get_cost_function(costFunctionName);
+        JSJshopVars.costFunction = CostFunctionFactory.get_cost_function(costFunctionName, dom.getName());
 
         for (int k = 0; k < probSet.size(); k++) {
             prob = (JSPlanningProblem) probSet.elementAt(k);

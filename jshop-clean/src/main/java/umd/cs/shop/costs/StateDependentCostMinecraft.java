@@ -14,6 +14,9 @@ public class StateDependentCostMinecraft implements CostFunction {
     @Override
     public double realCost(JSTState state, JSOperator op) {
         System.out.println(op.head());
+        op.print();
+
+        System.exit(0);
         return 1;
     }
 
