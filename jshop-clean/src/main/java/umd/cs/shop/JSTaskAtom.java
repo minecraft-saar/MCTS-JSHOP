@@ -114,7 +114,7 @@ public class JSTaskAtom extends JSPredicateForm {
                     //ns = tState.state();
                     top = op.head();
                     double cost;
-                    if(JSJshopVars.random){
+                    if(JSJshopVars.useApproximatedCostFunction){
                         cost = JSJshopVars.costFunction.approximate(ts, op);
                         JSJshopVars.approxUses++;
                     } else {

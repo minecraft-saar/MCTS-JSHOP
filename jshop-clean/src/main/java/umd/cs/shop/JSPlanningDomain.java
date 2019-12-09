@@ -119,7 +119,7 @@ public class JSPlanningDomain {
         return new JSPairPlanTSListNodes(pair, listNodes);
     }
 
-    public void solveMCTS(JSPlanningProblem prob, int runs, long timeout, boolean costFunction){
+    public void solveMCTS(JSPlanningProblem prob, int runs, long timeout){
         JSTState ts = new JSTState(prob.state(), new JSListLogicalAtoms(), new JSListLogicalAtoms());
         JSTasks tasks = prob.tasks();
         JSPlan plan = new JSPlan();
@@ -135,7 +135,7 @@ public class JSPlanningDomain {
                 break;
             }
             //System.out.println(" !!!!!!! Starting Run number : " + i + " after " + (currentTime - JSJshopVars.startTime) + " ms");
-            if(costFunction){
+            if(!JSJshopVars.costFunction.isUnitCost()){
                 Algorithm.runApprox(initial, this, 1);
             } else {
                 tasks.runMCTS(initial, this, 1);
