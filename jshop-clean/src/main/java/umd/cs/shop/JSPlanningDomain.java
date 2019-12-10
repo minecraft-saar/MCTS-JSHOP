@@ -143,6 +143,16 @@ public class JSPlanningDomain {
             this.mctsRuns ++;
         }
 
+
+
+        /*try {
+            BufferedWriter writer = new BufferedWriter(new FileWriter("finalUCT.dot"));
+            writer.write(initial.dotTree());
+            writer.close();
+        } catch (IOException e) {
+            e.printStackTrace();
+        } */
+
         JSUtil.println("Found Plan: " + JSJshopVars.planFound);
         if(!JSJshopVars.planFound){
             JSJshopVars.bestPlans.lastElement().plan.assignFailure();

@@ -2,7 +2,11 @@ package umd.cs.shop;
 
 import java.util.Vector;
 
+
 public class MCTSNode {
+    private static int NEXT_ID = 0;
+    private int id;
+
     private JSTState tState;
     private JSTasks taskNetwork;
     private int visited;
@@ -22,6 +26,7 @@ public class MCTSNode {
         this.plan = new JSPlan();
         this.plan.addElements(plan);
         this.children = new Vector<MCTSNode>();
+        this.id = NEXT_ID++;
     }
 
     MCTSNode(JSTState state , JSPlan plan) {
@@ -30,6 +35,7 @@ public class MCTSNode {
         this.plan.addElements(plan);
         this.reward = Double.NEGATIVE_INFINITY;
         this.visited = 0;
+        this.id = NEXT_ID++;
     }
 
     JSTState tState(){
@@ -75,6 +81,32 @@ public class MCTSNode {
     void setInTree(){
         this.inTree = true;
     }
+
+
+
+    String dotTree() {
+        String result = "digraph UCT {";
+        result += dotNode();
+        result += "}";
+        return result;
+
+    }
+
+    String dotNode() {
+        if(!this.inTree) return "";
+        String result = this.id + " [label=\"" + this.reward + " " + this.visited + "\"];\n";
+            for (MCTSNode child : children) {
+                //while (child.children.size() == 1) {
+                //    child = child.children.get(0);
+                //}
+                result += this.id + " -> " + child.id + ";\n";
+                result += child.dotNode();
+            }
+
+
+        return result;
+    }
+
 
 
 }
