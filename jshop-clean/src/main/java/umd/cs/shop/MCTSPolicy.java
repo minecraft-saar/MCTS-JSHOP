@@ -2,12 +2,12 @@ package umd.cs.shop;
 
 public interface MCTSPolicy {
 
-    JSPairTStateTasks randomChild(JSPairTStateTasks parent);
+    MCTSNode randomChild(MCTSNode parent);
 
-    JSPairTStateTasks bestChild(JSPairTStateTasks parent);
+    MCTSNode bestChild(MCTSNode parent);
 
-    void updateReward(JSPairTStateTasks parent, double reward);
+    void updateReward(MCTSNode parent, double reward);
 
-    void computeNewReward(JSPairTStateTasks child);
+    void computeNewReward(MCTSNode child);
 
 }

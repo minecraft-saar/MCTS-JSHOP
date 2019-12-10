@@ -8,19 +8,19 @@ public class UCTPolicy implements MCTSPolicy {
     Random randgen = new Random(21);
 
     @Override
-    public JSPairTStateTasks randomChild(JSPairTStateTasks parent) {
+    public MCTSNode randomChild(MCTSNode parent) {
         //JSUtil.println("RANDOM");
         int rand = this.randgen.nextInt(parent.children.size());
         return parent.children.get(rand);
     }
 
     @Override
-    public JSPairTStateTasks bestChild(JSPairTStateTasks parent) {
+    public MCTSNode bestChild(MCTSNode parent) {
         Double maxValue = Double.NEGATIVE_INFINITY;
-        JSPairTStateTasks bestChild = null;
+        MCTSNode bestChild = null;
         boolean allDeadEnd = true;
         //JSUtil.println(("Number of children to choose from: " + parent.children.size()));
-        for (JSPairTStateTasks child : parent.children) {
+        for (MCTSNode child : parent.children) {
             allDeadEnd = allDeadEnd && child.deadEnd;
             if (child.deadEnd) continue;
             if (child.visited() == 0) {
@@ -59,7 +59,7 @@ public class UCTPolicy implements MCTSPolicy {
         if (bestChild == null && !allDeadEnd) {
             System.out.println("NO CHILD SELECTED ");
             System.out.println(maxValue);
-            for (JSPairTStateTasks child : parent.children) {
+            for (MCTSNode child : parent.children) {
                 System.out.println(child.deadEnd);
                 System.out.println(child.reward());
             }
@@ -84,7 +84,7 @@ public class UCTPolicy implements MCTSPolicy {
     }
 
     @Override
-    public void updateReward(JSPairTStateTasks parent, double reward) { //Average over rewards
+    public void updateReward(MCTSNode parent, double reward) { //Average over rewards
         double newReward;
         if(Double.isInfinite(parent.reward())){
             newReward = reward;
@@ -111,7 +111,7 @@ public class UCTPolicy implements MCTSPolicy {
     }
 
     @Override
-    public void computeNewReward(JSPairTStateTasks child) {
+    public void computeNewReward(MCTSNode child) {
         double cost = 0.0;
         for (int i = 0; i < child.plan.size(); i++) {
             cost = cost + child.plan.elementCost(i);

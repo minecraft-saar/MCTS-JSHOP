@@ -122,7 +122,7 @@ public class JSPlanningDomain {
         JSTState ts = new JSTState(prob.state(), new JSListLogicalAtoms(), new JSListLogicalAtoms());
         JSTasks tasks = prob.tasks();
         JSPlan plan = new JSPlan();
-        JSPairTStateTasks initial = new JSPairTStateTasks(ts, tasks, plan);
+        MCTSNode initial = new MCTSNode(ts, tasks, plan);
         JSJshopVars.bestPlans.addElement(initial);
         JSJshopVars.treeDepth = 0;
         this.mctsRuns = 1;
@@ -135,7 +135,7 @@ public class JSPlanningDomain {
             }
             //System.out.println(" !!!!!!! Starting Run number : " + i + " after " + (currentTime - JSJshopVars.startTime) + " ms");
             if(!JSJshopVars.costFunction.isUnitCost()){
-                Algorithm.runApprox(initial, this, 1);
+                MCTSAlgorithm.runMCTS(initial, this, 1);
             } else {
                 tasks.runMCTS(initial, this, 1);
             }
@@ -158,7 +158,7 @@ public class JSPlanningDomain {
         JSTasks tasks = prob.tasks();
         JSTState ts = new JSTState(prob.state(), new JSListLogicalAtoms(), new JSListLogicalAtoms());
         JSPlan plan = new JSPlan();
-        JSPairTStateTasks initial = new JSPairTStateTasks(ts, plan);
+        MCTSNode initial = new MCTSNode(ts, plan);
         allPlans = tasks.seekPlanAll(initial , this, All);
 
         return allPlans;

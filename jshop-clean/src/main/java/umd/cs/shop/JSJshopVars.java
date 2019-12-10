@@ -56,7 +56,7 @@ public final class JSJshopVars {
     static CostFunction costFunction;
     static MCTSPolicy policy;
     //static JSPairTStateTasks stateBestPlan;
-    static Vector<JSPairTStateTasks> bestPlans = new Vector<>();
+    static Vector<MCTSNode> bestPlans = new Vector<>();
     static int approxUses = 0;
     static int realCostUses = 0;
 

@@ -1,8 +1,8 @@
 package umd.cs.shop;
 
-public  class Algorithm {
+public  class MCTSAlgorithm {
 
-    public static double runApprox(JSPairTStateTasks tst, JSPlanningDomain dom, int depth) {
+    public static double runMCTS(MCTSNode tst, JSPlanningDomain dom, int depth) {
 
         JSPlan ans;
         JSPairPlanTState pair;
@@ -53,11 +53,11 @@ public  class Algorithm {
                 tst.incVisited();
                 return tst.reward();
             }
-            JSPairTStateTasks child = JSJshopVars.policy.bestChild(tst);
+            MCTSNode child = JSJshopVars.policy.bestChild(tst);
             if(tst.deadEnd){
                 return tst.reward();
             }
-            double reward = runApprox(child, dom, depth+1);
+            double reward = runMCTS(child, dom, depth+1);
             tst.incVisited();
             JSJshopVars.policy.updateReward(tst, reward);
             if(!child.inTree){
@@ -90,7 +90,7 @@ public  class Algorithm {
                     pl.addElements(ans);
                     JSTaskAtom save = t.cloneTA();
                     //JSTaskAtom method = (JSTaskAtom) ans.get(0);
-                    JSPairTStateTasks child = new JSPairTStateTasks(pair.tState(), rest, pl);
+                    MCTSNode child = new MCTSNode(pair.tState(), rest, pl);
                     tst.addChild(child);
                 }
             } else {
@@ -111,7 +111,7 @@ public  class Algorithm {
                     for (int k = 0; k < red.reductions().size(); k++) {
                         newTasks = (JSTasks) red.reductions().elementAt(k);
                         newTasks.addElements(rest);
-                        JSPairTStateTasks child = new JSPairTStateTasks(tst.tState(), newTasks, tst.plan);
+                        MCTSNode child = new MCTSNode(tst.tState(), newTasks, tst.plan);
                         tst.addChild(child);
                     }
                     red = dom.methods().findAllReduction(t, tst.tState().state(), red, dom.axioms());
@@ -119,8 +119,8 @@ public  class Algorithm {
             }
         }
 
-        JSPairTStateTasks child = JSJshopVars.policy.randomChild(tst);
-        double reward = runApprox(child, dom, depth+1);
+        MCTSNode child = JSJshopVars.policy.randomChild(tst);
+        double reward = runMCTS(child, dom, depth+1);
         //tst.incVisited();
         JSJshopVars.policy.updateReward(tst, reward);
         return tst.reward();

@@ -1,32 +1,30 @@
 package umd.cs.shop;
 
-import javax.naming.event.ObjectChangeListener;
 import java.util.Vector;
-import java.util.concurrent.ExecutionException;
 
-public class JSPairTStateTasks {
+public class MCTSNode {
     private JSTState tState;
     private JSTasks taskNetwork;
     private int visited;
     private double reward;
-    Vector<JSPairTStateTasks> children;
+    Vector<MCTSNode> children;
     boolean inTree  = false;
     JSPlan plan;
     boolean deadEnd = false;
     //private JSTaskAtom primitiveAction; // method that generated this state
     //boolean primitive = false;
 
-    JSPairTStateTasks(JSTState state, JSTasks tasks, JSPlan plan) {
+    MCTSNode(JSTState state, JSTasks tasks, JSPlan plan) {
         this.tState = state;
         this.taskNetwork = tasks;
         this.visited = 0;
         this.reward = Double.NEGATIVE_INFINITY;
         this.plan = new JSPlan();
         this.plan.addElements(plan);
-        this.children = new Vector<JSPairTStateTasks>();
+        this.children = new Vector<MCTSNode>();
     }
 
-    JSPairTStateTasks(JSTState state , JSPlan plan) {
+    MCTSNode(JSTState state , JSPlan plan) {
         this.tState = state;
         this.plan = new JSPlan();
         this.plan.addElements(plan);
@@ -70,7 +68,7 @@ public class JSPairTStateTasks {
         this.reward = r;
     }
 
-    void addChild(JSPairTStateTasks ts){
+    void addChild(MCTSNode ts){
         this.children.add(ts);
     }
 

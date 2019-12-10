@@ -56,7 +56,7 @@ public class JSTasks extends JSListLogicalAtoms {
         //  JSUtil.flagParser("ListTasks parse succesful");
     }
 
-    public double runMCTS(JSPairTStateTasks tst, JSPlanningDomain dom,  int depth) {
+    public double runMCTS(MCTSNode tst, JSPlanningDomain dom, int depth) {
 
         JSPlan ans;
         JSPairPlanTState pair;
@@ -109,7 +109,7 @@ public class JSTasks extends JSListLogicalAtoms {
                 tst.incVisited();
                 return tst.reward();
             }
-            JSPairTStateTasks child = JSJshopVars.policy.bestChild(tst);
+            MCTSNode child = JSJshopVars.policy.bestChild(tst);
             //in bestchild there is also a check for dead end happening
             if(tst.deadEnd){
                 return tst.reward();
@@ -149,7 +149,7 @@ public class JSTasks extends JSListLogicalAtoms {
                     JSTaskAtom save = t.cloneTA();
                     //listNodes.addElement(new JSJshopNode(save, new Vector<>()));
                     //JSTaskAtom method = (JSTaskAtom) ans.get(0);
-                    JSPairTStateTasks child = new JSPairTStateTasks(pair.tState(), rest, pl);
+                    MCTSNode child = new MCTSNode(pair.tState(), rest, pl);
                     tst.addChild(child);
                 }
             } else {
@@ -174,7 +174,7 @@ public class JSTasks extends JSListLogicalAtoms {
                         //JSMethod selected = red.reductions().se
                         newTasks = (JSTasks) red.reductions().elementAt(k);
                         newTasks.addElements(rest);
-                        JSPairTStateTasks child = new JSPairTStateTasks(tst.tState(), newTasks, tst.plan);
+                        MCTSNode child = new MCTSNode(tst.tState(), newTasks, tst.plan);
                         tst.addChild(child);
                     }
                     red = dom.methods().findAllReduction(t, tst.tState().state(), red, dom.axioms());
@@ -182,7 +182,7 @@ public class JSTasks extends JSListLogicalAtoms {
             }
         }
 
-        JSPairTStateTasks child = JSJshopVars.policy.randomChild(tst);
+        MCTSNode child = JSJshopVars.policy.randomChild(tst);
         double reward = runMCTS(child, dom,  depth+1);
         //tst.incVisited();
         JSJshopVars.policy.updateReward(tst, reward);
@@ -248,7 +248,7 @@ public class JSTasks extends JSListLogicalAtoms {
     }
 
     /*   Multi plan generator */
-    public JSListPairPlanTStateNodes seekPlanAll(JSPairTStateTasks ts, JSPlanningDomain dom, boolean All) {
+    public JSListPairPlanTStateNodes seekPlanAll(MCTSNode ts, JSPlanningDomain dom, boolean All) {
         JSListPairPlanTStateNodes results, plans = new JSListPairPlanTStateNodes();
         JSPairPlanTSListNodes ptl;
         JSPlan ans;
@@ -289,7 +289,7 @@ public class JSTasks extends JSListLogicalAtoms {
                     JSUtil.println("Returning failure from find-plan: Can not find an operator");
                 return plans; // failure - empty list
             }
-            JSPairTStateTasks tst = new JSPairTStateTasks(pair.tState(), new JSPlan() );
+            MCTSNode tst = new MCTSNode(pair.tState(), new JSPlan() );
             tst.plan.addElements(ts.plan);
             tst.plan.addElements(ans);
             results = rest.seekPlanAll(tst, dom, All);
@@ -329,7 +329,7 @@ public class JSTasks extends JSListLogicalAtoms {
                 newTasks.addElements(rest);
                 JSPlan tmp = new JSPlan();
                 tmp.addElements(ts.plan);
-                JSPairTStateTasks tst = new JSPairTStateTasks(new JSTState(ts.tState()),tmp );
+                MCTSNode tst = new MCTSNode(new JSTState(ts.tState()),tmp );
                 results = newTasks.seekPlanAll(tst, dom, All);
 
                 if (results.isEmpty())

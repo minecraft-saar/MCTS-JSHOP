@@ -53,7 +53,7 @@ public final class JSJshop implements Runnable {
     @Option(names = {"-t", "--timeout"}, defaultValue = "10000", description = "Timeout in milliseconds")
     long timeout;
 
-    @Option(names = {"-c", "--costFunction"}, defaultValue = "unit", description = "Which cost function should be used")
+    @Option(names = {"-c", "--costFunction"}, defaultValue = "basic", description = "Which cost function should be used")
     String costFunctionName;
 
     @Option(names = {"-d", "--detail"}, defaultValue = "1", description = "Integer from 1 to 10 for more details during standard search")
