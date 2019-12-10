@@ -97,6 +97,7 @@ public class JSTasks extends JSListLogicalAtoms {
         rest.removeElement(t);
 
         if (tst.inTree) {
+
             if(tst.deadEnd){
                 //System.out.println("Returned to dead end at depth: "+ depth ); //t.print(); JSUtil.println("\n");
                 tst.incVisited();
@@ -104,20 +105,20 @@ public class JSTasks extends JSListLogicalAtoms {
             }
             //Should never happen since either the state is a goal or a dead and should not arrive here
             if (tst.children.size() == 0) {
-                //JSUtil.println("No children depth: " + depth);
+                JSUtil.println("No children depth: " + depth);
                 tst.incVisited();
                 return tst.reward();
             }
             JSPairTStateTasks child = JSJshopVars.policy.bestChild(tst);
+            //in bestchild there is also a check for dead end happening
             if(tst.deadEnd){
                 return tst.reward();
             }
             double reward = runMCTS(child, dom, depth+1);
-            tst.incVisited();
             JSJshopVars.policy.updateReward(tst, reward);
+            tst.incVisited();
             if(!child.inTree){
                 //JSUtil.println("Adding new node to tree in run " + dom.mctsRuns + "at depth " + depth);
-                child.incVisited();
             }
             child.setInTree();
             if(depth > JSJshopVars.treeDepth){
@@ -128,6 +129,8 @@ public class JSTasks extends JSListLogicalAtoms {
             return tst.reward();
         }
         if (tst.children.size() == 0) {
+            //System.out.println("MCTS TREE depth=" + depth);
+
             if (t.isPrimitive()) {
                 //task is primitive, so find applicable operators
                 pair = t.seekSimplePlan(dom, tst.tState());
@@ -154,7 +157,7 @@ public class JSTasks extends JSListLogicalAtoms {
                 JSAllReduction red = new JSAllReduction();
                 red = dom.methods().findAllReduction(t, tst.tState().state(), red, dom.axioms());
                 JSTasks newTasks;
-                JSMethod selMet = red.selectedMethod();
+
                 if (red.isDummy()) {
                     assert (!tst.taskNetwork().isEmpty());
                     tst.plan.assignFailure();
@@ -164,7 +167,11 @@ public class JSTasks extends JSListLogicalAtoms {
                     return tst.reward();
                 }
                 while (!red.isDummy()) {
+                    //JSMethod selMet = red.selectedMethod();
+                    //System.out.println(selMet.head());
+                    //red.printReductions();
                     for (int k = 0; k < red.reductions().size(); k++) {
+                        //JSMethod selected = red.reductions().se
                         newTasks = (JSTasks) red.reductions().elementAt(k);
                         newTasks.addElements(rest);
                         JSPairTStateTasks child = new JSPairTStateTasks(tst.tState(), newTasks, tst.plan);

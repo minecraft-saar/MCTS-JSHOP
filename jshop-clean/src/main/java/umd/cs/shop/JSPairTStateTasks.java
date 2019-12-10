@@ -2,6 +2,7 @@ package umd.cs.shop;
 
 import javax.naming.event.ObjectChangeListener;
 import java.util.Vector;
+import java.util.concurrent.ExecutionException;
 
 public class JSPairTStateTasks {
     private JSTState tState;
@@ -29,6 +30,8 @@ public class JSPairTStateTasks {
         this.tState = state;
         this.plan = new JSPlan();
         this.plan.addElements(plan);
+        this.reward = Double.NEGATIVE_INFINITY;
+        this.visited = 0;
     }
 
     JSTState tState(){
@@ -53,7 +56,17 @@ public class JSPairTStateTasks {
 
     void setDeadEnd() {this.deadEnd = true;}
 
-    void setReward(double r){
+    void setReward(double r) {
+        if(Double.isNaN(r)) {
+
+
+            for (StackTraceElement ste : Thread.currentThread().getStackTrace()) {
+                System.out.println(ste);
+            }
+
+
+            System.exit(0);
+        }
         this.reward = r;
     }
 

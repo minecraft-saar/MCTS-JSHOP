@@ -5,7 +5,7 @@ import java.util.Vector;
 
 public class UCTPolicy implements MCTSPolicy {
 
-    Random randgen = new Random(42);
+    Random randgen = new Random(21);
 
     @Override
     public JSPairTStateTasks randomChild(JSPairTStateTasks parent) {
@@ -24,9 +24,9 @@ public class UCTPolicy implements MCTSPolicy {
             allDeadEnd = allDeadEnd && child.deadEnd;
             if (child.deadEnd) continue;
             if (child.visited() == 0) {
-                /*
-                JSUtil.println("NEW CHILD UCT");
-                JSTaskAtom t = (JSTaskAtom) (child.taskNetwork().get(0));
+
+                //JSUtil.println("NEW CHILD UCT");
+                /*JSTaskAtom t = (JSTaskAtom) (child.taskNetwork().get(0));
                 t.print();
                 JSUtil.println("");*/
                 return child;  //You can't divide by 0 and it is common practise to ensure every child gets expanded
@@ -36,11 +36,24 @@ public class UCTPolicy implements MCTSPolicy {
             double exploration = (2.0 * 1.0 * java.lang.Math.log(parent.visited())) / child.visited();//1.0 is exploration factor
             exploration = java.lang.Math.sqrt(exploration);
             childValue = childValue + exploration;
-            if (childValue.compareTo(maxValue) > 0) {
-                //System.out.println("child-Value: " +childValue);
-                //System.out.println("maxValue: " +maxValue);
-                bestChild = child;
-                maxValue = childValue;
+            //JSUtil.println("Best value: " + maxValue + " child Values: " + child.reward());
+            int comp = childValue.compareTo(maxValue);
+            if (comp >= 0) {
+                if(comp == 0) {
+                    int rand = this.randgen.nextInt(2);
+                    if (rand == 0 || bestChild == null) {
+                        System.out.println("child-Value: " + childValue);
+                        System.out.println("maxValue: " + maxValue);
+                        bestChild = child;
+                        maxValue = childValue;
+                    }
+                }else {
+                        bestChild = child;
+                        maxValue = childValue;
+                    }
+
+                    //if(rand == 0 || bestChild == null) {
+                //}
             }
         }
         if (bestChild == null && !allDeadEnd) {
@@ -73,10 +86,14 @@ public class UCTPolicy implements MCTSPolicy {
     @Override
     public void updateReward(JSPairTStateTasks parent, double reward) { //Average over rewards
         double newReward;
-        if(JSJshopVars.updateMaximum){
+        if(Double.isInfinite(parent.reward())){
+            newReward = reward;
+        } else if(JSJshopVars.updateMaximum){
             newReward = Math.max(parent.reward(), reward);
         } else {
+
             newReward= (reward + parent.reward()*parent.visited())/(parent.visited() + 1);
+
         }
         parent.setReward(newReward);
         /*
