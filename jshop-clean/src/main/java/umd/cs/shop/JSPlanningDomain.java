@@ -118,7 +118,7 @@ public class JSPlanningDomain {
         return new JSPairPlanTSListNodes(pair, listNodes);
     }
 
-    public void solveMCTS(JSPlanningProblem prob, int runs, long timeout){
+    public void solveMCTS(JSPlanningProblem prob, int runs, long timeout) {
         JSTState ts = new JSTState(prob.state(), new JSListLogicalAtoms(), new JSListLogicalAtoms());
         JSTasks tasks = prob.tasks();
         JSPlan plan = new JSPlan();
@@ -126,25 +126,20 @@ public class JSPlanningDomain {
         JSJshopVars.bestPlans.addElement(initial);
         JSJshopVars.treeDepth = 0;
         this.mctsRuns = 1;
-        for(int i = 1; i <= runs ; i++) {
+        for (int i = 1; i <= runs; i++) {
             long currentTime = System.currentTimeMillis();
             long runningTime = currentTime - JSJshopVars.startTime;
-            if(runningTime >= timeout){
+            if (runningTime >= timeout) {
                 JSUtil.println("Timeout");
                 break;
             }
             //System.out.println(" !!!!!!! Starting Run number : " + i + " after " + (currentTime - JSJshopVars.startTime) + " ms");
-            if(!JSJshopVars.costFunction.isUnitCost()){
-                MCTSAlgorithm.runMCTS(initial, this, 1);
-            } else {
-                tasks.runMCTS(initial, this, 1);
-            }
+            //if(!JSJshopVars.costFunction.isUnitCost()){
+            MCTSAlgorithm.runMCTS(initial, this, 1);
+            //}
             initial.setInTree();
-            this.mctsRuns ++;
+            this.mctsRuns++;
         }
-
-
-
         /*try {
             BufferedWriter writer = new BufferedWriter(new FileWriter("finalUCT.dot"));
             writer.write(initial.dotTree());
@@ -152,14 +147,12 @@ public class JSPlanningDomain {
         } catch (IOException e) {
             e.printStackTrace();
         } */
-
         JSUtil.println("Found Plan: " + JSJshopVars.planFound);
-        if(!JSJshopVars.planFound){
+        if (!JSJshopVars.planFound) {
             JSJshopVars.bestPlans.lastElement().plan.assignFailure();
         }
 
     }
-
 
 
     public JSListPairPlanTStateNodes solveAll(JSPlanningProblem prob, boolean All) {
@@ -169,7 +162,7 @@ public class JSPlanningDomain {
         JSTState ts = new JSTState(prob.state(), new JSListLogicalAtoms(), new JSListLogicalAtoms());
         JSPlan plan = new JSPlan();
         MCTSNode initial = new MCTSNode(ts, plan);
-        allPlans = tasks.seekPlanAll(initial , this, All);
+        allPlans = tasks.seekPlanAll(initial, this, All);
 
         return allPlans;
     }

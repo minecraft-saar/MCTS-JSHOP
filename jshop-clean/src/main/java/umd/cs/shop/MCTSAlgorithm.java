@@ -1,6 +1,6 @@
 package umd.cs.shop;
 
-public  class MCTSAlgorithm {
+public class MCTSAlgorithm {
 
     public static double runMCTS(MCTSNode tst, JSPlanningDomain dom, int depth) {
 
@@ -9,68 +9,65 @@ public  class MCTSAlgorithm {
 
         if (tst.taskNetwork().isEmpty()) {
             //compute reward for found goal or increase count
-            if(tst.inTree) {
+            if (tst.inTree) {
                 tst.incVisited();
             }
             if (tst.visited() == 1 || !tst.inTree) {
-                JSJshopVars.policy.computeNewReward(tst);
+                JSJshopVars.policy.computeCost(tst);
             }
-
             //Get current best reward if it exist
-            Double currentReward = Double.NEGATIVE_INFINITY;
-            if(JSJshopVars.planFound){
-                currentReward = JSJshopVars.bestPlans.lastElement().reward();
+            Double currentCost = Double.POSITIVE_INFINITY;
+            if (JSJshopVars.planFound) {
+                currentCost = JSJshopVars.bestPlans.lastElement().getCost();
             } else {
                 long currentTime = System.currentTimeMillis();
-                JSUtil.println("Found first plan of reward " + tst.reward() +" in run " + dom.mctsRuns +" after " + (currentTime - JSJshopVars.startTime) + " ms at depth " + depth);
+                JSUtil.println("Found first plan of reward " + tst.getCost() + " in run " + dom.mctsRuns + " after " + (currentTime - JSJshopVars.startTime) + " ms at depth " + depth);
             }
 
-            Double foundReward = tst.reward();
-            if(foundReward.compareTo(currentReward) > 0){
+            Double foundCost = tst.getCost();
+            if (foundCost.compareTo(currentCost) < 0) {
                 JSJshopVars.bestPlans.addElement(tst);
-                if(JSJshopVars.planFound) {
+                JSJshopVars.bestCost = foundCost;
+                if (JSJshopVars.planFound) {
                     long currentTime = System.currentTimeMillis();
-                    JSUtil.println("Found better plan of reward " + tst.reward() + " in run " + dom.mctsRuns + " after " + (currentTime - JSJshopVars.startTime) + " ms at depth " + depth);
+                    JSUtil.println("Found better plan of reward " + tst.getCost() + " in run " + dom.mctsRuns + " after " + (currentTime - JSJshopVars.startTime) + " ms at depth " + depth);
                 }
             }
 
             JSJshopVars.FoundPlan();
-            return tst.reward();
+            return tst.getCost();
         }
         JSTaskAtom t = (JSTaskAtom) tst.taskNetwork().firstElement();
         JSTasks rest = tst.taskNetwork().cdr();
         rest.removeElement(t);
 
         if (tst.inTree) {
-            if(tst.deadEnd){
-                System.out.println("Returned to dead end at depth: " + depth ); //t.print(); JSUtil.println("\n");
+            if (tst.deadEnd) {
+                //System.out.println("Returned to dead end at depth: " + depth ); //t.print(); JSUtil.println("\n");
                 tst.incVisited();
-                return tst.reward();
+                return tst.getCost();
             }
-            //Should never happen since either the state is a goal or a dead and should not arrive here
             if (tst.children.size() == 0) {
-                //JSUtil.println("No children depth: " + depth);
-                tst.incVisited();
-                return tst.reward();
+                JSUtil.println("No children depth: " + depth + "SHOULD NOT HAVE HAPPENED");
+                System.exit(0);
             }
             MCTSNode child = JSJshopVars.policy.bestChild(tst);
-            if(tst.deadEnd){
-                return tst.reward();
+            if (tst.deadEnd) {
+                return tst.getCost();
             }
-            double reward = runMCTS(child, dom, depth+1);
-            tst.incVisited();
-            JSJshopVars.policy.updateReward(tst, reward);
-            if(!child.inTree){
+            double reward = runMCTS(child, dom, depth + 1);
+            JSJshopVars.policy.updateCostAndVisits(tst, reward);
+            if (!child.inTree) {
                 //JSUtil.println("Adding new node to tree in run " + dom.mctsRuns + "at depth " + depth);
-                child.incVisited();
+                JSJshopVars.policy.updateCostAndVisits(child, reward);
             }
             child.setInTree();
-            if(depth > JSJshopVars.treeDepth){
+            if (depth > JSJshopVars.treeDepth) {
                 JSJshopVars.treeDepth = depth;
                 long currentTime = System.currentTimeMillis();
-                JSUtil.println("Increased tree depth to " + depth + " at run " + dom.mctsRuns + " after " + (currentTime - JSJshopVars.startTime) + " ms" );
+                JSUtil.println("Increased tree depth to " + depth + " at run " + dom.mctsRuns + " after " + (currentTime - JSJshopVars.startTime) + " ms");
             }
-            return tst.reward();
+            return tst.getCost();
         }
         if (tst.children.size() == 0) {
             if (t.isPrimitive()) {
@@ -80,15 +77,13 @@ public  class MCTSAlgorithm {
                 if (ans.isFailure()) {
                     tst.plan.assignFailure();
                     //JSUtil.println("New dead end at depth: " + depth);
-                    //t.print();
                     tst.setDeadEnd();
-                    tst.setReward(-2000.0); // TODO fix reward for failure
-                    return tst.reward();
+                    tst.setCost(2000.0); // TODO fix reward for failure
+                    return tst.getCost();
                 } else {
                     JSPlan pl = new JSPlan();
                     pl.addElements(tst.plan);
                     pl.addElements(ans);
-                    JSTaskAtom save = t.cloneTA();
                     //JSTaskAtom method = (JSTaskAtom) ans.get(0);
                     MCTSNode child = new MCTSNode(pair.tState(), rest, pl);
                     tst.addChild(child);
@@ -104,8 +99,8 @@ public  class MCTSAlgorithm {
                     tst.plan.assignFailure();
                     tst.setDeadEnd();
                     //System.out.println("NO METHOD APPLICABLE, ASSIGNING FAILURE!!!");
-                    tst.setReward(-2000.0); // TODO fix reward for failure
-                    return tst.reward();
+                    tst.setCost(2000.0); // TODO fix reward for failure
+                    return tst.getCost();
                 }
                 while (!red.isDummy()) {
                     for (int k = 0; k < red.reductions().size(); k++) {
@@ -120,11 +115,9 @@ public  class MCTSAlgorithm {
         }
 
         MCTSNode child = JSJshopVars.policy.randomChild(tst);
-        double reward = runMCTS(child, dom, depth+1);
-        //tst.incVisited();
-        JSJshopVars.policy.updateReward(tst, reward);
-        return tst.reward();
-
+        double cost = runMCTS(child, dom, depth + 1);
+        child.setCost(cost);
+        return cost;
 
     }
 

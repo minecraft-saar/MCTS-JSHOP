@@ -9,7 +9,7 @@ import java.util.Vector;
 import picocli.CommandLine;
 import picocli.CommandLine.Option;
 import picocli.CommandLine.Parameters;
-import umd.cs.shop.costs.CostFunctionFactory;
+import umd.cs.shop.costs.CostFunction;
 
 
 /*HICAP import nrl.aic.hicap.*;*/
@@ -47,7 +47,7 @@ public final class JSJshop implements Runnable {
     @Option(names = {"--approx"}, defaultValue = "false", description = "use approximated cost function")
     boolean useApproximatedCostFunction;
 
-    @Option(names = {"-p", "--policy"}, defaultValue = "UCT", description = "UCT")
+    @Option(names = {"-p", "--policy"}, defaultValue = "uct1", description = "can be uct1 or uct2")
     String policy;
 
     @Option(names = {"-t", "--timeout"}, defaultValue = "10000", description = "Timeout in milliseconds")
@@ -173,10 +173,10 @@ public final class JSJshop implements Runnable {
 
     //MCTS
     public void mctsSearch() {
-        JSJshopVars.policy = new UCTPolicy(); //TODO adapt to parameter
+        JSJshopVars.policy = MCTSPolicy.getPolicy(policy); //TODO adapt to parameter
         JSJshopVars.updateMaximum = updateMaximum;
         JSJshopVars.useApproximatedCostFunction = useApproximatedCostFunction;
-        JSJshopVars.costFunction = CostFunctionFactory.get_cost_function(costFunctionName, dom.getName());
+        JSJshopVars.costFunction = CostFunction.getCostFunction(costFunctionName, dom.getName());
 
         for (int k = 0; k < probSet.size(); k++) {
             prob = (JSPlanningProblem) probSet.elementAt(k);
@@ -195,7 +195,7 @@ public final class JSJshop implements Runnable {
             } else {
                 JSUtil.println("Plan found:");
                 JSUtil.println("Solution in Tree: " + JSJshopVars.bestPlans.lastElement().inTree);
-                JSUtil.println("Reward for Given Plan: " + JSJshopVars.bestPlans.lastElement().reward());
+                JSUtil.println("Reward for Given Plan: " + JSJshopVars.bestPlans.lastElement().getCost());
                 JSUtil.println("********* PLAN *******");
                 JSJshopVars.bestPlans.lastElement().plan.printPlan();
             }
