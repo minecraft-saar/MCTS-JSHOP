@@ -1,5 +1,7 @@
 package umd.cs.shop;
 
+import umd.cs.shop.costs.CostFunction;
+
 import java.util.Vector;
 
 public final class JSJshopVars {
@@ -50,7 +52,7 @@ public final class JSJshopVars {
     static int treeDepth;
     static boolean planFound = false;
     static boolean updateMaximum = false;
-    static boolean random = false;
+    static boolean useApproximatedCostFunction = false;
     static CostFunction costFunction;
     static MCTSPolicy policy;
     //static JSPairTStateTasks stateBestPlan;

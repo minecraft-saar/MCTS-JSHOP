@@ -9,6 +9,7 @@ import java.util.Vector;
 import picocli.CommandLine;
 import picocli.CommandLine.Option;
 import picocli.CommandLine.Parameters;
+import umd.cs.shop.costs.CostFunctionFactory;
 
 
 /*HICAP import nrl.aic.hicap.*;*/
@@ -43,8 +44,8 @@ public final class JSJshop implements Runnable {
     @Option(names = {"-x", "--max"}, defaultValue = "false", description = "take maximum when updating the reward")
     boolean updateMaximum;
 
-    @Option(names = {"-r", "--random"}, defaultValue = "false", description = "take random cost function")
-    boolean random;
+    @Option(names = {"--approx"}, defaultValue = "false", description = "use approximated cost function")
+    boolean useApproximatedCostFunction;
 
     @Option(names = {"-p", "--policy"}, defaultValue = "UCT", description = "UCT")
     String policy;
@@ -52,8 +53,8 @@ public final class JSJshop implements Runnable {
     @Option(names = {"-t", "--timeout"}, defaultValue = "10000", description = "Timeout in milliseconds")
     long timeout;
 
-    @Option(names = {"-c", "--costFunction"}, defaultValue = "false", description = "Enables use of cost funtion")
-    boolean costFunction;
+    @Option(names = {"-c", "--costFunction"}, defaultValue = "unit", description = "Which cost function should be used")
+    String costFunctionName;
 
     @Option(names = {"-d", "--detail"}, defaultValue = "1", description = "Integer from 1 to 10 for more details during standard search")
     int detail;
@@ -174,18 +175,18 @@ public final class JSJshop implements Runnable {
     public void mctsSearch() {
         JSJshopVars.policy = new UCTPolicy(); //TODO adapt to parameter
         JSJshopVars.updateMaximum = updateMaximum;
-        JSJshopVars.random = random;
-        if (costFunction)
-            JSJshopVars.costFunction = new BasicCost(); //TODO adapt to parameter
+        JSJshopVars.useApproximatedCostFunction = useApproximatedCostFunction;
+        JSJshopVars.costFunction = CostFunctionFactory.get_cost_function(costFunctionName, dom.getName());
+
         for (int k = 0; k < probSet.size(); k++) {
             prob = (JSPlanningProblem) probSet.elementAt(k);
             JSUtil.println("Solving Problem :" + prob.Name() + " with mcts");
             JSUtil.println("time till timeout: " + timeout);
-            dom.solveMCTS(prob, mctsruns, timeout, costFunction);
+            dom.solveMCTS(prob, mctsruns, timeout);
             final long searchTime = System.currentTimeMillis();
             JSUtil.println("Total Time: " + (searchTime - JSJshopVars.startTime));
-            if (random) {
-                JSUtil.println("Random cost function uses: " + JSJshopVars.approxUses);
+            if (useApproximatedCostFunction) {
+                JSUtil.println("Approximated cost function uses: " + JSJshopVars.approxUses);
             } else {
                 JSUtil.println("Real cost function uses: " + JSJshopVars.realCostUses);
             }
