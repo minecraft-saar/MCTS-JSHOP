@@ -9,7 +9,14 @@ public interface UCTPolicy extends MCTSPolicy {
 
     @Override
     public default MCTSNode randomChild(MCTSNode parent) {
+        if (parent.isFullyExplored()) {
+            System.err.println("Error: randomly selecting children of fully explored node");
+            System.exit(-1);
+        }
         int rand = this.randgen.nextInt(parent.children.size());
+        while(parent.children.get(rand).isFullyExplored())  {
+            rand = this.randgen.nextInt(parent.children.size());
+        }
         return parent.children.get(rand);
     }
 
@@ -17,10 +24,12 @@ public interface UCTPolicy extends MCTSPolicy {
     public default MCTSNode bestChild(MCTSNode parent) {
         Double maxValue = Double.NEGATIVE_INFINITY;
         MCTSNode bestChild = null;
-        boolean allDeadEnd = true;
+        //boolean allDeadEnd = true;
+
         for (MCTSNode child : parent.children) {
-            allDeadEnd = allDeadEnd && child.deadEnd;
-            if (child.deadEnd) continue;
+            if (child.fullyExplored) continue;
+            //allDeadEnd = allDeadEnd && child.deadEnd;
+            //if (child.deadEnd) continue;
             if (child.visited() == 0) {
                 return child;  //You can't divide by 0 and it is common practise to ensure every child gets expanded
             }
@@ -32,7 +41,7 @@ public interface UCTPolicy extends MCTSPolicy {
             }
         }
 
-        if (bestChild == null && !allDeadEnd) {
+        if (bestChild == null /*&& !allDeadEnd*/) {
             JSUtil.println("NO CHILD SELECTED");
             for (MCTSNode child : parent.children) {
                 JSUtil.println("This child is dead-end: " + child.deadEnd);
@@ -40,11 +49,11 @@ public interface UCTPolicy extends MCTSPolicy {
             }
             System.exit(0);
         }
-        if (allDeadEnd) {
+        /*if (allDeadEnd) {
             parent.setDeadEnd();
             parent.children = new Vector<>();
             return parent;
-        }
+        }*/
 
         return bestChild;
     }

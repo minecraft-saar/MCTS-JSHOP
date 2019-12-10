@@ -15,6 +15,9 @@ public class MCTSNode {
     boolean inTree = false;
     JSPlan plan;
     boolean deadEnd = false;
+
+    boolean fullyExplored = false;
+
     //private JSTaskAtom primitiveAction; // method that generated this state
     //boolean primitive = false;
 
@@ -36,6 +39,7 @@ public class MCTSNode {
         this.cost = Double.POSITIVE_INFINITY;
         this.visited = 0;
         this.id = NEXT_ID++;
+
     }
 
     JSTState tState() {
@@ -60,6 +64,7 @@ public class MCTSNode {
 
     void setDeadEnd() {
         this.deadEnd = true;
+        this.fullyExplored = true;
     }
 
     void setCost(double r) {
@@ -100,9 +105,24 @@ public class MCTSNode {
             result += child.dotNode();
         }
 
-
         return result;
     }
+
+    public boolean isFullyExplored() {
+        return fullyExplored;
+    }
+
+
+    public void checkFullyExplored() {
+        this.fullyExplored = true;
+        for (MCTSNode c : children) {
+            if(!c.fullyExplored) {
+                this.fullyExplored = false;
+                return;
+            }
+        }
+    }
+
 
 
 }

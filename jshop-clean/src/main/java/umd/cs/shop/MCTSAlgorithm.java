@@ -3,11 +3,17 @@ package umd.cs.shop;
 public class MCTSAlgorithm {
 
     public static double runMCTS(MCTSNode tst, JSPlanningDomain dom, int depth) {
+        if (tst.fullyExplored) {
+            System.err.println("Error: we are coming back to a fully explored node");
+            System.exit(-1);
+        }
 
         JSPlan ans;
         JSPairPlanTState pair;
 
         if (tst.taskNetwork().isEmpty()) {
+            tst.fullyExplored = true;
+
             //compute reward for found goal or increase count
             if (tst.inTree) {
                 tst.incVisited();
@@ -15,7 +21,7 @@ public class MCTSAlgorithm {
             if (tst.visited() == 1 || !tst.inTree) {
                 JSJshopVars.policy.computeCost(tst);
             }
-            //Get current best reward if it exist
+            //Get current best reward if it exists
             Double currentCost = Double.POSITIVE_INFINITY;
             if (JSJshopVars.planFound) {
                 currentCost = JSJshopVars.bestPlans.lastElement().getCost();
@@ -37,6 +43,8 @@ public class MCTSAlgorithm {
             JSJshopVars.FoundPlan();
             return tst.getCost();
         }
+
+
         JSTaskAtom t = (JSTaskAtom) tst.taskNetwork().firstElement();
         JSTasks rest = tst.taskNetwork().cdr();
         rest.removeElement(t);
@@ -69,6 +77,7 @@ public class MCTSAlgorithm {
             }
             return tst.getCost();
         }
+
         if (tst.children.size() == 0) {
             if (t.isPrimitive()) {
                 //task is primitive, so find applicable operators
@@ -116,6 +125,9 @@ public class MCTSAlgorithm {
 
         MCTSNode child = JSJshopVars.policy.randomChild(tst);
         double cost = runMCTS(child, dom, depth + 1);
+        if(child.fullyExplored){
+            tst.checkFullyExplored();
+        }
         child.setCost(cost);
         return cost;
 
