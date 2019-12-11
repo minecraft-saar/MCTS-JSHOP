@@ -95,20 +95,29 @@ public class MCTSNode {
     }
 
     String dotNode() {
-        if (!this.inTree) return "";
         String color = "";
-        if (this.deadEnd) {
-            color = " fillcolor=red";
-        }else if (this.fullyExplored) {
-            color = " fillcolor=green";
+        String label = this.cost + " " + this.visited;
+        if (!this.inTree) {
+            label = "";
         }
-        String result = this.id + " [label=\"" + this.cost + " " + this.visited +  "\"" + color + "];\n";
+        if (this.deadEnd) {
+            color = " style=filled fillcolor=red";
+        }else if (this.fullyExplored) {
+            color = " style=filled fillcolor=green";
+        } else if (!this.inTree) {
+            color = " style=filled fillcolor=grey";
+        }
+
+        String result = this.id + " [label=\"" +  label +  "\"" + color + "];\n";
         for (MCTSNode child : children) {
-            while (child.children.size() == 1 && child.children.get(0).inTree) {
+            /*while (child.children.size() == 1 && child.children.get(0).inTree) {
                 child = child.children.get(0);
-            }
+            }*/
+
+            //if (child.inTree) {
             result += this.id + " -> " + child.id + ";\n";
             result += child.dotNode();
+            //}
         }
 
         return result;
