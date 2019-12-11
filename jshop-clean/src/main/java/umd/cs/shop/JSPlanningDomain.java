@@ -133,6 +133,11 @@ public class JSPlanningDomain {
                 JSUtil.println("Timeout");
                 break;
             }
+
+            if (initial.fullyExplored) {
+                JSUtil.println("Solved optimally");
+                break;
+            }
             //System.out.println(" !!!!!!! Starting Run number : " + i + " after " + (currentTime - JSJshopVars.startTime) + " ms");
             //if(!JSJshopVars.costFunction.isUnitCost()){
             MCTSAlgorithm.runMCTS(initial, this, 1);
@@ -140,13 +145,13 @@ public class JSPlanningDomain {
             initial.setInTree();
             this.mctsRuns++;
         }
-        /*try {
+        try {
             BufferedWriter writer = new BufferedWriter(new FileWriter("finalUCT.dot"));
             writer.write(initial.dotTree());
             writer.close();
         } catch (IOException e) {
             e.printStackTrace();
-        } */
+        }
         JSUtil.println("Found Plan: " + JSJshopVars.planFound);
         if (!JSJshopVars.planFound) {
             JSJshopVars.bestPlans.lastElement().plan.assignFailure();

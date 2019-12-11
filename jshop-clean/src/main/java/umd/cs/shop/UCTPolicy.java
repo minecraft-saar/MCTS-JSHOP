@@ -22,12 +22,17 @@ public interface UCTPolicy extends MCTSPolicy {
 
     @Override
     public default MCTSNode bestChild(MCTSNode parent) {
+        if (parent.isFullyExplored()) {
+            System.err.println("Error: randomly selecting children of fully explored node");
+            System.exit(-1);
+        }
+
         Double maxValue = Double.NEGATIVE_INFINITY;
         MCTSNode bestChild = null;
         //boolean allDeadEnd = true;
 
         for (MCTSNode child : parent.children) {
-            if (child.fullyExplored) continue;
+            if (child.isFullyExplored()) continue;
             //allDeadEnd = allDeadEnd && child.deadEnd;
             //if (child.deadEnd) continue;
             if (child.visited() == 0) {
@@ -44,8 +49,7 @@ public interface UCTPolicy extends MCTSPolicy {
         if (bestChild == null /*&& !allDeadEnd*/) {
             JSUtil.println("NO CHILD SELECTED");
             for (MCTSNode child : parent.children) {
-                JSUtil.println("This child is dead-end: " + child.deadEnd);
-                JSUtil.println("This child has cost:" + child.getCost());
+                JSUtil.println("This child  has cost: " + child.getCost() + " is dead-end: " + child.deadEnd + " is fully explored: " + child.isFullyExplored());
             }
             System.exit(0);
         }
@@ -73,7 +77,7 @@ public interface UCTPolicy extends MCTSPolicy {
         if (JSJshopVars.updateMaximum) {
             newCost = Math.min(node.getCost(), cost);
         } else {
-            newCost = (cost + node.getCost() * node.visited()) / (node.visited());
+            newCost = (cost + node.getCost() * (node.visited() - 1)) / (node.visited());
         }
         node.setCost(newCost);
 

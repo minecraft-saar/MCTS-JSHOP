@@ -64,6 +64,9 @@ public class MCTSAlgorithm {
                 return tst.getCost();
             }
             double reward = runMCTS(child, dom, depth + 1);
+            if(child.isFullyExplored()){
+                tst.checkFullyExplored();
+            }
             JSJshopVars.policy.updateCostAndVisits(tst, reward);
             if (!child.inTree) {
                 //JSUtil.println("Adding new node to tree in run " + dom.mctsRuns + "at depth " + depth);
@@ -125,7 +128,7 @@ public class MCTSAlgorithm {
 
         MCTSNode child = JSJshopVars.policy.randomChild(tst);
         double cost = runMCTS(child, dom, depth + 1);
-        if(child.fullyExplored){
+        if(child.isFullyExplored()){
             tst.checkFullyExplored();
         }
         child.setCost(cost);

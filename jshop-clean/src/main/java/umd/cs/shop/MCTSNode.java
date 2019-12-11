@@ -96,11 +96,17 @@ public class MCTSNode {
 
     String dotNode() {
         if (!this.inTree) return "";
-        String result = this.id + " [label=\"" + this.cost + " " + this.visited + "\"];\n";
+        String color = "";
+        if (this.deadEnd) {
+            color = " fillcolor=red";
+        }else if (this.fullyExplored) {
+            color = " fillcolor=green";
+        }
+        String result = this.id + " [label=\"" + this.cost + " " + this.visited +  "\"" + color + "];\n";
         for (MCTSNode child : children) {
-            //while (child.children.size() == 1) {
-            //    child = child.children.get(0);
-            //}
+            while (child.children.size() == 1 && child.children.get(0).inTree) {
+                child = child.children.get(0);
+            }
             result += this.id + " -> " + child.id + ";\n";
             result += child.dotNode();
         }
