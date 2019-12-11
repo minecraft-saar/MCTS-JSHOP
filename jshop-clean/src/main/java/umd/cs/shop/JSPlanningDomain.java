@@ -118,7 +118,7 @@ public class JSPlanningDomain {
         return new JSPairPlanTSListNodes(pair, listNodes);
     }
 
-    public void solveMCTS(JSPlanningProblem prob, int runs, long timeout) {
+    public void solveMCTS(JSPlanningProblem prob, int runs, long timeout, boolean printTree) {
         JSTState ts = new JSTState(prob.state(), new JSListLogicalAtoms(), new JSListLogicalAtoms());
         JSTasks tasks = prob.tasks();
         JSPlan plan = new JSPlan();
@@ -134,7 +134,7 @@ public class JSPlanningDomain {
                 break;
             }
 
-            if (initial.fullyExplored) {
+            if (initial.isFullyExplored()) {
                 JSUtil.println("Solved optimally");
                 break;
             }
@@ -145,12 +145,14 @@ public class JSPlanningDomain {
             initial.setInTree();
             this.mctsRuns++;
         }
-        try {
-            BufferedWriter writer = new BufferedWriter(new FileWriter("finalUCT.dot"));
-            writer.write(initial.dotTree());
-            writer.close();
-        } catch (IOException e) {
-            e.printStackTrace();
+        if(printTree) {
+            try {
+                BufferedWriter writer = new BufferedWriter(new FileWriter("finalUCT.dot"));
+                writer.write(initial.dotTree());
+                writer.close();
+            } catch (IOException e) {
+                e.printStackTrace();
+            }
         }
         JSUtil.println("Found Plan: " + JSJshopVars.planFound);
         if (!JSJshopVars.planFound) {

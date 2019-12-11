@@ -38,6 +38,12 @@ public final class JSJshop implements Runnable {
     @Option(names = {"-s"}, defaultValue = "false", description = "Enables standard search")
     boolean standardSearch;
 
+    @Option(names = {"-f"}, defaultValue = "true", description = "Disables fully explored")
+    boolean exploreFully;
+
+    @Option(names = {"--printTree"}, defaultValue = "false", description = "Enable printing of tree")
+    boolean printTree;
+
     @Option(names = {"-m", "--monteCarloRuns"}, defaultValue = "10000", description = "Number of runs for the monte carlo search")
     int mctsruns;
 
@@ -69,7 +75,7 @@ public final class JSJshop implements Runnable {
         if(plan != null){
             return;
         }*/
-
+        JSJshopVars.useFullyExplored = exploreFully;
         JSUtil.println("Reading file " + nameDomainFile);
         if (!parserFile(nameDomainFile))
             if (JSJshopVars.flagExit)
@@ -182,7 +188,7 @@ public final class JSJshop implements Runnable {
             prob = (JSPlanningProblem) probSet.elementAt(k);
             JSUtil.println("Solving Problem :" + prob.Name() + " with mcts");
             JSUtil.println("time till timeout: " + timeout);
-            dom.solveMCTS(prob, mctsruns, timeout);
+            dom.solveMCTS(prob, mctsruns, timeout, printTree);
             final long searchTime = System.currentTimeMillis();
             JSUtil.println("Total Time: " + (searchTime - JSJshopVars.startTime));
             if (useApproximatedCostFunction) {
@@ -194,7 +200,7 @@ public final class JSJshop implements Runnable {
                 JSUtil.println("0 plans found");
             } else {
                 JSUtil.println("Plan found:");
-                JSUtil.println("Solution in Tree: " + JSJshopVars.bestPlans.lastElement().inTree);
+                JSUtil.println("Solution in Tree: " + JSJshopVars.bestPlans.lastElement().isInTree());
                 JSUtil.println("Reward for Given Plan: " + JSJshopVars.bestPlans.lastElement().getCost());
                 JSUtil.println("********* PLAN *******");
                 JSJshopVars.bestPlans.lastElement().plan.printPlan();

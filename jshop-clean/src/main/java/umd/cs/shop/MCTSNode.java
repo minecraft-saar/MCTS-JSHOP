@@ -10,13 +10,14 @@ public class MCTSNode {
     private JSTState tState;
     private JSTasks taskNetwork;
     private int visited;
+    private int solvedVisits;
     private double cost;
     Vector<MCTSNode> children;
-    boolean inTree = false;
+    private boolean inTree = false;
     JSPlan plan;
-    boolean deadEnd = false;
+    private boolean deadEnd = false;
 
-    boolean fullyExplored = false;
+    private boolean fullyExplored = false;
 
     //private JSTaskAtom primitiveAction; // method that generated this state
     //boolean primitive = false;
@@ -25,6 +26,7 @@ public class MCTSNode {
         this.tState = state;
         this.taskNetwork = tasks;
         this.visited = 0;
+        this.solvedVisits = 0;
         this.cost = Double.POSITIVE_INFINITY;
         this.plan = new JSPlan();
         this.plan.addElements(plan);
@@ -38,6 +40,7 @@ public class MCTSNode {
         this.plan.addElements(plan);
         this.cost = Double.POSITIVE_INFINITY;
         this.visited = 0;
+        this.solvedVisits = 0;
         this.id = NEXT_ID++;
 
     }
@@ -54,6 +57,10 @@ public class MCTSNode {
         this.visited += 1;
     }
 
+    void incSolvedVisits() {
+        this.solvedVisits += 1;
+    }
+
     double getCost() {
         return this.cost;
     }
@@ -62,9 +69,15 @@ public class MCTSNode {
         return this.visited;
     }
 
+    int solvedVisits() {
+        return this.solvedVisits;
+    }
+
+    /**Also sets fullyExplored**/
     void setDeadEnd() {
         this.deadEnd = true;
         this.fullyExplored = true;
+        this.setCost(Double.POSITIVE_INFINITY);
     }
 
     void setCost(double r) {
@@ -77,6 +90,11 @@ public class MCTSNode {
         this.cost = r;
     }
 
+    void setFullyExplored() {
+        if (JSJshopVars.useFullyExplored)
+            this.fullyExplored = true;
+    }
+
     void addChild(MCTSNode ts) {
         this.children.add(ts);
     }
@@ -85,6 +103,14 @@ public class MCTSNode {
         this.inTree = true;
     }
 
+    boolean isDeadEnd() {
+        return this.deadEnd;
+    }
+
+
+    boolean isInTree() {
+        return this.inTree;
+    }
 
     String dotTree() {
         String result = "digraph UCT {";
@@ -102,21 +128,21 @@ public class MCTSNode {
         }
         if (this.deadEnd) {
             color = " style=filled fillcolor=red";
-        }else if (this.fullyExplored) {
+        } else if (this.fullyExplored) {
             color = " style=filled fillcolor=green";
         } else if (!this.inTree) {
             color = " style=filled fillcolor=grey";
         }
 
-        String result = this.id + " [label=\"" +  label +  "\"" + color + "];\n";
+        String result = this.id + " [label=\"" + label + "\"" + color + "];\n";
         for (MCTSNode child : children) {
             /*while (child.children.size() == 1 && child.children.get(0).inTree) {
                 child = child.children.get(0);
             }*/
 
-            //if (child.inTree) {
-            result += this.id + " -> " + child.id + ";\n";
-            result += child.dotNode();
+           // if (child.inTree) {
+                result += this.id + " -> " + child.id + ";\n";
+                result += child.dotNode();
             //}
         }
 
@@ -130,14 +156,28 @@ public class MCTSNode {
 
     public void checkFullyExplored() {
         this.fullyExplored = true;
+        this.deadEnd = true;
         for (MCTSNode c : children) {
-            if(!c.fullyExplored) {
+            if (!c.fullyExplored) {
                 this.fullyExplored = false;
+                this.deadEnd = false;
                 return;
+            }
+            if (!c.deadEnd) {
+                this.deadEnd = false;
             }
         }
     }
 
 
+    public void setGoal() {
+
+        JSJshopVars.policy.computeCost(this); // sets cost
+        this.setFullyExplored();
+        if(this.isInTree()) {
+            this.incSolvedVisits();
+            this.incVisited();
+        }
+    }
 
 }

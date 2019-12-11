@@ -5,7 +5,7 @@ import java.util.Vector;
 
 public interface UCTPolicy extends MCTSPolicy {
 
-    static  final Random randgen = new Random(21);
+    static final Random randgen = new Random(21);
 
     @Override
     public default MCTSNode randomChild(MCTSNode parent) {
@@ -14,7 +14,7 @@ public interface UCTPolicy extends MCTSPolicy {
             System.exit(-1);
         }
         int rand = this.randgen.nextInt(parent.children.size());
-        while(parent.children.get(rand).isFullyExplored())  {
+        while (parent.children.get(rand).isFullyExplored()) {
             rand = this.randgen.nextInt(parent.children.size());
         }
         return parent.children.get(rand);
@@ -49,7 +49,7 @@ public interface UCTPolicy extends MCTSPolicy {
         if (bestChild == null /*&& !allDeadEnd*/) {
             JSUtil.println("NO CHILD SELECTED");
             for (MCTSNode child : parent.children) {
-                JSUtil.println("This child  has cost: " + child.getCost() + " is dead-end: " + child.deadEnd + " is fully explored: " + child.isFullyExplored());
+                JSUtil.println("This child  has cost: " + child.getCost() + " is dead-end: " + child.isDeadEnd() + " is fully explored: " + child.isFullyExplored());
             }
             System.exit(0);
         }
@@ -58,7 +58,6 @@ public interface UCTPolicy extends MCTSPolicy {
             parent.children = new Vector<>();
             return parent;
         }*/
-
         return bestChild;
     }
 
@@ -68,19 +67,19 @@ public interface UCTPolicy extends MCTSPolicy {
     @Override
     public default void updateCostAndVisits(MCTSNode node, double cost) {
         double newCost;
-        if (node.visited() == 0) {
-            node.setCost(cost);
-            node.incVisited();
-            return;
+
+        if (!Double.isInfinite(cost)) {
+            if (node.solvedVisits() == 0) {
+                newCost = cost;
+            } else if (JSJshopVars.updateMaximum) {
+                newCost = Math.min(node.getCost(), cost);
+            } else {
+                newCost = (cost + node.getCost() * (node.solvedVisits())) / (node.solvedVisits() + 1);
+            }
+            node.incSolvedVisits();
+            node.setCost(newCost);
         }
         node.incVisited();
-        if (JSJshopVars.updateMaximum) {
-            newCost = Math.min(node.getCost(), cost);
-        } else {
-            newCost = (cost + node.getCost() * (node.visited() - 1)) / (node.visited());
-        }
-        node.setCost(newCost);
-
     }
 
     @Override
