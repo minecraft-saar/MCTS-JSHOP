@@ -14,8 +14,7 @@ public interface UCTPolicy extends MCTSPolicy {
             System.exit(-1);
         }
         int rand = this.randgen.nextInt(parent.children.size());
-        MCTSNode child = parent.children.get(rand);
-        while (child.isFullyExplored()) {
+        while (parent.children.get(rand).isFullyExplored()) {
             rand = this.randgen.nextInt(parent.children.size());
         }
         return parent.children.get(rand);
@@ -27,7 +26,6 @@ public interface UCTPolicy extends MCTSPolicy {
             System.err.println("Error: randomly selecting children of fully explored node");
             System.exit(-1);
         }
-
         Double maxValue = Double.NEGATIVE_INFINITY;
         MCTSNode bestChild = null;
         //boolean allDeadEnd = true;

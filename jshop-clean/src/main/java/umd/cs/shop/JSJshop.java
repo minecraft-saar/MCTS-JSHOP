@@ -47,6 +47,8 @@ public final class JSJshop implements Runnable {
     @Option(names = {"--noRec"}, defaultValue = "true", description = "Disables collapsing nodes")
     boolean recursive;
 
+    @Option(names = {"-e", "--expansionPolicy"}, defaultValue = "simple", description = "can be uct1 or uct2")
+    String expansionPolicy;
 
     @Option(names = {"-m", "--monteCarloRuns"}, defaultValue = "10000", description = "Number of runs for the monte carlo search")
     int mctsruns;
@@ -60,7 +62,7 @@ public final class JSJshop implements Runnable {
     @Option(names = {"-p", "--policy"}, defaultValue = "uct1", description = "can be uct1 or uct2")
     String policy;
 
-    @Option(names = {"-t", "--timeout"}, defaultValue = "10000", description = "Timeout in milliseconds")
+    @Option(names = {"-t", "--timeout"}, defaultValue = "30000", description = "Timeout in milliseconds")
     long timeout;
 
     @Option(names = {"-c", "--costFunction"}, defaultValue = "basic", description = "Which cost function should be used")
@@ -133,6 +135,39 @@ public final class JSJshop implements Runnable {
 
     /******** main constructor **********/
 
+    //MCTS
+    public void mctsSearch() {
+        JSJshopVars.policy = MCTSPolicy.getPolicy(policy);
+        JSJshopVars.expansionPolicy = MCTSExpand.getPolicy(expansionPolicy, recursive);
+        JSJshopVars.updateMaximum = updateMaximum;
+        JSJshopVars.useApproximatedCostFunction = useApproximatedCostFunction;
+        JSJshopVars.costFunction = CostFunction.getCostFunction(costFunctionName, dom.getName());
+
+        for (int k = 0; k < probSet.size(); k++) {
+            prob = (JSPlanningProblem) probSet.elementAt(k);
+            JSUtil.println("Solving Problem :" + prob.Name() + " with mcts");
+            JSUtil.println("time till timeout: " + timeout);
+            dom.solveMCTS(prob, mctsruns, timeout, printTree);
+            final long searchTime = System.currentTimeMillis();
+            JSUtil.println("Total Time: " + (searchTime - JSJshopVars.startTime));
+            if (useApproximatedCostFunction) {
+                JSUtil.println("Approximated cost function uses: " + JSJshopVars.approxUses);
+            } else {
+                JSUtil.println("Real cost function uses: " + JSJshopVars.realCostUses);
+            }
+            if (JSJshopVars.bestPlans.lastElement().plan.isFailure()) {
+                JSUtil.println("0 plans found");
+            } else {
+                JSUtil.println("Plan found:");
+                JSUtil.println("Solution in Tree: " + JSJshopVars.bestPlans.lastElement().isInTree());
+                JSUtil.println("Reward for Given Plan: " + JSJshopVars.bestPlans.lastElement().getCost());
+                JSUtil.println("********* PLAN *******");
+                JSJshopVars.bestPlans.lastElement().plan.printPlan();
+            }
+            //}
+        }
+    }
+
     public void standardSearch() {
         JSJshopVars.allPlans = allPlans;
         JSJshopVars.flagLevel = detail;
@@ -182,38 +217,6 @@ public final class JSJshop implements Runnable {
         }
     }
 
-    //MCTS
-    public void mctsSearch() {
-        JSJshopVars.policy = MCTSPolicy.getPolicy(policy);
-        JSJshopVars.expansionPolicy = new MCTSExpansionSimple(recursive); //TODO adapt to parameter
-        JSJshopVars.updateMaximum = updateMaximum;
-        JSJshopVars.useApproximatedCostFunction = useApproximatedCostFunction;
-        JSJshopVars.costFunction = CostFunction.getCostFunction(costFunctionName, dom.getName());
-
-        for (int k = 0; k < probSet.size(); k++) {
-            prob = (JSPlanningProblem) probSet.elementAt(k);
-            JSUtil.println("Solving Problem :" + prob.Name() + " with mcts");
-            JSUtil.println("time till timeout: " + timeout);
-            dom.solveMCTS(prob, mctsruns, timeout, printTree);
-            final long searchTime = System.currentTimeMillis();
-            JSUtil.println("Total Time: " + (searchTime - JSJshopVars.startTime));
-            if (useApproximatedCostFunction) {
-                JSUtil.println("Approximated cost function uses: " + JSJshopVars.approxUses);
-            } else {
-                JSUtil.println("Real cost function uses: " + JSJshopVars.realCostUses);
-            }
-            if (JSJshopVars.bestPlans.lastElement().plan.isFailure()) {
-                JSUtil.println("0 plans found");
-            } else {
-                JSUtil.println("Plan found:");
-                JSUtil.println("Solution in Tree: " + JSJshopVars.bestPlans.lastElement().isInTree());
-                JSUtil.println("Reward for Given Plan: " + JSJshopVars.bestPlans.lastElement().getCost());
-                JSUtil.println("********* PLAN *******");
-                JSJshopVars.bestPlans.lastElement().plan.printPlan();
-            }
-            //}
-        }
-    }
 
     //Calls mcts search but returns the plan insteasd of printing it for use in the NLG System
     public JSPlan nlgSearch(int mctsruns, long timeout, InputStream world) {

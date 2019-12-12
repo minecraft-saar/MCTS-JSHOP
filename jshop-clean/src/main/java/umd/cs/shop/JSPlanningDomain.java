@@ -138,9 +138,9 @@ public class JSPlanningDomain {
                 JSUtil.println("Solved optimally");
                 break;
             }
-            //System.out.println(" !!!!!!! Starting Run number : " + i + " after " + (currentTime - JSJshopVars.startTime) + " ms");
             //if(!JSJshopVars.costFunction.isUnitCost()){
             MCTSAlgorithm.runMCTS(initial, this, 1);
+            //System.out.println(" !!!!!!! Finished Run number : " + i + " after " + (currentTime - JSJshopVars.startTime) + " ms");
             //}
             initial.setInTree();
             this.mctsRuns++;
