@@ -11,13 +11,20 @@ public interface CostFunction {
 
     boolean isUnitCost();
 
-    public static CostFunction getCostFunction(String costFunctionName, String domainName) {
+    enum CostFunctionType {
+        UNIT,
+        BASIC,
+        STATEDEPENDENT
+    }
+
+
+    public static CostFunction getCostFunction(CostFunctionType costFunctionName, String domainName) {
         switch (costFunctionName) {
-            case "unit":
+            case UNIT:
                 return new UnitCost();
-            case "basic":
+            case BASIC:
                 return new BasicCost();
-            case "stateDependent":
+            case STATEDEPENDENT:
                 if (domainName.equals("house")) {
                     return new StateDependentCostMinecraft();
                 }else if (domainName.equals("blocksworld")) {

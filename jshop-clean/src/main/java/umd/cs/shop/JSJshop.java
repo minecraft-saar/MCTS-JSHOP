@@ -4,6 +4,7 @@ import javax.swing.*;
 import java.io.*;
 import java.net.MalformedURLException;
 import java.net.URL;
+import java.rmi.activation.ActivationGroupDesc;
 import java.util.Vector;
 
 import picocli.CommandLine;
@@ -47,7 +48,7 @@ public final class JSJshop implements Runnable {
     @Option(names = {"--noRec"}, defaultValue = "true", description = "Disables collapsing nodes")
     boolean recursive;
 
-    @Option(names = {"-e", "--expansionPolicy"}, defaultValue = "simple", description = "can be uct1 or uct2")
+    @Option(names = {"-e", "--expansionPolicy"}, defaultValue = "simple", description = "")
     String expansionPolicy;
 
     @Option(names = {"-m", "--monteCarloRuns"}, defaultValue = "10000", description = "Number of runs for the monte carlo search")
@@ -65,8 +66,8 @@ public final class JSJshop implements Runnable {
     @Option(names = {"-t", "--timeout"}, defaultValue = "30000", description = "Timeout in milliseconds")
     long timeout;
 
-    @Option(names = {"-c", "--costFunction"}, defaultValue = "basic", description = "Which cost function should be used")
-    String costFunctionName;
+    @Option(names = {"-c", "--costFunction"}, defaultValue = "BASIC", description = "Which cost function should be used:  ${COMPLETION-CANDIDATES}")
+    CostFunction.CostFunctionType costFunctionName;
 
     @Option(names = {"-d", "--detail"}, defaultValue = "1", description = "Integer from 1 to 10 for more details during standard search")
     int detail;
@@ -110,7 +111,13 @@ public final class JSJshop implements Runnable {
     }
 
     public static void main(String[] args) {
-        CommandLine.run(new JSJshop(), args);
+        JSJshop j = new JSJshop();
+        CommandLine cmd = new CommandLine(j).setCaseInsensitiveEnumValuesAllowed(true);
+        cmd.parseArgs(args);
+        j.run();
+
+        //CommandLine.run(new JSJshop(), args);
+
 
     }
 

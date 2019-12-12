@@ -67,7 +67,6 @@ public class MCTSAlgorithm {
 
         Vector<MCTSNode> children = JSJshopVars.expansionPolicy.expand(tst, dom);
         tst.addChildren(children);
-        JSUtil.println("Number of Children: " + tst.children.size());
         tst.checkFullyExplored();
         if(tst.children.isEmpty()){
             tst.setDeadEnd();

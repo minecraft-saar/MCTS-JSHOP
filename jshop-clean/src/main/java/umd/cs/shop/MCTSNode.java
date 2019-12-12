@@ -126,8 +126,11 @@ public class MCTSNode {
 
     String dotNode() {
         String color = "";
-
-        String label = this.taskNetwork.firstElement().toString() + " " +  this.cost + " " + this.visited;
+        String taskName = "";
+        if (!this.taskNetwork.isEmpty()) {
+            taskName = this.taskNetwork.firstElement().toString() + " ";
+        }
+        String label = taskName +  this.cost + " " + this.visited;
         if (!this.inTree) {
             label = "";
         }
