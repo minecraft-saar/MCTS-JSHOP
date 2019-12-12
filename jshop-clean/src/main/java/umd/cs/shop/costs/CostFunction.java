@@ -26,6 +26,7 @@ public interface CostFunction {
                 }
             default:
                 System.err.println("Unknown cost function: " + costFunctionName);
+                System.err.println("Options are: unit basic stateDependent");
                 System.exit(-1);
         }
         return null;

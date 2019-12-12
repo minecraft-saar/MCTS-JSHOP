@@ -23,6 +23,7 @@ public interface MCTSPolicy {
                 return new UCTVersion2();
             default:
                 System.err.println("Unknown policy name: " + policy);
+                System.err.println("Options are: uct1 uct2");
                 System.exit(-1);
         }
         return null;
