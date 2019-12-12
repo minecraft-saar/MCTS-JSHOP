@@ -20,6 +20,9 @@ public interface CostFunction {
             case "stateDependent":
                 if (domainName.equals("house")) {
                     return new StateDependentCostMinecraft();
+                }else if (domainName.equals("blocksworld")) {
+                    return new StateDependentCostBlocksworld();
+
                 } else {
                     System.err.println("No state dependent cost function defined for " + domainName);
                     System.exit(-1);
