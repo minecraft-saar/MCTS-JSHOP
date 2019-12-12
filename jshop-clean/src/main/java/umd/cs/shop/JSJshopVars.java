@@ -61,6 +61,7 @@ public final class JSJshopVars {
     static int approxUses = 0;
     static int realCostUses = 0;
     static boolean useFullyExplored = true;
+    static  MCTSExpand expansionPolicy;
 
     static void FoundPlan(){
         planFound = true;

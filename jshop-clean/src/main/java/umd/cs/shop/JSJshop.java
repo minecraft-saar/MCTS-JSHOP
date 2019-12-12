@@ -44,6 +44,10 @@ public final class JSJshop implements Runnable {
     @Option(names = {"--printTree"}, defaultValue = "false", description = "Enable printing of tree")
     boolean printTree;
 
+    @Option(names = {"--noRec"}, defaultValue = "true", description = "Disables collapsing nodes")
+    boolean recursive;
+
+
     @Option(names = {"-m", "--monteCarloRuns"}, defaultValue = "10000", description = "Number of runs for the monte carlo search")
     int mctsruns;
 
@@ -76,6 +80,7 @@ public final class JSJshop implements Runnable {
             return;
         }*/
         JSJshopVars.useFullyExplored = exploreFully;
+        JSUtil.println("Explore: " + exploreFully);
         JSUtil.println("Reading file " + nameDomainFile);
         if (!parserFile(nameDomainFile))
             if (JSJshopVars.flagExit)
@@ -179,7 +184,8 @@ public final class JSJshop implements Runnable {
 
     //MCTS
     public void mctsSearch() {
-        JSJshopVars.policy = MCTSPolicy.getPolicy(policy); //TODO adapt to parameter
+        JSJshopVars.policy = MCTSPolicy.getPolicy(policy);
+        JSJshopVars.expansionPolicy = new MCTSExpansionSimple(recursive); //TODO adapt to parameter
         JSJshopVars.updateMaximum = updateMaximum;
         JSJshopVars.useApproximatedCostFunction = useApproximatedCostFunction;
         JSJshopVars.costFunction = CostFunction.getCostFunction(costFunctionName, dom.getName());

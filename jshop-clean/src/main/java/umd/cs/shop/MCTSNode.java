@@ -99,6 +99,10 @@ public class MCTSNode {
         this.children.add(ts);
     }
 
+    void addChildren(Vector<MCTSNode> vec) {
+        this.children.addAll(vec);
+    }
+
     void setInTree() {
         this.inTree = true;
     }
@@ -140,7 +144,7 @@ public class MCTSNode {
                 child = child.children.get(0);
             }*/
 
-           // if (child.inTree) {
+            //if (child.inTree) {
                 result += this.id + " -> " + child.id + ";\n";
                 result += child.dotNode();
             //}
@@ -150,7 +154,7 @@ public class MCTSNode {
     }
 
     public boolean isFullyExplored() {
-        return fullyExplored;
+        return fullyExplored || deadEnd;
     }
 
 

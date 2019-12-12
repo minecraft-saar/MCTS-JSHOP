@@ -10,8 +10,6 @@ public class JSState extends JSListLogicalAtoms {
 
     /*==== instance variables ====*/
 
-    private String label;
-
     public JSState() {
         super();
     }
