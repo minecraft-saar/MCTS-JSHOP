@@ -143,15 +143,27 @@ public class MCTSNode {
         }
 
         String result = this.id + " [label=\"" + label + "\"" + color + "];\n";
+
+        int num_empty_children = 0;
+        int empty_children_id = 0;
+
         for (MCTSNode child : children) {
             /*while (child.children.size() == 1 && child.children.get(0).inTree) {
                 child = child.children.get(0);
             }*/
 
-            //if (child.inTree) {
+            if (child.inTree || !child.children.isEmpty() || child.isFullyExplored()) {
                 result += this.id + " -> " + child.id + ";\n";
                 result += child.dotNode();
-            //}
+            } else {
+                num_empty_children++;
+                empty_children_id = child.id; //Re-use the ID of some empty children for the empty_children node.
+            }
+        }
+
+        if (num_empty_children > 0) {
+            result +=  "" +  empty_children_id + " [label=\"(" + num_empty_children + ")\", style= filled fillcolor=gray];\n";
+            result += this.id + "->" + empty_children_id + ";\n";
         }
 
         return result;
