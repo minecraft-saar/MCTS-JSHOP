@@ -129,6 +129,9 @@ public class MCTSNode {
         String taskName = "";
         if (!this.taskNetwork.isEmpty()) {
             taskName = this.taskNetwork.firstElement().toString() + " ";
+           // for (Object o : this.taskNetwork) {
+           //     taskName += o.toString() + " ";
+           // }
         }
         String label = taskName +  this.cost + " " + this.visited;
         if (!this.inTree) {

@@ -2,46 +2,84 @@ package umd.cs.shop;
 
 
 import java.io.*;
+import java.util.HashSet;
+import java.util.Set;
 
 
-public class JSState extends JSListLogicalAtoms {
+public class JSState {
+
+    Set<JSPredicateForm> atoms;
 
     // This is a Vector over JSPredicateForm (call terms count as JSPredicateForm but should not end up in the state)
 
     /*==== instance variables ====*/
 
-    public JSState() {
-        super();
+    public JSState(Set<JSPredicateForm> atoms) {
+        this.atoms = new HashSet<JSPredicateForm>();
+        this.atoms.addAll(atoms);
     }
 
     public JSState(StreamTokenizer tokenizer) {
-        super(tokenizer);
-    }
+        JSPredicateForm ta;
+        //label = "";
+        //varlist = false;
+        this.atoms = new HashSet<JSPredicateForm>();
 
-    // Added 25/01/2001
-    public void addElementsToState(JSListLogicalAtoms s) {
-        /* Appends the contents of this to the end of s */
-      /*for (int i =0; i<s.size(); i++)
-      {
-        this.insertElementAt(s.elementAt(i),i);
-      }*/
-
-        int j = 0;
-        for (int i = 0; i < s.size(); i++) {
-            if (this.contains(s.elementAt(i)))
-                continue;
-            this.insertElementAt(s.elementAt(i), j);
-            j++;
+        if (!JSUtil.readToken(tokenizer, "ListLogicalAtoms"))
+            throw new JSParserError(); //return;
+        /*  If this is an empty list "nil"    */
+        if ((tokenizer.ttype == StreamTokenizer.TT_WORD) && (tokenizer.sval.equalsIgnoreCase("nil")))
+            return;
+        /*  If this is a variable list " ?x"    */
+        if (tokenizer.ttype == JSJshopVars.interrogation) {
+            tokenizer.pushBack();
+            JSTerm t = new JSTerm(tokenizer);
+            if (t.isEmpty())
+                throw new JSParserError(); //return;
+            atoms.add(t);
+            //varlist = true;
+            return;
         }
 
-    }
+        /* If this is a regular list of atoms */
+        tokenizer.pushBack();
 
-    JSState apply(JSPlan pl) {
-        JSState ns = new JSState();
+        if (!JSUtil.expectTokenType(JSJshopVars.leftPar, tokenizer,
+                "ListLogicalAtoms expecting ("))
+            throw new JSParserError(); //return;
 
-        JSUtil.flag20("<STATE>.apply(<JSPlan>) not implemented yet");
+        if (!JSUtil.readToken(tokenizer, "ListLogicalAtoms"))
+            throw new JSParserError(); //return;
 
-        return ns;
+        // Added 11/28/00
+        if (tokenizer.ttype == JSJshopVars.colon) {
+
+            if (!JSUtil.readToken(tokenizer, " 'first' expected"))
+                throw new JSParserError(); //return;  //Error:  There is nothing after :
+            if ((tokenizer.ttype != StreamTokenizer.TT_WORD) || (!tokenizer.sval.equalsIgnoreCase("first"))) {
+                JSUtil.println("Line : " + tokenizer.lineno() + " Expecting 'first'");
+                throw new JSParserError(); //return;  // Error: After colon there must be a word and it must be "first"
+            }
+            //label = tokenizer.sval;
+
+            if (!JSUtil.readToken(tokenizer, "Expecting list of logical atoms"))
+                throw new JSParserError(); //return; // Error: There must be something after "first"
+        }
+        //End of additions
+
+        while (tokenizer.ttype != JSJshopVars.rightPar) {
+            tokenizer.pushBack();
+            ta = new JSPredicateForm(tokenizer);
+            if (ta.size() != 0) {
+                atoms.add(ta);
+            } else {
+                JSUtil.flag("Line : " + tokenizer.lineno() + " ListLogicalAtoms: unexpected Atom");
+                throw new JSParserError(); //return;
+            }
+            if (!JSUtil.readToken(tokenizer, "Expecting ')' "))
+                throw new JSParserError(); //return;
+        }
+        //parsed successfully
     }
 
     JSTState applyOp(JSOperator op, JSSubstitution alpha, JSListLogicalAtoms addL,
@@ -50,7 +88,6 @@ public class JSState extends JSListLogicalAtoms {
         JSListLogicalAtoms del = op.deleteList();
         JSListLogicalAtoms opAddL = add.applySubstitutionListLogicalAtoms(alpha);
         JSListLogicalAtoms opDelL = del.applySubstitutionListLogicalAtoms(alpha);
-        JSState ns = new JSState();
         JSListLogicalAtoms nAddL = new JSListLogicalAtoms();
         JSListLogicalAtoms nDelL = new JSListLogicalAtoms();
         JSPredicateForm el;
@@ -68,16 +105,11 @@ public class JSState extends JSListLogicalAtoms {
         }
         //  JSUtil.flagPlanning("<-- ndelete list");
 
-        for (short i = 0; i < this.size(); i++)//creates a new state
-        {
-            el = (JSPredicateForm) this.elementAt(i);
-            if (!opDelL.contains(el)) {
+        JSState ns = new JSState(this.atoms);
 
-                //   ns.insertElementAt(el, 0);// modified 22/01
-                ns.addElement(el);
-            }
+        for (Object o : opAddL) {
+            ns.atoms.add((JSPredicateForm) o);
         }
-        ns.addElementsToState(opAddL); // previously AddElements
 
         for (short i = 0; i < addL.size(); i++)//creates a new add list
         {
@@ -175,13 +207,14 @@ public class JSState extends JSListLogicalAtoms {
     //
     // Otherwise: returns an empty list
     {
-        JSPredicateForm el;
+        //JSPredicateForm el;
         JSSubstitution subs;
         JSListSubstitution answers = new JSListSubstitution();
         if (JSJshopVars.flagLevel > 7)
             System.out.println(" ");
-        for (int i = 0; i < this.size(); i++) {
-            el = (JSPredicateForm) this.elementAt(i);
+        for (JSPredicateForm el : this.atoms) {
+            //int i = 0; i < atoms.size(); i++) {
+            //el = (JSPredicateForm) atoms.elementAt(i);
             subs = t.matches(el, alpha);
             if (!subs.fail()) {
                 if (JSJshopVars.flagLevel > 7) {
@@ -198,18 +231,27 @@ public class JSState extends JSListLogicalAtoms {
         return answers;
     }
 
+    public Set<JSPredicateForm> atoms(){
+        return this.atoms;
+    }
+
+    public void print(){
+        for(JSPredicateForm pred : this.atoms){
+            pred.print();
+        }
+    }
+
+
     public boolean equals(Object o) {
         if (!(o instanceof JSState))
             return false;
         JSState state = (JSState) o;
 
-        if (state.size() != this.size())
+        if (state.atoms.size() != this.atoms.size())
             return false;
 
-        for (int i = 0; i < this.size(); i++) {
-            if (!state.contains(this.elementAt(i))) {
-                return false;
-            }
+        if (!state.atoms.containsAll(this.atoms)) {
+            return false;
         }
         return true;
     }

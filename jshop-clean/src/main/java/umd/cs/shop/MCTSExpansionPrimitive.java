@@ -1,5 +1,6 @@
 package umd.cs.shop;
 
+import java.util.LinkedList;
 import java.util.Vector;
 
 public class MCTSExpansionPrimitive implements MCTSExpand {
@@ -11,8 +12,32 @@ public class MCTSExpansionPrimitive implements MCTSExpand {
         this.recursive = recursive;
     }
 
-    @Override
     public Vector<MCTSNode> expand(MCTSNode node, JSPlanningDomain dom) {
+        LinkedList<MCTSNode> toExpand = new LinkedList<>();
+        Vector<MCTSNode> primitive = new Vector<>();
+        toExpand.addAll(findChildren(node,dom, recursive));
+        while (!toExpand.isEmpty()){
+            MCTSNode next = toExpand.removeFirst();
+            if(next.taskNetwork().isEmpty()){
+                primitive.add(next);
+                continue;
+            }
+            JSTaskAtom t = (JSTaskAtom) next.taskNetwork().firstElement();
+            if(t.isPrimitive){
+                primitive.addAll(findChildren(next, dom, false));
+                continue;
+            }
+            toExpand.addAll(findChildren(next,dom, recursive));
+        }
+
+        if (recursive && primitive.size() == 1 && !primitive.get(0).taskNetwork().isEmpty()) {
+            return expand(primitive.get(0), dom);
+        }
+
+        return primitive;
+    }
+
+    public Vector<MCTSNode> findChildren(MCTSNode node, JSPlanningDomain dom, boolean applyRecursion) {
         JSPairPlanTState pair;
         JSPlan ans;
         JSTaskAtom t = (JSTaskAtom) node.taskNetwork().firstElement();
@@ -60,15 +85,17 @@ public class MCTSExpansionPrimitive implements MCTSExpand {
                 }
             }
         }
-        if (recursive && children.size() == 1) {
-
+        if (applyRecursion && children.size() == 1) {
             MCTSNode child = children.get(0);
             if (child.taskNetwork().isEmpty()) {
                 return children;
             }
-            children.remove(child);
+            JSTaskAtom newTask = (JSTaskAtom) child.taskNetwork().firstElement();
+            if(newTask.isPrimitive){
+                return children;
+            }
             //JSUtil.println("Doing recursive call with task: " + child.taskNetwork().get(0).toString());
-            return this.expand(child, dom);
+            return this.findChildren(child, dom, applyRecursion);
         }
 
         return children;

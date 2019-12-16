@@ -23,8 +23,7 @@ public class StateDependentCostBlocksworld implements CostFunction {
         assert grounded_operator.isGround();
         String operator_name = grounded_operator.get(0).toString();
 
-        for (Object x : state.state()) {
-            JSPredicateForm term = (JSPredicateForm)x;
+        for (JSPredicateForm term : state.state().atoms()) {
             term.print();
           //  System.out.println("X: " + term.elementAt(0));
 
