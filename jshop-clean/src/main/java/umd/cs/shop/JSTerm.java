@@ -4,9 +4,10 @@ import java.io.*;
 
 
 import java.lang.*;
+import java.util.Vector;
 
 
-public class JSTerm extends JSPredicateForm {
+public class JSTerm extends Vector<Object> {
 
     /*==== instance variables ====*/
 

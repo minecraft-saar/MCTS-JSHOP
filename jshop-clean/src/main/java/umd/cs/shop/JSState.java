@@ -32,13 +32,8 @@ public class JSState {
             return;
         /*  If this is a variable list " ?x"    */
         if (tokenizer.ttype == JSJshopVars.interrogation) {
-            tokenizer.pushBack();
-            JSTerm t = new JSTerm(tokenizer);
-            if (t.isEmpty())
-                throw new JSParserError(); //return;
-            atoms.add(t);
-            //varlist = true;
-            return;
+            System.err.println("Unexpected term while parsing state!");
+            throw new JSParserError();
         }
 
         /* If this is a regular list of atoms */
@@ -48,10 +43,9 @@ public class JSState {
                 "ListLogicalAtoms expecting ("))
             throw new JSParserError(); //return;
 
-        if (!JSUtil.readToken(tokenizer, "ListLogicalAtoms"))
+        if (!JSUtil.readToken(tokenizer, "State"))
             throw new JSParserError(); //return;
 
-        // Added 11/28/00
         if (tokenizer.ttype == JSJshopVars.colon) {
 
             if (!JSUtil.readToken(tokenizer, " 'first' expected"))
@@ -65,7 +59,6 @@ public class JSState {
             if (!JSUtil.readToken(tokenizer, "Expecting list of logical atoms"))
                 throw new JSParserError(); //return; // Error: There must be something after "first"
         }
-        //End of additions
 
         while (tokenizer.ttype != JSJshopVars.rightPar) {
             tokenizer.pushBack();
@@ -250,14 +243,11 @@ public class JSState {
         if (state.atoms.size() != this.atoms.size())
             return false;
 
-        if (!state.atoms.containsAll(this.atoms)) {
-            return false;
-        }
-        return true;
+        return  !state.atoms.equals(this.atoms);
     }
 
     public int hashCode() {
-        return super.hashCode();
+        return this.atoms.hashCode();
     }
 
 }
