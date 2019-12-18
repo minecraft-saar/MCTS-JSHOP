@@ -62,11 +62,16 @@ public final class JSJshopVars {
     static int realCostUses = 0;
     static boolean useFullyExplored = true;
     static  MCTSExpand expansionPolicy;
+    static Registry registry;
 
     static void FoundPlan(){
         planFound = true;
     }
 
+
+    public static int combineHashCodes(int h1, int h2) {
+        return (((h1 << 5) + h1) ^ h2);
+    }
 
     static void SetAllPlans(boolean val) {
 

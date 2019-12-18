@@ -75,6 +75,9 @@ public final class JSJshop implements Runnable {
     @Option(names = {"-a", "--all"}, defaultValue = "false", description = "Find all plans in standard search")
     boolean allPlans;
 
+    @Option(names = { "--duplicateDetection"}, defaultValue = "false", description = "Use duplicate Detection")
+    boolean duplicate;
+
     @Override
     public void run() {
         JSJshopVars.startTime = System.currentTimeMillis();
@@ -149,6 +152,9 @@ public final class JSJshop implements Runnable {
         JSJshopVars.updateMaximum = updateMaximum;
         JSJshopVars.useApproximatedCostFunction = useApproximatedCostFunction;
         JSJshopVars.costFunction = CostFunction.getCostFunction(costFunctionName, dom.getName());
+        if(duplicate){
+            JSJshopVars.registry = new Registry();
+        }
 
         for (int k = 0; k < probSet.size(); k++) {
             prob = (JSPlanningProblem) probSet.elementAt(k);
@@ -162,6 +168,9 @@ public final class JSJshop implements Runnable {
             } else {
                 JSUtil.println("Real cost function uses: " + JSJshopVars.realCostUses);
             }
+
+            //JSUtil.println("Number of Insertion into Registry " + JSJshopVars.registry.numStates);
+
             if (JSJshopVars.bestPlans.lastElement().plan.isFailure()) {
                 JSUtil.println("0 plans found");
             } else {

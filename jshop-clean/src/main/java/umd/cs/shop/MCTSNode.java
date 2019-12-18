@@ -133,9 +133,9 @@ public class MCTSNode {
            //     taskName += o.toString() + " ";
            // }
         }
-        String label = taskName +  this.cost + " " + this.visited;
+        String label = taskName +  this.cost + " " + this.visited + " " + this.id;
         if (!this.inTree) {
-            label = "";
+            //label = "";
         }
         if (this.deadEnd) {
             color = " style=filled fillcolor=red";

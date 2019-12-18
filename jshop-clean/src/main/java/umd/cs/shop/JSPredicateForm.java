@@ -336,7 +336,20 @@ public class JSPredicateForm extends Vector<Object> {
     }
 
     public int hashCode() {
-        return super.hashCode();
+            //JSUtil.println("Using Predicate Hash Code");
+        String str = (String) this.elementAt(0);
+        int hash =  str.hashCode();
+        if (str.equalsIgnoreCase("not")) {
+            JSPredicateForm el = (JSPredicateForm) this.elementAt(1);
+            hash = JSJshopVars.combineHashCodes(hash, el.hashCode());
+        } else {
+            JSTerm el;
+            for (short i = 1; i < this.size(); i++) {
+                el = (JSTerm) this.elementAt(i);
+                hash = JSJshopVars.combineHashCodes(hash, el.hashCode());
+            }
+        }
+        return hash;
     }
 
     public JSPredicateForm standarizerPredicateForm() {

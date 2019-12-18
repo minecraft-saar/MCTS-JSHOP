@@ -603,4 +603,21 @@ public class JSTerm extends Vector<Object> {
 
     }
     // Additions ended
+
+    public int hashCode() {
+        int hash;
+        if (this.isVariable || this.isConstant) {
+            String str = (String) this.elementAt(0);
+            return str.hashCode();
+        } else {
+            String str = (String) this.elementAt(0);
+            hash = str.hashCode();
+            JSTerm el;
+            for (short i = 1; i < this.size(); i++) {
+                el = (JSTerm) this.elementAt(i);
+                hash = JSJshopVars.combineHashCodes(hash, el.hashCode());
+            }
+        }
+        return hash;
+    }
 }

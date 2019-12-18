@@ -251,7 +251,18 @@ public class JSListLogicalAtoms extends Vector<Object> {
     }
 
     public int hashCode() {
-        return super.hashCode();
+        if(varlist){
+            JSTerm term = (JSTerm) this.elementAt(0);
+            return term.hashCode();
+        }
+
+        int hash = 1;
+        for(Object o : this) {
+            JSPredicateForm pred = (JSPredicateForm) o;
+            int predHash = pred.hashCode();
+            hash = JSJshopVars.combineHashCodes(hash, predHash);
+        }
+        return hash;
     }
 
 }

@@ -66,6 +66,17 @@ public class MCTSAlgorithm {
         }
 
         Vector<MCTSNode> children = JSJshopVars.expansionPolicy.expand(tst, dom);
+        if(JSJshopVars.registry != null){
+            for(MCTSNode child : children){
+                JSState state = child.tState().state();
+                JSTasks tasks = child.taskNetwork();
+                if(!JSJshopVars.registry.checkStateTaskNetwork(state, tasks)){
+                    JSJshopVars.registry.addToStateRegistry(state);
+                    JSJshopVars.registry.addToTaskNetworkRegistry(tasks);
+                }
+            }
+        }
+
         tst.addChildren(children);
         tst.checkFullyExplored();
         if(tst.children.isEmpty()){
