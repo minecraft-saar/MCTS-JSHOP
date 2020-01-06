@@ -104,6 +104,10 @@ public class JSState {
             ns.atoms.add((JSPredicateForm) o);
         }
 
+        for (Object o : opDelL){
+            ns.atoms.remove(o);
+        }
+
         for (short i = 0; i < addL.size(); i++)//creates a new add list
         {
             el = (JSPredicateForm) addL.elementAt(i);
