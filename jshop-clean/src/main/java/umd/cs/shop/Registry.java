@@ -22,7 +22,12 @@ public class Registry {
             if (mapResult.equals(state)) {
                 return false;
             } else {
-                System.out.println("Different States with same hash Code");
+                JSUtil.println("Different States with same hash Code");
+                JSUtil.println("State in Registry: ");
+                mapResult.print();
+                JSUtil.println(" \n New State: ");
+                state.print();
+                JSUtil.println("\n");
                 //System.exit(0);
             }
         }

@@ -168,9 +168,9 @@ public final class JSJshop implements Runnable {
             } else {
                 JSUtil.println("Real cost function uses: " + JSJshopVars.realCostUses);
             }
-
-            //JSUtil.println("Number of Insertion into Registry " + JSJshopVars.registry.numStates);
-
+            if(duplicate) {
+                JSUtil.println("Number of Insertion into Registry " + JSJshopVars.registry.numStates);
+            }
             if (JSJshopVars.bestPlans.lastElement().plan.isFailure()) {
                 JSUtil.println("0 plans found");
             } else {

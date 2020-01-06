@@ -239,11 +239,10 @@ public class JSState {
         if (!(o instanceof JSState))
             return false;
         JSState state = (JSState) o;
-
         if (state.atoms.size() != this.atoms.size())
             return false;
 
-        return  !state.atoms.equals(this.atoms);
+        return state.atoms.equals(this.atoms);
     }
 
     public int hashCode() {
