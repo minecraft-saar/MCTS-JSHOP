@@ -163,6 +163,8 @@ public final class JSJshop implements Runnable {
             dom.solveMCTS(prob, mctsruns, timeout, printTree);
             final long searchTime = System.currentTimeMillis();
             JSUtil.println("Total Time: " + (searchTime - JSJshopVars.startTime));
+            JSUtil.println("Number of Nodes in Tree: " + MCTSNode.TREE_ID);
+            JSUtil.println("Number of Nodes generated: " + MCTSNode.NEXT_ID);
             if (useApproximatedCostFunction) {
                 JSUtil.println("Approximated cost function uses: " + JSJshopVars.approxUses);
             } else {

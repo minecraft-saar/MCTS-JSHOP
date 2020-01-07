@@ -4,8 +4,10 @@ import java.util.Vector;
 
 
 public class MCTSNode {
-    private static int NEXT_ID = 0;
+    static int NEXT_ID = 0;
+    static int TREE_ID = 0;
     private int id;
+    private int idTree;
 
     private JSTState tState;
     private JSTasks taskNetwork;
@@ -73,7 +75,9 @@ public class MCTSNode {
         return this.solvedVisits;
     }
 
-    /**Also sets fullyExplored**/
+    /**
+     * Also sets fullyExplored
+     **/
     void setDeadEnd() {
         this.deadEnd = true;
         this.fullyExplored = true;
@@ -105,6 +109,7 @@ public class MCTSNode {
 
     void setInTree() {
         this.inTree = true;
+        this.idTree = TREE_ID++;
     }
 
     boolean isDeadEnd() {
@@ -129,11 +134,11 @@ public class MCTSNode {
         String taskName = "";
         if (!this.taskNetwork.isEmpty()) {
             taskName = this.taskNetwork.firstElement().toString() + " ";
-           // for (Object o : this.taskNetwork) {
-           //     taskName += o.toString() + " ";
-           // }
+            // for (Object o : this.taskNetwork) {
+            //     taskName += o.toString() + " ";
+            // }
         }
-        String label = taskName +  this.cost + " " + this.visited + " " + this.id;
+        String label = taskName + this.cost + " " + this.visited + " " + this.id;
         if (!this.inTree) {
             //label = "";
         }
@@ -165,7 +170,7 @@ public class MCTSNode {
         }
 
         if (num_empty_children > 0) {
-            result +=  "" +  empty_children_id + " [label=\"(" + num_empty_children + ")\", style= filled fillcolor=gray];\n";
+            result += "" + empty_children_id + " [label=\"(" + num_empty_children + ")\", style= filled fillcolor=gray];\n";
             result += this.id + "->" + empty_children_id + ";\n";
         }
 
@@ -197,7 +202,7 @@ public class MCTSNode {
 
         JSJshopVars.policy.computeCost(this); // sets cost
         this.setFullyExplored();
-        if(this.isInTree()) {
+        if (this.isInTree()) {
             this.incSolvedVisits();
             this.incVisited();
         }
