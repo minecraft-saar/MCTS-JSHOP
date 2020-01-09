@@ -72,10 +72,6 @@ public class MCTSExpansionSimple implements MCTSExpand{
             return this.expand(child, dom);
         } else if(deadEnd && children.size() > 1){
             children.removeIf(child -> testDeadEnd(child, dom));
-            if(children.isEmpty()){
-
-                JSUtil.println("ALL CHILDREN REMOVED");
-            }
         }
         return children;
     }
