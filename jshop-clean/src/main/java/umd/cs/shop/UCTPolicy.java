@@ -9,6 +9,9 @@ public interface UCTPolicy extends MCTSPolicy {
 
     @Override
     public default MCTSNode randomChild(MCTSNode parent) {
+        if(!JSJshopVars.random){
+           return parent.children.get(0);
+        }
         if (parent.isFullyExplored()) {
             System.err.println("Error: randomly selecting children of fully explored node");
             System.exit(-1);

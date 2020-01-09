@@ -48,6 +48,9 @@ public final class JSJshop implements Runnable {
     @Option(names = {"--noRec"}, defaultValue = "true", description = "Disables collapsing nodes")
     boolean recursive;
 
+    @Option(names = {"--noRandom"}, defaultValue = "true", description = "Disables Randomdecision for child nodes")
+    boolean random;
+
     @Option(names = {"-e", "--expansionPolicy"}, defaultValue = "simple", description = "")
     String expansionPolicy;
 
@@ -86,6 +89,7 @@ public final class JSJshop implements Runnable {
             return;
         }*/
         JSJshopVars.useFullyExplored = exploreFully;
+        JSJshopVars.random = random;
         JSUtil.println("Explore: " + exploreFully);
         JSUtil.println("Reading file " + nameDomainFile);
         if (!parserFile(nameDomainFile))
