@@ -26,10 +26,11 @@ public interface CostFunction {
                 return new BasicCost();
             case STATEDEPENDENT:
                 if (domainName.equals("house")) {
-                    return new StateDependentCostMinecraft();
+                    return new SDCostMinecraft();
                 }else if (domainName.equals("blocksworld")) {
-                    return new StateDependentCostBlocksworld();
-
+                    return new SDCostBlocksworld();
+                }else if (domainName.equals("childsnack")) {
+                    return new SDCostChildsnack();
                 } else {
                     System.err.println("No state dependent cost function defined for " + domainName);
                     System.exit(-1);
