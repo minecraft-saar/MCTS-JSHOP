@@ -4,7 +4,7 @@ import umd.cs.shop.JSOperator;
 import umd.cs.shop.JSTState;
 import umd.cs.shop.JSTaskAtom;
 
-public class StateDependentCostMinecraft implements CostFunction {
+public class SDCostMinecraft implements CostFunction {
 
 
     @Override

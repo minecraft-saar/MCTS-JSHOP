@@ -1,10 +1,5 @@
 package umd.cs.shop;
 
-import umd.cs.shop.costs.BasicCost;
-import umd.cs.shop.costs.CostFunction;
-import umd.cs.shop.costs.StateDependentCostMinecraft;
-import umd.cs.shop.costs.UnitCost;
-
 public interface MCTSPolicy {
 
     MCTSNode randomChild(MCTSNode parent);
