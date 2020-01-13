@@ -154,6 +154,7 @@ public class JSPlanningDomain {
                 e.printStackTrace();
             }
         }
+        JSUtil.println("Number of Runs done: " + this.mctsRuns);
         JSUtil.println("Found Plan: " + JSJshopVars.planFound);
         if (!JSJshopVars.planFound) {
             JSJshopVars.bestPlans.lastElement().plan.assignFailure();

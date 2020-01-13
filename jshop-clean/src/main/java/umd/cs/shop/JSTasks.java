@@ -72,7 +72,7 @@ public class JSTasks extends JSListLogicalAtoms {
         rest.removeElement(t);
 
         if (t.isPrimitive()) {
-            pair = t.seekSimplePlan(dom, ts);
+            pair = t.seekSimplePlanCostFunction(dom, ts,false);
             ans = pair.plan();
             if (ans.isFailure()) {
                 return pair; // failure
@@ -147,7 +147,7 @@ public class JSTasks extends JSListLogicalAtoms {
         JSTasks rest = this.cdr();
 
         if (t.isPrimitive()) {
-            pair = t.seekSimplePlan(dom, ts.tState());
+            pair = t.seekSimplePlanCostFunction(dom, ts.tState(),false);
             ans = pair.plan();
             if (ans.isFailure()) {
                 if (JSJshopVars.flagLevel > 1)

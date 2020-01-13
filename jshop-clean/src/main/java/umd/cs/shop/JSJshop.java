@@ -191,6 +191,8 @@ public final class JSJshop implements Runnable {
     }
 
     public void standardSearch() {
+        JSJshopVars.useApproximatedCostFunction = useApproximatedCostFunction;
+        JSJshopVars.costFunction = CostFunction.getCostFunction(costFunctionName, dom.getName());
         JSJshopVars.allPlans = allPlans;
         JSJshopVars.flagLevel = detail;
         JSPairPlanTSListNodes pair;

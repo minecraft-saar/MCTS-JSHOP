@@ -314,7 +314,7 @@
 (:method (build-roof-north ?x ?y ?z ?length ?width ?dir)
         width-one
         ((call equal ?width 1) (call equal ?dir 3))
-        ((build-row ?x ?y (call + (call - ?z ?length) 1) ?length 3))
+        ((build-row ?x ?y (call - (call + ?z ?length) 1) ?length 3))
 
         north-two
         ((call equal ?dir 3) (not (call equal ?width 1)))
