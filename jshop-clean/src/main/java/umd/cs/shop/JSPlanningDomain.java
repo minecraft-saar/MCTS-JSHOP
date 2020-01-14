@@ -154,7 +154,6 @@ public class JSPlanningDomain {
         if (!JSJshopVars.planFound) {
             JSJshopVars.bestPlans.lastElement().assignFailure();
         }
-
     }
 
 
