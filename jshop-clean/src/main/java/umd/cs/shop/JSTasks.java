@@ -69,6 +69,7 @@ public class JSTasks extends JSListLogicalAtoms {
 
         JSTaskAtom t = (JSTaskAtom) this.firstElement();
         JSTasks rest = this.cdr();
+        rest.removeElement(t);
 
         if (t.isPrimitive()) {
             pair = t.seekSimplePlan(ts);

@@ -122,7 +122,7 @@ public class JSPlanningDomain {
         MCTSNode initial = new MCTSNode(ts, tasks, plan);
         JSJshopVars.bestPlans.addElement(initial.plan);
         JSJshopVars.treeDepth = 0;
-        for (int i = 1; i <= runs; i++) {
+        for (JSJshopVars.mctsRuns = 1; JSJshopVars.mctsRuns <= runs; JSJshopVars.mctsRuns++) {
             long currentTime = System.currentTimeMillis();
             long runningTime = currentTime - JSJshopVars.startTime;
             if (runningTime >= timeout) {
@@ -139,7 +139,6 @@ public class JSPlanningDomain {
             //System.out.println(" !!!!!!! Finished Run number : " + i + " after " + (currentTime - JSJshopVars.startTime) + " ms");
             //}
             initial.setInTree();
-            JSJshopVars.mctsRuns++;
         }
         if(printTree) {
             try {
@@ -150,6 +149,7 @@ public class JSPlanningDomain {
                 e.printStackTrace();
             }
         }
+        JSUtil.println("Number of Runs done: " + JSJshopVars.mctsRuns);
         JSUtil.println("Found Plan: " + JSJshopVars.planFound);
         if (!JSJshopVars.planFound) {
             JSJshopVars.bestPlans.lastElement().assignFailure();
