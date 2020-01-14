@@ -98,7 +98,8 @@ public class MCTSSimulationFast implements MCTSSimulation {
                             result.addWithCost(head.applySubstitutionTA(alpha), cost);
                             return result;
                         } else {
-                            if (budget-- == 0) {
+                            budget--;
+                            if (budget == 0) {
                                 return new Plan();
                             }
                         }
@@ -122,7 +123,8 @@ public class MCTSSimulationFast implements MCTSSimulation {
                     if (result.isPlan()) {
                         return result;
                     } else {
-                        if (budget-- == 0) {
+                        budget--;
+                        if (budget == 0) {
                             return new Plan();
                         }
                     }

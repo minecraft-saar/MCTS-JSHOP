@@ -13,7 +13,7 @@ public class MCTSSimulationExpand implements MCTSSimulation {
         return this.simulation(current, depth, budget_recursive);
     }
 
-    public double simulation(MCTSNode current, int depth, int budget) {
+    public double simulation(MCTSNode current, int depth, Integer budget) {
         if (current.taskNetwork().isEmpty()) {
             current.setGoal();
             JSJshopVars.FoundPlan(current.plan, depth);
@@ -22,7 +22,7 @@ public class MCTSSimulationExpand implements MCTSSimulation {
 
         current.expand();
         if (current.isDeadEnd()) {
-            return 10000;
+            return Double.POSITIVE_INFINITY;
         }
 
         //JSUtil.println("Size of child list : " + current.children.size());
@@ -31,12 +31,12 @@ public class MCTSSimulationExpand implements MCTSSimulation {
         if(child.isFullyExplored()) {
             current.checkFullyExplored();
             if (budget > 0 && child.isDeadEnd() && !current.isFullyExplored()) {
-                return simulation(current, depth, budget-1);
+                budget--;
+                return simulation(current, depth, budget);
             }
         }
 
-
-        current.setCost(cost);
+        child.setCost(cost);
         return cost;
     }
 }

@@ -44,7 +44,7 @@ public class MCTSAlgorithm {
                 long currentTime = System.currentTimeMillis();
                 JSUtil.println("Increased tree depth to " + depth + " at run " + JSJshopVars.mctsRuns + " after " + (currentTime - JSJshopVars.startTime) + " ms");
             }
-            return tst.getCost();
+            return reward;
         }
 
         tst.expand();
