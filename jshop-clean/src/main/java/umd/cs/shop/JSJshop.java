@@ -77,6 +77,13 @@ public final class JSJshop implements Runnable {
     @Option(names = { "--duplicateDetection"}, defaultValue = "false", description = "Use duplicate Detection")
     boolean duplicate;
 
+    @Option(names = { "--fastSimulation"}, defaultValue = "false", description = "Use duplicate Detection")
+    boolean fastSimulation;
+
+    @Option(names = {"--recursiveSimulation"}, defaultValue = "0", description = "")
+    int recursiveSimulationBudget;
+
+
     @Override
     public void run() {
         JSJshopVars.startTime = System.currentTimeMillis();
@@ -145,11 +152,12 @@ public final class JSJshop implements Runnable {
 
     /******** main constructor **********/
 
+
     //MCTS
     public void mctsSearch() {
         JSJshopVars.policy = MCTSPolicy.getPolicy(policy);
         JSJshopVars.expansionPolicy = MCTSExpand.getPolicy(expansionPolicy, recursive);
-        JSJshopVars.simulationPolicy = MCTSSimulation.getPolicy(false, 100000);
+        JSJshopVars.simulationPolicy = MCTSSimulation.getPolicy(!fastSimulation, recursiveSimulationBudget);
 
         JSJshopVars.updateMaximum = updateMaximum;
         JSJshopVars.useApproximatedCostFunction = useApproximatedCostFunction;
