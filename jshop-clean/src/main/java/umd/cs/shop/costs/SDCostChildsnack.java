@@ -13,6 +13,7 @@ public class SDCostChildsnack implements CostFunction {
 
     @Override
     public double realCost(JSTState state, JSOperator op, JSTaskAtom grounded_operator) {
+        String operator_name = grounded_operator.get(0).toString();
         return 0;
     }
 

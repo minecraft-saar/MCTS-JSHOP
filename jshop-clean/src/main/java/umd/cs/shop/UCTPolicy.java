@@ -16,7 +16,6 @@ public interface UCTPolicy extends MCTSPolicy {
                     continue;
                 }
                 return parent.children.get(i);
-
             }
         }
         if (parent.isFullyExplored()) {

@@ -16,8 +16,6 @@ public class JSPlanningDomain {
 
     private JSListMethods methods = new JSListMethods();
 
-    int mctsRuns;
-
 
     /*==== constructor ====*/
     public JSPlanningDomain() {
@@ -112,8 +110,7 @@ public class JSPlanningDomain {
 
         JSTasks tasks = prob.tasks();
         pair = tasks.seekPlan(new JSTState(prob.state(), new JSListLogicalAtoms(),
-                        new JSListLogicalAtoms()),
-                this, new JSPlan(), listNodes);
+                        new JSListLogicalAtoms()), new JSPlan(), listNodes);
 
         return new JSPairPlanTSListNodes(pair, listNodes);
     }
@@ -123,9 +120,8 @@ public class JSPlanningDomain {
         JSTasks tasks = prob.tasks();
         JSPlan plan = new JSPlan();
         MCTSNode initial = new MCTSNode(ts, tasks, plan);
-        JSJshopVars.bestPlans.addElement(initial);
+        JSJshopVars.bestPlans.addElement(initial.plan);
         JSJshopVars.treeDepth = 0;
-        this.mctsRuns = 1;
         for (int i = 1; i <= runs; i++) {
             long currentTime = System.currentTimeMillis();
             long runningTime = currentTime - JSJshopVars.startTime;
@@ -139,11 +135,11 @@ public class JSPlanningDomain {
                 break;
             }
             //if(!JSJshopVars.costFunction.isUnitCost()){
-            MCTSAlgorithm.runMCTS(initial, this, 1);
+            MCTSAlgorithm.runMCTS(initial, 1);
             //System.out.println(" !!!!!!! Finished Run number : " + i + " after " + (currentTime - JSJshopVars.startTime) + " ms");
             //}
             initial.setInTree();
-            this.mctsRuns++;
+            JSJshopVars.mctsRuns++;
         }
         if(printTree) {
             try {
@@ -156,7 +152,7 @@ public class JSPlanningDomain {
         }
         JSUtil.println("Found Plan: " + JSJshopVars.planFound);
         if (!JSJshopVars.planFound) {
-            JSJshopVars.bestPlans.lastElement().plan.assignFailure();
+            JSJshopVars.bestPlans.lastElement().assignFailure();
         }
 
     }
@@ -169,7 +165,7 @@ public class JSPlanningDomain {
         JSTState ts = new JSTState(prob.state(), new JSListLogicalAtoms(), new JSListLogicalAtoms());
         JSPlan plan = new JSPlan();
         MCTSNode initial = new MCTSNode(ts, plan);
-        allPlans = tasks.seekPlanAll(initial, this, All);
+        allPlans = tasks.seekPlanAll(initial, All);
 
         return allPlans;
     }

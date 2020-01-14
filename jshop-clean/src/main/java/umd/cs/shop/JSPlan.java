@@ -73,6 +73,5 @@ public class JSPlan extends JSTasks {
         }
         return sum;
     }
-
 }
 

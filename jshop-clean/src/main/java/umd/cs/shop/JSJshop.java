@@ -4,7 +4,6 @@ import javax.swing.*;
 import java.io.*;
 import java.net.MalformedURLException;
 import java.net.URL;
-import java.rmi.activation.ActivationGroupDesc;
 import java.util.Vector;
 
 import picocli.CommandLine;
@@ -26,9 +25,6 @@ public final class JSJshop implements Runnable {
     /*HICAP*//*==== class variables ====*/
     // /*HICAP*/public static boolean corbaToHicap = false;
     // /*HICAP*/public static JApplet applet;
-
-    /* instance variables */
-    private JSPlanningDomain dom;
 
     @Parameters(index = "0", description = "The domain file")
     String nameDomainFile;
@@ -153,9 +149,11 @@ public final class JSJshop implements Runnable {
     public void mctsSearch() {
         JSJshopVars.policy = MCTSPolicy.getPolicy(policy);
         JSJshopVars.expansionPolicy = MCTSExpand.getPolicy(expansionPolicy, recursive);
+        JSJshopVars.simulationPolicy = MCTSSimulation.getPolicy(false, 100000);
+
         JSJshopVars.updateMaximum = updateMaximum;
         JSJshopVars.useApproximatedCostFunction = useApproximatedCostFunction;
-        JSJshopVars.costFunction = CostFunction.getCostFunction(costFunctionName, dom.getName());
+        JSJshopVars.costFunction = CostFunction.getCostFunction(costFunctionName, JSJshopVars.domain.getName());
         if(duplicate){
             JSJshopVars.registry = new Registry();
         }
@@ -164,7 +162,7 @@ public final class JSJshop implements Runnable {
             prob = (JSPlanningProblem) probSet.elementAt(k);
             JSUtil.println("Solving Problem :" + prob.Name() + " with mcts");
             JSUtil.println("time till timeout: " + timeout);
-            dom.solveMCTS(prob, mctsruns, timeout, printTree);
+            JSJshopVars.domain.solveMCTS(prob, mctsruns, timeout, printTree);
             final long searchTime = System.currentTimeMillis();
             JSUtil.println("Total Time: " + (searchTime - JSJshopVars.startTime));
             JSUtil.println("Number of Nodes in Tree: " + MCTSNode.TREE_ID);
@@ -177,14 +175,14 @@ public final class JSJshop implements Runnable {
             if(duplicate) {
                 JSUtil.println("Number of Insertion into Registry " + JSJshopVars.registry.numStates);
             }
-            if (JSJshopVars.bestPlans.lastElement().plan.isFailure()) {
+            if (JSJshopVars.bestPlans.lastElement().isFailure()) {
                 JSUtil.println("0 plans found");
             } else {
                 JSUtil.println("Plan found:");
-                JSUtil.println("Solution in Tree: " + JSJshopVars.bestPlans.lastElement().isInTree());
-                JSUtil.println("Reward for Given Plan: " + JSJshopVars.bestPlans.lastElement().getCost());
+                //JSUtil.println("Solution in Tree: " + JSJshopVars.bestPlans.lastElement().isInTree());
+                JSUtil.println("Reward for Given Plan: " + JSJshopVars.bestPlans.lastElement().planCost());
                 JSUtil.println("********* PLAN *******");
-                JSJshopVars.bestPlans.lastElement().plan.printPlan();
+                JSJshopVars.bestPlans.lastElement().printPlan();
             }
             //}
         }
@@ -200,7 +198,7 @@ public final class JSJshop implements Runnable {
 
             prob = (JSPlanningProblem) probSet.elementAt(k);
             JSUtil.println("Solving Problem :" + prob.Name());
-            allPlans = dom.solveAll(prob, JSJshopVars.allPlans);
+            allPlans = JSJshopVars.domain.solveAll(prob, JSJshopVars.allPlans);
             final long totalTime = System.currentTimeMillis();
             JSUtil.println("Total Time: " + (totalTime - JSJshopVars.startTime));
             if (allPlans.isEmpty()) {
@@ -258,7 +256,7 @@ public final class JSJshop implements Runnable {
         this.mctsruns = mctsruns;
         this.timeout = timeout;
         mctsSearch();
-        return JSJshopVars.bestPlans.lastElement().plan;
+        return JSJshopVars.bestPlans.lastElement();
     }
 
 /*HICAP:   
@@ -340,13 +338,13 @@ public final class JSJshop implements Runnable {
         /*HICAP: prob.makeTask(pred);*/
 
         JSUtil.flag("File parsed");
-        dom.print();
+        JSJshopVars.domain.print();
         JSUtil.flag("<- domain");
         prob.print();
         JSUtil.flag("<- problem");
 
         JSJshopVars.allPlans = false;
-        JSListPairPlanTStateNodes listPairs = dom.solveAll(prob, JSJshopVars.allPlans);
+        JSListPairPlanTStateNodes listPairs = JSJshopVars.domain.solveAll(prob, JSJshopVars.allPlans);
         if (listPairs.size() == 0)
             return null;
         else
@@ -603,7 +601,7 @@ public final class JSJshop implements Runnable {
                 throw new JSParserError(); //return;
 
             if (w.equalsIgnoreCase("defdomain")) {
-                dom = new JSPlanningDomain(tokenizer);
+                JSJshopVars.domain = new JSPlanningDomain(tokenizer);
                 return;
             } else {
                 if (w.equalsIgnoreCase("defproblem")) {
@@ -619,10 +617,6 @@ public final class JSJshop implements Runnable {
             System.err.println("Line : " + tokenizer.lineno() + " Expected '('");
             throw new JSParserError(); //return;
         }
-    }
-
-    public JSPlanningDomain dom() {
-        return dom;
     }
 
     public JSPlanningProblem prob() {

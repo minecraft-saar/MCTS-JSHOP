@@ -48,6 +48,8 @@ public final class JSJshopVars {
     //Any addition/change of a character implies a change
     // in the following methods in JSUtil:
     // stringTokenizer/1, initParseTable/1 and printTokenizer/1
+
+
     static long startTime;
     static int treeDepth;
     static boolean planFound = false;
@@ -56,16 +58,43 @@ public final class JSJshopVars {
     static CostFunction costFunction;
     static MCTSPolicy policy;
     //static JSPairTStateTasks stateBestPlan;
-    static Vector<MCTSNode> bestPlans = new Vector<>();
+    static Vector<JSPlan> bestPlans = new Vector<>();
     static double bestCost;
     static int approxUses = 0;
     static int realCostUses = 0;
     static boolean random = true;
     static boolean useFullyExplored = true;
     static  MCTSExpand expansionPolicy;
+    static MCTSSimulation simulationPolicy;
     static Registry registry;
 
-    static void FoundPlan(){
+    static int mctsRuns = 1;
+    static int expansions = 0;
+
+
+    static JSPlanningDomain domain;
+
+    static void FoundPlan(JSPlan plan, int depth){
+        //Get current best reward if it exists
+        Double currentCost = Double.POSITIVE_INFINITY;
+
+        Double foundCost = plan.planCost();
+        if (planFound) {
+            currentCost = JSJshopVars.bestPlans.lastElement().planCost();
+        } else {
+            long currentTime = System.currentTimeMillis();
+            JSUtil.println("Found first plan of reward " + foundCost + " in run " + mctsRuns + " after " + (currentTime - startTime) + " ms at depth " + depth);
+        }
+
+        if (foundCost.compareTo(currentCost) < 0) {
+            bestPlans.addElement(plan);
+            bestCost = foundCost;
+            if (planFound) {
+                long currentTime = System.currentTimeMillis();
+                JSUtil.println("Found better plan of reward " + foundCost + " in run " + mctsRuns + " after " + (currentTime - startTime) + " ms at depth " + depth);
+            }
+        }
+
         planFound = true;
     }
 
@@ -89,6 +118,7 @@ public final class JSJshopVars {
 
         flagLevel = val;
     }
+
 
 
 }

@@ -4,7 +4,7 @@ import java.util.Vector;
 
 public interface MCTSExpand {
 
-    public Vector<MCTSNode> expand(MCTSNode node,  JSPlanningDomain domain);
+    public Vector<MCTSNode> expand(MCTSNode node);
 
     public static MCTSExpand getPolicy(String policy, boolean recursive) {
         switch (policy) {

@@ -5,17 +5,17 @@ import java.util.Vector;
 
 public class MCTSExpansionPrimitive implements MCTSExpand {
 
-
     boolean recursive;
 
     MCTSExpansionPrimitive(boolean recursive) {
         this.recursive = recursive;
     }
 
-    public Vector<MCTSNode> expand(MCTSNode node, JSPlanningDomain dom) {
+    public Vector<MCTSNode> expand(MCTSNode node) {
+        JSJshopVars.expansions ++;
         LinkedList<MCTSNode> toExpand = new LinkedList<>();
         Vector<MCTSNode> primitive = new Vector<>();
-        toExpand.addAll(findChildren(node,dom, recursive));
+        toExpand.addAll(findChildren(node,recursive));
         while (!toExpand.isEmpty()){
             MCTSNode next = toExpand.removeFirst();
             if(next.taskNetwork().isEmpty()){
@@ -24,30 +24,30 @@ public class MCTSExpansionPrimitive implements MCTSExpand {
             }
             JSTaskAtom t = (JSTaskAtom) next.taskNetwork().firstElement();
             if(t.isPrimitive){
-                primitive.addAll(findChildren(next, dom, false));
+                primitive.addAll(findChildren(next, false));
                 continue;
             }
-            toExpand.addAll(findChildren(next,dom, recursive));
+            toExpand.addAll(findChildren(next,recursive));
         }
 
         if (recursive && primitive.size() == 1 && !primitive.get(0).taskNetwork().isEmpty()) {
-            return expand(primitive.get(0), dom);
+            return expand(primitive.get(0));
         }
 
         return primitive;
     }
 
-    public Vector<MCTSNode> findChildren(MCTSNode node, JSPlanningDomain dom, boolean applyRecursion) {
+    public Vector<MCTSNode> findChildren(MCTSNode node, boolean applyRecursion) {
         JSPairPlanTState pair;
         JSPlan ans;
         JSTaskAtom t = (JSTaskAtom) node.taskNetwork().firstElement();
         JSTasks rest = node.taskNetwork().cdr();
-        rest.removeElement(t);
+
         Vector<MCTSNode> children = new Vector<>();
         if (node.children.size() == 0) {
             if (t.isPrimitive()) {
                 //task is primitive, so find applicable operators
-                pair = t.seekSimplePlanCostFunction(dom, node.tState(), false);
+                pair = t.seekSimplePlanCostFunction(node.tState(), false);
                 ans = pair.plan();
                 if (ans.isFailure()) {
                     node.plan.assignFailure();
@@ -65,7 +65,7 @@ public class MCTSExpansionPrimitive implements MCTSExpand {
             } else {
                 //Reduce task to find all applicable methods
                 JSAllReduction red = new JSAllReduction();
-                red = dom.methods().findAllReduction(t, node.tState().state(), red, dom.axioms());
+                red = JSJshopVars.domain.methods().findAllReduction(t, node.tState().state(), red, JSJshopVars.domain.axioms());
                 JSTasks newTasks;
                 JSMethod selMet = red.selectedMethod();
                 if (red.isDummy()) {
@@ -81,7 +81,7 @@ public class MCTSExpansionPrimitive implements MCTSExpand {
                         MCTSNode child = new MCTSNode(node.tState(), newTasks, node.plan);
                         children.add(child);
                     }
-                    red = dom.methods().findAllReduction(t, node.tState().state(), red, dom.axioms());
+                    red = JSJshopVars.domain.methods().findAllReduction(t, node.tState().state(), red, JSJshopVars.domain.axioms());
                 }
             }
         }
@@ -95,7 +95,7 @@ public class MCTSExpansionPrimitive implements MCTSExpand {
                 return children;
             }
             //JSUtil.println("Doing recursive call with task: " + child.taskNetwork().get(0).toString());
-            return this.findChildren(child, dom, applyRecursion);
+            return this.findChildren(child, applyRecursion);
         }
 
         return children;

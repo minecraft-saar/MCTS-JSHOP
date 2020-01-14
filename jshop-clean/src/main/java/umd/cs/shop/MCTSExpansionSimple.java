@@ -13,17 +13,18 @@ public class MCTSExpansionSimple implements MCTSExpand{
     }
 
     @Override
-    public Vector<MCTSNode> expand(MCTSNode node, JSPlanningDomain dom){
+    public Vector<MCTSNode> expand(MCTSNode node){
+        JSJshopVars.expansions ++;
         JSPairPlanTState pair;
         JSPlan ans;
         JSTaskAtom t = (JSTaskAtom) node.taskNetwork().firstElement();
         JSTasks rest = node.taskNetwork().cdr();
-        rest.removeElement(t);
+
         Vector<MCTSNode> children = new Vector<>();
         if (node.children.size() == 0) {
             if (t.isPrimitive()) {
                 //task is primitive, so find applicable operators
-                pair = t.seekSimplePlanCostFunction(dom, node.tState(), false);
+                pair = t.seekSimplePlanCostFunction(node.tState(), false);
                 ans = pair.plan();
                 if (ans.isFailure()) {
                     node.plan.assignFailure();
@@ -41,7 +42,7 @@ public class MCTSExpansionSimple implements MCTSExpand{
             } else {
                 //Reduce task to find all applicable methods
                 JSAllReduction red = new JSAllReduction();
-                red = dom.methods().findAllReduction(t, node.tState().state(), red, dom.axioms());
+                red = JSJshopVars.domain.methods().findAllReduction(t, node.tState().state(), red, JSJshopVars.domain.axioms());
                 JSTasks newTasks;
                 JSMethod selMet = red.selectedMethod();
                 if (red.isDummy()) {
@@ -57,7 +58,7 @@ public class MCTSExpansionSimple implements MCTSExpand{
                         MCTSNode child = new MCTSNode(node.tState(), newTasks, node.plan);
                         children.add(child);
                     }
-                    red = dom.methods().findAllReduction(t, node.tState().state(), red, dom.axioms());
+                    red = JSJshopVars.domain.methods().findAllReduction(t, node.tState().state(), red, JSJshopVars.domain.axioms());
                 }
             }
         }
@@ -69,23 +70,23 @@ public class MCTSExpansionSimple implements MCTSExpand{
             }
             children.remove(child);
             //JSUtil.println("Doing recursive call with task: " + child.taskNetwork().get(0).toString());
-            return this.expand(child, dom);
+            return this.expand(child);
         } else if(deadEnd && children.size() > 1){
-            children.removeIf(child -> testDeadEnd(child, dom));
+            children.removeIf(child -> testDeadEnd(child));
         }
         return children;
     }
 
-    boolean testDeadEnd(MCTSNode node, JSPlanningDomain dom) {
+    boolean testDeadEnd(MCTSNode node) {
         JSPairPlanTState pair;
         JSPlan ans;
         JSTaskAtom t = (JSTaskAtom) node.taskNetwork().firstElement();
         JSTasks rest = node.taskNetwork().cdr();
-        rest.removeElement(t);
+
         Vector<MCTSNode> children = new Vector<>();
         if (t.isPrimitive()) {
             //task is primitive, so find applicable operators
-            pair = t.seekSimplePlanCostFunction(dom, node.tState(), false);
+            pair = t.seekSimplePlanCostFunction(node.tState(), false);
             ans = pair.plan();
             if (ans.isFailure()) {
                 node.plan.assignFailure();
@@ -97,7 +98,7 @@ public class MCTSExpansionSimple implements MCTSExpand{
         }
 
         JSAllReduction red = new JSAllReduction();
-        red = dom.methods().findAllReduction(t, node.tState().state(), red, dom.axioms());
+        red = JSJshopVars.domain.methods().findAllReduction(t, node.tState().state(), red, JSJshopVars.domain.axioms());
         JSTasks newTasks;
         JSMethod selMet = red.selectedMethod();
         if (red.isDummy()) {

@@ -44,7 +44,6 @@ public class MCTSNode {
         this.visited = 0;
         this.solvedVisits = 0;
         this.id = NEXT_ID++;
-
     }
 
     JSTState tState() {
@@ -97,14 +96,6 @@ public class MCTSNode {
     void setFullyExplored() {
         if (JSJshopVars.useFullyExplored)
             this.fullyExplored = true;
-    }
-
-    void addChild(MCTSNode ts) {
-        this.children.add(ts);
-    }
-
-    void addChildren(Vector<MCTSNode> vec) {
-        this.children.addAll(vec);
     }
 
     void setInTree() {
@@ -197,9 +188,33 @@ public class MCTSNode {
         }
     }
 
+    void expand() {
+        Vector<MCTSNode> newChildren = JSJshopVars.expansionPolicy.expand(this);
+        if(JSJshopVars.registry != null){
+            for(int i = 0; i< newChildren.size(); i++){
+                MCTSNode child = newChildren.get(i);
+                JSState state = child.tState().state();
+                JSTasks tasks = child.taskNetwork();
+
+                //TODO Check if the g-value is better!
+                if(!JSJshopVars.registry.checkStateTaskNetwork(state, tasks)){
+                    JSJshopVars.registry.addToStateRegistry(state);
+                    JSJshopVars.registry.addToTaskNetworkRegistry(tasks);
+                } else {
+                    newChildren.remove(child);
+                }
+            }
+        }
+
+        this.children.addAll(newChildren);
+        this.checkFullyExplored();
+        if(this.children.isEmpty()) {
+            this.setDeadEnd();
+        }
+    }
+
 
     public void setGoal() {
-
         JSJshopVars.policy.computeCost(this); // sets cost
         this.setFullyExplored();
         if (this.isInTree()) {

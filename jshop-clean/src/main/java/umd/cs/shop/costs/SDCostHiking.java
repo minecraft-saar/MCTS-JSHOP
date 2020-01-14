@@ -13,6 +13,9 @@ public class SDCostHiking implements CostFunction {
 
     @Override
     public double realCost(JSTState state, JSOperator op, JSTaskAtom grounded_operator) {
+        System.out.println(grounded_operator.toString());
+
+
         return 0;
     }
 

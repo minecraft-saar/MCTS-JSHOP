@@ -4,32 +4,14 @@ import java.util.Vector;
 
 public class MCTSAlgorithm {
 
-    public static double runMCTS(MCTSNode tst, JSPlanningDomain dom, int depth) {
+    public static double runMCTS(MCTSNode tst, int depth) {
         if (tst.isFullyExplored()) {
             System.err.println("Error: we are coming back to a fully explored node");
             System.exit(-1);
         }
         if (tst.taskNetwork().isEmpty()) {
             tst.setGoal();
-            //Get current best reward if it exists
-            Double currentCost = Double.POSITIVE_INFINITY;
-            if (JSJshopVars.planFound) {
-                currentCost = JSJshopVars.bestPlans.lastElement().getCost();
-            } else {
-                long currentTime = System.currentTimeMillis();
-                JSUtil.println("Found first plan of reward " + tst.getCost() + " in run " + dom.mctsRuns + " after " + (currentTime - JSJshopVars.startTime) + " ms at depth " + depth);
-            }
-
-            Double foundCost = tst.getCost();
-            if (foundCost.compareTo(currentCost) < 0) {
-                JSJshopVars.bestPlans.addElement(tst);
-                JSJshopVars.bestCost = foundCost;
-                if (JSJshopVars.planFound) {
-                    long currentTime = System.currentTimeMillis();
-                    JSUtil.println("Found better plan of reward " + tst.getCost() + " in run " + dom.mctsRuns + " after " + (currentTime - JSJshopVars.startTime) + " ms at depth " + depth);
-                }
-            }
-            JSJshopVars.FoundPlan();
+            JSJshopVars.FoundPlan(tst.plan, depth);
             return tst.getCost();
         }
 
@@ -47,7 +29,7 @@ public class MCTSAlgorithm {
             if (tst.isDeadEnd()) {
                 return tst.getCost();
             }
-            double reward = runMCTS(child, dom, depth + 1);
+            double reward = runMCTS(child, depth + 1);
             if(child.isFullyExplored()){
                 tst.checkFullyExplored();
             }
@@ -60,45 +42,19 @@ public class MCTSAlgorithm {
             if (depth > JSJshopVars.treeDepth) {
                 JSJshopVars.treeDepth = depth;
                 long currentTime = System.currentTimeMillis();
-                JSUtil.println("Increased tree depth to " + depth + " at run " + dom.mctsRuns + " after " + (currentTime - JSJshopVars.startTime) + " ms");
+                JSUtil.println("Increased tree depth to " + depth + " at run " + JSJshopVars.mctsRuns + " after " + (currentTime - JSJshopVars.startTime) + " ms");
             }
             return tst.getCost();
         }
 
-        Vector<MCTSNode> children = JSJshopVars.expansionPolicy.expand(tst, dom);
+        tst.expand();
 
-        if(JSJshopVars.registry != null){
-            for(int i = 0; i< children.size(); i++){
-                MCTSNode child = children.get(i);
-                JSState state = child.tState().state();
-                JSTasks tasks = child.taskNetwork();
-                if(!JSJshopVars.registry.checkStateTaskNetwork(state, tasks)){
-                    JSJshopVars.registry.addToStateRegistry(state);
-                    JSJshopVars.registry.addToTaskNetworkRegistry(tasks);
-                } else {
-                    children.remove(child);
-                }
-            }
-        }
-
-        tst.addChildren(children);
-        tst.checkFullyExplored();
-        if(tst.children.isEmpty()){
-            tst.setDeadEnd();
-        }
         if(tst.isDeadEnd()){
+            //TODO Return cost here?
             return tst.getCost();
         }
 
-        //JSUtil.println("Size of child list : " + tst.children.size());
-        MCTSNode child = JSJshopVars.policy.randomChild(tst);
-        double cost = runMCTS(child, dom, depth + 1);
-        if(child.isFullyExplored()){
-            tst.checkFullyExplored();
-        }
-        child.setCost(cost);
-        return cost;
-
+        return JSJshopVars.simulationPolicy.simulation(tst, depth);
     }
 
 }
