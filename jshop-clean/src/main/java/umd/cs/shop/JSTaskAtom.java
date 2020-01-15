@@ -85,7 +85,7 @@ public class JSTaskAtom extends JSPredicateForm {
 
     }
 
-    public JSPairPlanTState seekSimplePlanCostFunction(JSTState ts,  boolean inTree) {
+    public JSPairPlanTState seekSimplePlanCostFunction(JSTState ts) {
         //JSPairPlanTState pair;
         JSSubstitution alpha;
         JSOperator op;

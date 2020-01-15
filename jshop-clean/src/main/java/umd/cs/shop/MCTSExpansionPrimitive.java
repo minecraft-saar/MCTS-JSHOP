@@ -47,7 +47,7 @@ public class MCTSExpansionPrimitive implements MCTSExpand {
         if (node.children.size() == 0) {
             if (t.isPrimitive()) {
                 //task is primitive, so find applicable operators
-                pair = t.seekSimplePlanCostFunction(node.tState(), false);
+                pair = t.seekSimplePlanCostFunction(node.tState());
                 ans = pair.plan();
                 if (ans.isFailure()) {
                     node.plan.assignFailure();

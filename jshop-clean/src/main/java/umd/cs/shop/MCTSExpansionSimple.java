@@ -24,7 +24,7 @@ public class MCTSExpansionSimple implements MCTSExpand{
         if (node.children.size() == 0) {
             if (t.isPrimitive()) {
                 //task is primitive, so find applicable operators
-                pair = t.seekSimplePlanCostFunction(node.tState(), false);
+                pair = t.seekSimplePlanCostFunction(node.tState());
                 ans = pair.plan();
                 if (ans.isFailure()) {
                     node.plan.assignFailure();
@@ -86,7 +86,7 @@ public class MCTSExpansionSimple implements MCTSExpand{
         Vector<MCTSNode> children = new Vector<>();
         if (t.isPrimitive()) {
             //task is primitive, so find applicable operators
-            pair = t.seekSimplePlanCostFunction(node.tState(), false);
+            pair = t.seekSimplePlanCostFunction(node.tState());
             ans = pair.plan();
             if (ans.isFailure()) {
                 node.plan.assignFailure();

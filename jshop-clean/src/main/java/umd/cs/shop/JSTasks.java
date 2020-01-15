@@ -146,7 +146,7 @@ public class JSTasks extends JSListLogicalAtoms {
         JSTasks rest = this.cdr();
 
         if (t.isPrimitive()) {
-            pair = t.seekSimplePlan(ts.tState());
+            pair = t.seekSimplePlanCostFunction(ts.tState());
             ans = pair.plan();
             if (ans.isFailure()) {
                 if (JSJshopVars.flagLevel > 1)
