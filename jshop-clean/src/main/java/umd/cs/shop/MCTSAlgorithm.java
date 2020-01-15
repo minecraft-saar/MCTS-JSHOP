@@ -33,11 +33,6 @@ public class MCTSAlgorithm {
             if(child.isFullyExplored()){
                 tst.checkFullyExplored();
             }
-            if (!child.isInTree()) {
-                //JSUtil.println("Adding new node to tree in run " + dom.mctsRuns + "at depth " + depth);
-                child.setInTree();
-                JSJshopVars.policy.updateCostAndVisits(child, reward);
-            }
             JSJshopVars.policy.updateCostAndVisits(tst, reward);
             if (depth > JSJshopVars.treeDepth) {
                 JSJshopVars.treeDepth = depth;
@@ -48,13 +43,16 @@ public class MCTSAlgorithm {
         }
 
         tst.expand();
+        tst.setInTree();
 
         if(tst.isDeadEnd()){
-            //TODO Return cost here?
             return tst.getCost();
         }
 
-        return JSJshopVars.simulationPolicy.simulation(tst, depth);
+        double result = JSJshopVars.simulationPolicy.simulation(tst, depth);
+        JSJshopVars.policy.updateCostAndVisits(tst, result);
+
+        return result;
     }
 
 }
