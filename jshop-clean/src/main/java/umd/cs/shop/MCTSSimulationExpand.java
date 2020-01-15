@@ -13,7 +13,7 @@ public class MCTSSimulationExpand implements MCTSSimulation {
         return simulation_rec_expanded(current, depth, this.budget_recursive);
     }
 
-    public double simulation_rec_expanded(MCTSNode current, int depth, int budget) {
+    public double simulation_rec_expanded(MCTSNode current, int depth, Integer budget) {
         MCTSNode child = JSJshopVars.policy.randomChild(current);
         double result = this.simulation_rec(child, depth +1, budget);
         current.checkFullyExplored();
@@ -42,37 +42,3 @@ public class MCTSSimulationExpand implements MCTSSimulation {
         return simulation_rec_expanded(current, depth, this.budget_recursive);
     }
 }
-
-
-/*
-    public double simulation_rec(MCTSNode current, int depth, Integer budget) {
-        if (current.taskNetwork().isEmpty()) {
-            current.setGoal();
-            JSJshopVars.FoundPlan(current.plan, depth);
-            return current.getCost();
-        }
-
-        if (current.isFullyExplored()) {
-            return current.getCost();
-        }
-
-        //JSUtil.println("Size of child list : " + current.children.size());
-        MCTSNode child = JSJshopVars.policy.randomChild(current);
-        child.expand();
-        double cost = this.simulation_rec(child, depth + 1, budget);
-        current.checkFullyExplored();
-
-        while (child.isDeadEnd() && !current.isFullyExplored() && budget > 0) {
-            child = JSJshopVars.policy.randomChild(current);
-            child.expand();
-            budget --;
-            cost = this.simulation_rec(child, depth + 1, budget);
-            current.checkFullyExplored();
-        }
-
-        current.setCost(cost);
-        return cost;
-    }
-
-    /*
- */
