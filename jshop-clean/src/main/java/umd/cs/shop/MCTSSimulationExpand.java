@@ -16,6 +16,7 @@ public class MCTSSimulationExpand implements MCTSSimulation {
     public double simulation_rec_expanded(MCTSNode current, int depth, Integer budget) {
         MCTSNode child = JSJshopVars.policy.randomChild(current);
         double result = this.simulation_rec(child, depth +1, budget);
+
         current.checkFullyExplored();
 
         while (child.isDeadEnd() && !current.isFullyExplored() && budget > 0) {
@@ -24,6 +25,7 @@ public class MCTSSimulationExpand implements MCTSSimulation {
             result = this.simulation_rec(child, depth +1, budget);
             current.checkFullyExplored();
         }
+        current.setCost(result);
         return result;
     }
 

@@ -120,6 +120,16 @@ public class MCTSNode {
 
     }
 
+    String tasks_string() {
+        String res = "";
+        for (Object o : this.taskNetwork) {
+            res +=  o.toString() + "   ";
+        }
+        return res;
+
+
+    }
+
     String dotNode() {
         String color = "";
         String taskName = "";
@@ -189,6 +199,10 @@ public class MCTSNode {
     }
 
     void expand() {
+        if (!this.children.isEmpty() || this.isDeadEnd()) {
+            //Node was already expanded
+            return;
+        }
         Vector<MCTSNode> newChildren = JSJshopVars.expansionPolicy.expand(this);
         if(JSJshopVars.registry != null){
             for(int i = 0; i< newChildren.size(); i++){

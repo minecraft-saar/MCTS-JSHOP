@@ -43,6 +43,7 @@ public class MCTSAlgorithm {
         }
 
         tst.expand();
+
         tst.setInTree();
 
         if(tst.isDeadEnd()){
