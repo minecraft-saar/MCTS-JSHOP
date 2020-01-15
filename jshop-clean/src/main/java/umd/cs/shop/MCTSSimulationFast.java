@@ -7,6 +7,7 @@ import java.util.Vector;
 public class MCTSSimulationFast implements MCTSSimulation {
 
     int budget_recursive;
+    int available_budget;
 
     MCTSSimulationFast(int budget_recursive) {
         this.budget_recursive = budget_recursive;
@@ -15,10 +16,11 @@ public class MCTSSimulationFast implements MCTSSimulation {
     @Override
     public double simulation(MCTSNode current, int depth ) {
         Plan plan;
+        this.available_budget = this.budget_recursive;
         if(JSJshopVars.random || JSJshopVars.mctsRuns > 1) {
-            plan = this.random_simulation(current.tState(), current.taskNetwork(), depth, budget_recursive);
+            plan = this.random_simulation(current.tState(), current.taskNetwork(), depth, current.plan.planCost());
         } else {
-            plan = this.deterministic_simulation(current.tState(), current.taskNetwork(), depth, budget_recursive);
+            plan = this.deterministic_simulation(current.tState(), current.taskNetwork(), depth, current.plan.planCost());
         }
         if (plan.isPlan()) {
             JSPlan realPlan = new JSPlan();
@@ -57,7 +59,24 @@ public class MCTSSimulationFast implements MCTSSimulation {
         }
     }
 
-    public Plan deterministic_simulation(JSTState currentState, JSTasks currentTasks, int depth, Integer budget) {
+    public double action_cost (JSOperator op, JSSubstitution alpha, JSTState currentState){
+        JSTaskAtom head = op.head();
+        double cost;
+        if(JSJshopVars.useApproximatedCostFunction){
+            cost = JSJshopVars.costFunction.approximate(currentState, op, head.applySubstitutionTA(alpha));
+            JSJshopVars.approxUses++;
+        } else {
+            cost = JSJshopVars.costFunction.realCost(currentState, op, head.applySubstitutionTA(alpha));
+            JSJshopVars.realCostUses++;
+        }
+        return cost;
+    }
+
+    public Plan deterministic_simulation(JSTState currentState, JSTasks currentTasks, int depth, double plan_cost) {
+        if (plan_cost >= JSJshopVars.bestCost) {
+            return new Plan();
+        }
+
         if (currentTasks.isEmpty()) {
             return new Plan(depth);
         }
@@ -83,23 +102,14 @@ public class MCTSSimulationFast implements MCTSSimulation {
                     JSListSubstitution satisfiers = JSJshopVars.domain.axioms().TheoremProver(op.precondition(), currentState.state, alpha, true);
                     if (!satisfiers.isEmpty()) {
                         JSTState newState = currentState.state.applyOp(op, alpha, currentState.addList(), currentState.deleteList());
-
-                        Plan result = this.deterministic_simulation(newState, rest, depth+1, budget);
+                        double action_cost = this.action_cost(op, alpha, currentState);
+                        Plan result = this.deterministic_simulation(newState, rest, depth+1, plan_cost + action_cost);
                         if (result.isPlan()) {
-                            head = op.head();
-                            double cost;
-                            if(JSJshopVars.useApproximatedCostFunction){
-                                cost = JSJshopVars.costFunction.approximate(currentState, op, head.applySubstitutionTA(alpha));
-                                JSJshopVars.approxUses++;
-                            } else {
-                                cost = JSJshopVars.costFunction.realCost(currentState, op, head.applySubstitutionTA(alpha));
-                                JSJshopVars.realCostUses++;
-                            }
-                            result.addWithCost(head.applySubstitutionTA(alpha), cost);
+                            result.addWithCost(head.applySubstitutionTA(alpha), action_cost);
                             return result;
                         } else {
-                            budget--;
-                            if (budget == 0) {
+                            this.available_budget--;
+                            if (this.available_budget == 0) {
                                 return new Plan();
                             }
                         }
@@ -119,12 +129,12 @@ public class MCTSSimulationFast implements MCTSSimulation {
                 for (int k = 0; k < red.reductions().size(); k++) {
                     newTasks = (JSTasks) red.reductions().elementAt(k);
                     newTasks.addElements(rest);
-                    Plan result = this.deterministic_simulation(currentState, newTasks, depth + 1, budget);
+                    Plan result = this.deterministic_simulation(currentState, newTasks, depth + 1, plan_cost);
                     if (result.isPlan()) {
                         return result;
                     } else {
-                        budget--;
-                        if (budget == 0) {
+                        this.available_budget--;
+                        if (this.available_budget == 0) {
                             return new Plan();
                         }
                     }
@@ -137,10 +147,15 @@ public class MCTSSimulationFast implements MCTSSimulation {
     }
 
 
-    public Plan random_simulation(JSTState currentState, JSTasks currentTasks, int depth, Integer budget) {
+    public Plan random_simulation(JSTState currentState, JSTasks currentTasks, int depth, double plan_cost) {
+        if (plan_cost >= JSJshopVars.bestCost) {
+            return new Plan();
+        }
+
         if (currentTasks.isEmpty()) {
             return new Plan(depth);
         }
+
 
         JSTaskAtom task = (JSTaskAtom) currentTasks.firstElement();
         JSTasks rest = currentTasks.cdr();
@@ -165,22 +180,16 @@ public class MCTSSimulationFast implements MCTSSimulation {
                     JSListSubstitution satisfiers = JSJshopVars.domain.axioms().TheoremProver(op.precondition(), currentState.state, alpha, true);
                     if (!satisfiers.isEmpty()) {
                         JSTState newState = currentState.state.applyOp(op, alpha, currentState.addList(), currentState.deleteList());
-
-                        Plan result = this.random_simulation(newState, rest, depth+1, budget);
+                        double action_cost = this.action_cost(op, alpha, currentState);
+                        Plan result = this.random_simulation(newState, rest, depth+1, plan_cost + action_cost);
                         if (result.isPlan()) {
                             head = op.head();
-                            double cost;
-                            if(JSJshopVars.useApproximatedCostFunction){
-                                cost = JSJshopVars.costFunction.approximate(currentState, op, head.applySubstitutionTA(alpha));
-                                JSJshopVars.approxUses++;
-                            } else {
-                                cost = JSJshopVars.costFunction.realCost(currentState, op, head.applySubstitutionTA(alpha));
-                                JSJshopVars.realCostUses++;
-                            }
-                            result.addWithCost(head.applySubstitutionTA(alpha), cost);
+
+                            result.addWithCost(head.applySubstitutionTA(alpha), action_cost);
                             return result;
                         } else {
-                            if (budget-- == 0) {
+                            this.available_budget--;
+                            if (this.available_budget == 0) {
                                 return new Plan();
                             }
                         }
@@ -199,11 +208,12 @@ public class MCTSSimulationFast implements MCTSSimulation {
             JSMethod selMet = red.selectedMethod();
             for (JSTasks newTasks : reductions) {
                newTasks.addElements(rest);
-               Plan result = this.random_simulation(currentState, newTasks, depth + 1, budget);
+               Plan result = this.random_simulation(currentState, newTasks, depth + 1, plan_cost);
                if (result.isPlan()) {
                    return result;
                } else {
-                   if (budget-- == 0) {
+                   this.available_budget--;
+                   if (this.available_budget == 0) {
                        return new Plan();
                    }
                }

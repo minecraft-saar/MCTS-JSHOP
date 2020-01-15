@@ -199,6 +199,11 @@ public class MCTSNode {
     }
 
     void expand() {
+    /*if (plan.planCost() >= JSJshopVars.bestCost) {
+            this.setDeadEnd();
+            return;
+        }*/
+
         if (!this.children.isEmpty() || this.isDeadEnd()) {
             //Node was already expanded
             return;

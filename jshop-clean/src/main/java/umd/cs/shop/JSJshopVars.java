@@ -59,7 +59,7 @@ public final class JSJshopVars {
     static MCTSPolicy policy;
     //static JSPairTStateTasks stateBestPlan;
     static Vector<JSPlan> bestPlans = new Vector<>();
-    static double bestCost;
+    static double bestCost = Double.POSITIVE_INFINITY;
     static int approxUses = 0;
     static int realCostUses = 0;
     static boolean random = true;
@@ -76,26 +76,19 @@ public final class JSJshopVars {
 
     static void FoundPlan(JSPlan plan, int depth){
         //Get current best reward if it exists
-        Double currentCost = Double.POSITIVE_INFINITY;
-
         Double foundCost = plan.planCost();
-        if (planFound) {
-            currentCost = JSJshopVars.bestPlans.lastElement().planCost();
-        } else {
-            long currentTime = System.currentTimeMillis();
-            JSUtil.println("Found first plan of reward " + foundCost + " in run " + mctsRuns + " after " + (currentTime - startTime) + " ms at depth " + depth);
-        }
-
-        if (foundCost.compareTo(currentCost) < 0) {
+        long currentTime = System.currentTimeMillis();
+        if (!planFound) {
+            planFound = true;
+            JSUtil.println("Found first plan of cost " + foundCost + " in run " + mctsRuns + " after " + (currentTime - startTime) + " ms at depth " + depth);
+        } else if (foundCost.compareTo(bestCost) < 0) {
             bestPlans.addElement(plan);
             bestCost = foundCost;
-            if (planFound) {
-                long currentTime = System.currentTimeMillis();
-                JSUtil.println("Found better plan of reward " + foundCost + " in run " + mctsRuns + " after " + (currentTime - startTime) + " ms at depth " + depth);
-            }
+
+            JSUtil.println("Found better plan of cost " + foundCost + " in run " + mctsRuns + " after " + (currentTime - startTime) + " ms at depth " + depth);
         }
 
-        planFound = true;
+
     }
 
 

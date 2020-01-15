@@ -1,5 +1,7 @@
 package umd.cs.shop;
 
+import jdk.jshell.JShell;
+
 import java.util.*;
 
 import java.io.*;
@@ -113,6 +115,7 @@ public class JSTasks extends JSListLogicalAtoms {
 
     /*   Multi plan generator */
     public JSListPairPlanTStateNodes seekPlanAll(MCTSNode ts, boolean All) {
+
         JSListPairPlanTStateNodes results, plans = new JSListPairPlanTStateNodes();
         JSPairPlanTSListNodes ptl;
         JSPlan ans;
@@ -123,6 +126,10 @@ public class JSTasks extends JSListLogicalAtoms {
         JSTaskAtom ta;
         JSTState tts;
 
+        if (ts.plan.planCost() >= JSJshopVars.bestCost){
+            return plans;
+        }
+
         if (this.isEmpty()) {
             if (JSJshopVars.flagLevel > 1)
                 JSUtil.println("Returning successfully from find-plan : No more tasks to plan");
@@ -132,7 +139,8 @@ public class JSTasks extends JSListLogicalAtoms {
             ptl = new JSPairPlanTSListNodes(pair, new Vector<>());
             double cost = ts.plan.planCost();
             long currentTime = System.currentTimeMillis();
-            JSUtil.println("Found plan after " + (currentTime - JSJshopVars.startTime) + " ms of cost " + cost);
+            JSJshopVars.FoundPlan(ts.plan, 0);
+            //JSUtil.println("Found plan after " + (currentTime - JSJshopVars.startTime) + " ms of cost " + cost);
             plans.addElement(ptl);
             return plans;
         }
@@ -209,7 +217,6 @@ public class JSTasks extends JSListLogicalAtoms {
             }
             red = JSJshopVars.domain.methods().findAllReduction(t, ts.tState().state(), red, JSJshopVars.domain.axioms());
             selMet = red.selectedMethod();
-
         }
 
         return plans;

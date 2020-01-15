@@ -63,7 +63,6 @@ public class MCTSExpansionSimple implements MCTSExpand{
             }
         }
         if(recursive && children.size() == 1){
-
             MCTSNode child = children.get(0);
             if(child.taskNetwork().isEmpty()){
                 return children;
