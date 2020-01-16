@@ -100,13 +100,15 @@ public class JSState {
 
         JSState ns = new JSState(this.atoms);
 
+        for (Object o : opDelL){
+            ns.atoms.remove(o);
+        }
+
+
         for (Object o : opAddL) {
             ns.atoms.add((JSPredicateForm) o);
         }
 
-        for (Object o : opDelL){
-            ns.atoms.remove(o);
-        }
 
         for (short i = 0; i < addL.size(); i++)//creates a new add list
         {
