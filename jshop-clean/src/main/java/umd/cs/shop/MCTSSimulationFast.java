@@ -9,9 +9,17 @@ public class MCTSSimulationFast implements MCTSSimulation {
     int budget_recursive;
     int available_budget;
 
+    double prune_bound;
+
     MCTSSimulationFast(int budget_recursive) {
         this.budget_recursive = budget_recursive;
     }
+
+    MCTSSimulationFast(int budget_recursive, double prune_bound) {
+        this.budget_recursive = budget_recursive;
+        this.prune_bound = prune_bound;
+    }
+
 
     @Override
     public double simulation(MCTSNode current, int depth ) {
@@ -73,10 +81,6 @@ public class MCTSSimulationFast implements MCTSSimulation {
     }
 
     public Plan deterministic_simulation(JSTState currentState, JSTasks currentTasks, int depth, double plan_cost) {
-        if (plan_cost >= JSJshopVars.bestCost) {
-            return new Plan();
-        }
-
         if (currentTasks.isEmpty()) {
             return new Plan(depth);
         }
@@ -148,12 +152,11 @@ public class MCTSSimulationFast implements MCTSSimulation {
 
 
     public Plan random_simulation(JSTState currentState, JSTasks currentTasks, int depth, double plan_cost) {
-        if (plan_cost >= JSJshopVars.bestCost) {
-            return new Plan();
-        }
-
         if (currentTasks.isEmpty()) {
             return new Plan(depth);
+        }
+        if (plan_cost >= this.prune_bound) {
+            return new Plan();
         }
 
 

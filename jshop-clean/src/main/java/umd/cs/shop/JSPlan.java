@@ -9,7 +9,7 @@ public class JSPlan extends JSTasks {
 
     private boolean isFailure;
     Vector<Object> costs;
-
+    double planCost;
 
     JSPlan() {
 
@@ -17,6 +17,7 @@ public class JSPlan extends JSTasks {
 
         isFailure = false;
         costs = new Vector<>();
+        planCost = 0;
 
     }
 
@@ -35,7 +36,7 @@ public class JSPlan extends JSTasks {
             // Added in May 2
             costs.addElement(pl.costs.elementAt(i));
         }
-
+        planCost += pl.planCost;
     }
 
     public void printPlan() {
@@ -54,12 +55,13 @@ public class JSPlan extends JSTasks {
 
         addElement(t);
         costs.addElement(String.valueOf(cost));
+        planCost += cost;
     }
 
     public void insertWithCost(int place, JSTaskAtom t, double cost) {
-
         insertElementAt(t, place);
         costs.insertElementAt(String.valueOf(cost), place);
+        planCost += cost;
     }
 
     public double elementCost(int i) {
@@ -67,11 +69,7 @@ public class JSPlan extends JSTasks {
     }
 
     public double planCost() {
-        double sum = 0.0;
-        for (int i = 0; i< costs.size(); i++){
-            sum = sum +  this.elementCost(i);
-        }
-        return sum;
+        return planCost;
     }
 }
 

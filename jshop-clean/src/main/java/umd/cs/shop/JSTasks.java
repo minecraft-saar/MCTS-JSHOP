@@ -126,7 +126,7 @@ public class JSTasks extends JSListLogicalAtoms {
         JSTaskAtom ta;
         JSTState tts;
 
-        if (ts.plan.planCost() >= JSJshopVars.bestCost){
+        if (JSJshopVars.bb_pruning(ts.plan.planCost())){
             return plans;
         }
 

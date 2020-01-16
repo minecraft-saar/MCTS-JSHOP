@@ -32,11 +32,23 @@ public class MCTSSimulationExpand implements MCTSSimulation {
         return result;
     }
 
+
+
     public double simulation_rec(MCTSNode current, int depth) {
         if (current.taskNetwork().isEmpty()) {
             current.setGoal();
             JSJshopVars.FoundPlan(current.plan, depth);
             return current.getCost();
+        }
+
+        if (JSJshopVars.bb_pruning(current.plan.planCost())) {
+            double cost = current.getCost();
+            if (JSJshopVars.perform_bb_pruning_fast) {
+                MCTSSimulationFast simulation_fast = new MCTSSimulationFast(this.available_budget, cost);
+                cost = simulation_fast.simulation(current, depth);
+            }
+            current.setFullyExplored();
+            return cost;
         }
 
         current.expand();

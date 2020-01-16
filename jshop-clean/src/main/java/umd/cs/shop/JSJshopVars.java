@@ -67,6 +67,8 @@ public final class JSJshopVars {
     static  MCTSExpand expansionPolicy;
     static MCTSSimulation simulationPolicy;
     static Registry registry;
+    static boolean perform_bb_pruning;
+    static boolean perform_bb_pruning_fast;
 
     static int mctsRuns = 1;
     static int expansions = 0;
@@ -87,8 +89,6 @@ public final class JSJshopVars {
 
             JSUtil.println("Found better plan of cost " + foundCost + " in run " + mctsRuns + " after " + (currentTime - startTime) + " ms at depth " + depth);
         }
-
-
     }
 
 
@@ -97,21 +97,19 @@ public final class JSJshopVars {
     }
 
     static void SetAllPlans(boolean val) {
-
         allPlans = val;
     }
 
-
     static void SetFlagExit(boolean val) {
-
         flagExit = val;
     }
 
     static void SetFlagLevel(int val) {
-
         flagLevel = val;
     }
 
 
-
+    public static boolean bb_pruning(double planCost) {
+        return perform_bb_pruning && planCost >= bestCost;
+    }
 }

@@ -29,14 +29,16 @@ public class MCTSAlgorithm {
             if (tst.isDeadEnd()) {
                 return tst.getCost();
             }
+
+            if (JSJshopVars.bb_pruning(tst.plan.planCost())) {
+                tst.setFullyExplored();
+                return tst.getCost();
+            }
+
             double reward = runMCTS(child, depth + 1);
             if(child.isFullyExplored()){
                 tst.checkFullyExplored();
-                if (tst.plan.planCost() >= JSJshopVars.bestCost) {
-                    tst.setFullyExplored();
-                }
             }
-
 
             JSJshopVars.policy.updateCostAndVisits(tst, reward);
             if (depth > JSJshopVars.treeDepth) {
@@ -55,13 +57,15 @@ public class MCTSAlgorithm {
             return tst.getCost();
         }
 
+        if (JSJshopVars.bb_pruning(tst.plan.planCost())) {
+            tst.setFullyExplored();
+            return tst.getCost();
+        }
+
         double result = JSJshopVars.simulationPolicy.simulation(tst, depth);
         JSJshopVars.policy.updateCostAndVisits(tst, result);
 
 
-        if (tst.plan.planCost() >= JSJshopVars.bestCost) {
-            tst.setFullyExplored();
-        }
 
         return result;
     }

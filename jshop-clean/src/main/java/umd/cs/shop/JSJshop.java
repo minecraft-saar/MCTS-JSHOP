@@ -24,7 +24,7 @@ import umd.cs.shop.costs.CostFunction;
 public final class JSJshop implements Runnable {
     /*HICAP*//*==== class variables ====*/
     // /*HICAP*/public static boolean corbaToHicap = false;
-    // /*HICAP*/public static JApplet applet;
+    // /*HICAP*/public static JApplet applet;-b
 
     @Parameters(index = "0", description = "The domain file")
     String nameDomainFile;
@@ -80,6 +80,15 @@ public final class JSJshop implements Runnable {
     @Option(names = { "--fastSimulation"}, defaultValue = "false", description = "Use duplicate Detection")
     boolean fastSimulation;
 
+
+    @Option(names = {"-b", "--BBpruning"}, defaultValue = "false", description = "Use branch-and-bound pruning (i.e. prune against best solution found so far)")
+    boolean bbPruning;
+
+    @Option(names = {"-bf", "--BBpruningFast"}, defaultValue = "false", description = "Use branch-and-bound pruning (i.e. prune against best solution found so far)")
+    boolean bbPruningFast;
+
+
+
     @Option(names = {"--recursiveSimulation"}, defaultValue = "0", description = "")
     int recursiveSimulationBudget;
 
@@ -91,6 +100,9 @@ public final class JSJshop implements Runnable {
         if(plan != null){
             return;
         }*/
+        JSJshopVars.perform_bb_pruning = bbPruning || bbPruningFast;
+        JSJshopVars.perform_bb_pruning_fast = bbPruningFast;
+
         JSJshopVars.useFullyExplored = exploreFully;
         JSJshopVars.random = random;
         JSUtil.println("Explore: " + exploreFully);
@@ -127,8 +139,6 @@ public final class JSJshop implements Runnable {
         j.run();
 
         //CommandLine.run(new JSJshop(), args);
-
-
     }
 
     private JSPlanningProblem prob;
@@ -162,6 +172,8 @@ public final class JSJshop implements Runnable {
         JSJshopVars.updateMaximum = updateMaximum;
         JSJshopVars.useApproximatedCostFunction = useApproximatedCostFunction;
         JSJshopVars.costFunction = CostFunction.getCostFunction(costFunctionName, JSJshopVars.domain.getName());
+
+
         if(duplicate){
             JSJshopVars.registry = new Registry();
         }
