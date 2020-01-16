@@ -1,7 +1,5 @@
 package umd.cs.shop;
 
-import jdk.jshell.JShell;
-
 import java.util.*;
 
 import java.io.*;
