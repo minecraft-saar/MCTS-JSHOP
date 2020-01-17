@@ -83,6 +83,7 @@ public final class JSJshopVars {
         if (!planFound) {
             planFound = true;
             JSUtil.println("Found first plan of cost " + foundCost + " in run " + mctsRuns + " after " + (currentTime - startTime) + " ms at depth " + depth);
+            bestCost = foundCost;
         } else if (foundCost.compareTo(bestCost) < 0) {
             bestPlans.addElement(plan);
             bestCost = foundCost;

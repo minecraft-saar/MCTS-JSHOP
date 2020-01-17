@@ -237,13 +237,13 @@ public final class JSJshop implements Runnable {
                 JSUtil.println(allPlans.size() + " plans found.");
                 if (JSJshopVars.flagLevel > 0) {
                     int bestplanIndex = 0;
-                    Double bestPlanValue = Double.NEGATIVE_INFINITY;
+                    Double bestPlanValue = Double.POSITIVE_INFINITY;
                     JSUtil.println("********* PLANS *******");
                     for (int i = 0; i < allPlans.size(); i++) {
-                        JSUtil.println("Plan # " + (i + 1));
+                        //JSUtil.println("Plan # " + (i + 1));
                         pair = (JSPairPlanTSListNodes) allPlans.elementAt(i);
                         double planCost = pair.planS().plan().planCost();
-                        JSUtil.println("Plan cost: " + planCost);
+                        //JSUtil.println("Plan cost: " + planCost);
                         if (bestPlanValue.compareTo(planCost) > 0) {
                             bestPlanValue = planCost;
                             bestplanIndex = i;
@@ -251,8 +251,8 @@ public final class JSJshop implements Runnable {
                         //pair.planS().plan().printPlan();//.print();
                         // pair.print();
                     }
-                    JSUtil.println("Best Plan: ");
                     pair = (JSPairPlanTSListNodes) allPlans.elementAt(bestplanIndex);
+                    JSUtil.println("Best Plan with cost "+bestPlanValue +": ");
                     pair.planS().plan().printPlan();
                 }
             }
