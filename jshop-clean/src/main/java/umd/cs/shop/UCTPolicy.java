@@ -9,7 +9,7 @@ public interface UCTPolicy extends MCTSPolicy {
 
     @Override
     public default MCTSNode randomChild(MCTSNode parent) {
-        if(!JSJshopVars.random){
+        if(!JSJshopVars.random && JSJshopVars.mctsRuns <= 1) {
             for(int i = 0; i<parent.children.size(); i++){
                 MCTSNode child = parent.children.get(i);
                 if(child.isFullyExplored()){
