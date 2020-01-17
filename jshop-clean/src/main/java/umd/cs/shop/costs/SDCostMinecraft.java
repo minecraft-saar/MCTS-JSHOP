@@ -29,7 +29,7 @@ public class SDCostMinecraft implements CostFunction {
                 int lz = (int) Double.parseDouble(grounded_operator.get(7).toString().replace("[", "").replace("]", ""));
 
                 if (Math.pow(lx - x, 2) + Math.pow(ly - y, 2) + Math.pow(lz - z, 2) <= 1) {
-                    return 0.1;
+                    return 0.5;
                 } else {
                     return 2;
                 }
