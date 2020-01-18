@@ -87,7 +87,8 @@ public final class JSJshop implements Runnable {
     @Option(names = {"-bf", "--BBpruningFast"}, defaultValue = "false", description = "Use branch-and-bound pruning (i.e. prune against best solution found so far)")
     boolean bbPruningFast;
 
-
+    @Option(names = {"-exp", "--explorationFactor"}, defaultValue = "1.41421", description = "exploration factor used by mcts")
+    double explorationFactor;
 
     @Option(names = {"--recursiveSimulation"}, defaultValue = "0", description = "")
     int recursiveSimulationBudget;
@@ -103,6 +104,9 @@ public final class JSJshop implements Runnable {
         JSJshopVars.perform_bb_pruning = bbPruning || bbPruningFast;
         JSJshopVars.perform_bb_pruning_fast = bbPruningFast;
 
+        if(explorationFactor != 1.41421){
+            JSJshopVars.explorationFactor = explorationFactor;
+        }
         JSJshopVars.useFullyExplored = exploreFully;
         JSJshopVars.random = random;
         JSUtil.println("Explore: " + exploreFully);
@@ -243,7 +247,7 @@ public final class JSJshop implements Runnable {
                         //JSUtil.println("Plan # " + (i + 1));
                         pair = (JSPairPlanTSListNodes) allPlans.elementAt(i);
                         double planCost = pair.planS().plan().planCost();
-                        //JSUtil.println("Plan cost: " + planCost);
+                        JSUtil.println("Plan cost: " + planCost);
                         if (bestPlanValue.compareTo(planCost) > 0) {
                             bestPlanValue = planCost;
                             bestplanIndex = i;

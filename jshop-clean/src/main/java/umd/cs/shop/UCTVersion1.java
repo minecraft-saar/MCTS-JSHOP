@@ -15,7 +15,7 @@ public class UCTVersion1 implements UCTPolicy{
             reward = 0.5;
         }
 
-        double childValue = reward + java.lang.Math.sqrt(2) * exploration; //middle part is exploration factor
+        double childValue = reward + JSJshopVars.explorationFactor * exploration; //middle part is exploration factor
         return childValue;
     }
 }

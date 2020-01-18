@@ -69,6 +69,7 @@ public final class JSJshopVars {
     static Registry registry;
     static boolean perform_bb_pruning;
     static boolean perform_bb_pruning_fast;
+    static double explorationFactor = java.lang.Math.sqrt(2);
 
     static int mctsRuns = 1;
     static int expansions = 0;
