@@ -113,7 +113,7 @@ public class MCTSSimulationFast implements MCTSSimulation {
                             return result;
                         } else {
                             this.available_budget--;
-                            if (this.available_budget == 0) {
+                            if (this.available_budget <= 0) {
                                 return new Plan();
                             }
                         }
@@ -138,7 +138,7 @@ public class MCTSSimulationFast implements MCTSSimulation {
                         return result;
                     } else {
                         this.available_budget--;
-                        if (this.available_budget == 0) {
+                        if (this.available_budget <= 0) {
                             return new Plan();
                         }
                     }
@@ -192,7 +192,7 @@ public class MCTSSimulationFast implements MCTSSimulation {
                             return result;
                         } else {
                             this.available_budget--;
-                            if (this.available_budget == 0) {
+                            if (this.available_budget <= 0) {
                                 return new Plan();
                             }
                         }
@@ -216,7 +216,7 @@ public class MCTSSimulationFast implements MCTSSimulation {
                    return result;
                } else {
                    this.available_budget--;
-                   if (this.available_budget == 0) {
+                   if (this.available_budget <= 0) {
                        return new Plan();
                    }
                }
