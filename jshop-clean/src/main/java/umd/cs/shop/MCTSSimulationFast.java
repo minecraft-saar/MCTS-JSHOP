@@ -9,10 +9,11 @@ public class MCTSSimulationFast implements MCTSSimulation {
     int budget_recursive;
     int available_budget;
 
-    double prune_bound;
+    double prune_bound = Double.POSITIVE_INFINITY;
 
     MCTSSimulationFast(int budget_recursive) {
         this.budget_recursive = budget_recursive;
+        this.prune_bound = Double.POSITIVE_INFINITY;
     }
 
     MCTSSimulationFast(int budget_recursive, double prune_bound) {
