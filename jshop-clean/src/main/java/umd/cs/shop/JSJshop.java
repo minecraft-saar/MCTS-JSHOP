@@ -93,6 +93,8 @@ public final class JSJshop implements Runnable {
     @Option(names = {"--recursiveSimulation"}, defaultValue = "0", description = "")
     int recursiveSimulationBudget;
 
+    @Option(names = {"--randomSeed"}, defaultValue = "42", description = "use this number as seed for random Generator")
+    int randomSeed;
 
     @Override
     public void run() {
@@ -103,7 +105,7 @@ public final class JSJshop implements Runnable {
         }*/
         JSJshopVars.perform_bb_pruning = bbPruning || bbPruningFast;
         JSJshopVars.perform_bb_pruning_fast = bbPruningFast;
-
+        JSJshopVars.initRandGen(this.randomSeed);
         if(explorationFactor != 1.41421){
             JSJshopVars.explorationFactor = explorationFactor;
         }

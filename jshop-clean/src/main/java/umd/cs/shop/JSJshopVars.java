@@ -2,6 +2,7 @@ package umd.cs.shop;
 
 import umd.cs.shop.costs.CostFunction;
 
+import java.util.Random;
 import java.util.Vector;
 
 public final class JSJshopVars {
@@ -73,7 +74,7 @@ public final class JSJshopVars {
 
     static int mctsRuns = 1;
     static int expansions = 0;
-
+    static Random randomGenerator;
 
     static JSPlanningDomain domain;
 
@@ -89,11 +90,13 @@ public final class JSJshopVars {
         } else if (foundCost.compareTo(bestCost) < 0) {
             bestPlans.addElement(plan);
             bestCost = foundCost;
-
             JSUtil.println("Found better plan of cost " + foundCost + " in run " + mctsRuns + " after " + (currentTime - startTime) + " ms at depth " + depth);
         }
     }
 
+    public static void initRandGen(int randomSeed){
+        JSJshopVars.randomGenerator = new Random(randomSeed);
+    }
 
     public static int combineHashCodes(int h1, int h2) {
         return (((h1 << 5) + h1) ^ h2);

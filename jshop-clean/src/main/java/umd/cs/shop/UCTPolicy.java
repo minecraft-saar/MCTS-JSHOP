@@ -5,7 +5,7 @@ import java.util.Vector;
 
 public interface UCTPolicy extends MCTSPolicy {
 
-    static final Random randgen = new Random(42);
+
 
     @Override
     public default MCTSNode randomChild(MCTSNode parent) {
@@ -22,9 +22,9 @@ public interface UCTPolicy extends MCTSPolicy {
             System.err.println("Error: randomly selecting children of fully explored node");
             System.exit(-1);
         }
-        int rand = this.randgen.nextInt(parent.children.size());
+        int rand = JSJshopVars.randomGenerator.nextInt(parent.children.size());
         while (parent.children.get(rand).isFullyExplored()) {
-            rand = this.randgen.nextInt(parent.children.size());
+            rand = JSJshopVars.randomGenerator.nextInt(parent.children.size());
         }
         return parent.children.get(rand);
     }

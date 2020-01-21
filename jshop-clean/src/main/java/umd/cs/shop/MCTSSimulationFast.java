@@ -208,7 +208,7 @@ public class MCTSSimulationFast implements MCTSSimulation {
                 reductions.addAll(red.reductions());
                 red = JSJshopVars.domain.methods().findAllReduction(task, currentState.state(), red, JSJshopVars.domain.axioms());
             }
-            Collections.shuffle(reductions);
+            Collections.shuffle(reductions, JSJshopVars.randomGenerator);
             JSMethod selMet = red.selectedMethod();
             for (JSTasks newTasks : reductions) {
                newTasks.addElements(rest);
