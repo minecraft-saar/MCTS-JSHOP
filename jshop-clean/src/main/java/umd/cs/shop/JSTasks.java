@@ -19,7 +19,7 @@ public class JSTasks extends JSListLogicalAtoms {
         super();
 
         JSTaskAtom ta;
-        JSUtil.flagParser("in ListTasks()");
+        //JSUtil.flagParser("in ListTasks()");
 
         if (!JSUtil.readToken(tokenizer, "List of tasks"))
             throw new JSParserError(); //return;
@@ -57,7 +57,7 @@ public class JSTasks extends JSListLogicalAtoms {
     }
 
 
-    public JSPairPlanTState seekPlan(JSTState ts, JSPlan pl, Vector<Object> listNodes) {
+    public JSPairPlanTState seekPlan(JSTState ts, JSPlan pl, Vector<Object> listNodes, JSJshopVars vars) {
 
         JSPlan ans;
         JSPairPlanTState pair;
@@ -71,19 +71,19 @@ public class JSTasks extends JSListLogicalAtoms {
         JSTasks rest = this.cdr();
 
         if (t.isPrimitive()) {
-            pair = t.seekSimplePlan(ts);
+            pair = t.seekSimplePlan(ts, vars);
             ans = pair.plan();
             if (ans.isFailure()) {
                 return pair; // failure
             } else {
                 pl.addElements(ans);
                 listNodes.addElement(new JSJshopNode(t, new Vector<>()));
-                return rest.seekPlan(pair.tState(), pl, listNodes);
+                return rest.seekPlan(pair.tState(), pl, listNodes, vars);
             }
         } else {
             JSJshopNode node;
             JSReduction red = new JSReduction();
-            red = t.reduce( ts.state(), red); //counter to iterate
+            red = t.reduce( ts.state(), red, vars); //counter to iterate
             // on all reductions
 
             JSTasks newTasks;
@@ -94,14 +94,14 @@ public class JSTasks extends JSListLogicalAtoms {
 
                 //  JSUtil.flag("<- tasks");
                 newTasks.addElements(rest);
-                pair = newTasks.seekPlan(ts, pl, listNodes);
+                pair = newTasks.seekPlan(ts, pl, listNodes, vars);
                 if (!pair.plan().isFailure()) {
                     //  JSUtil.flag("reduced");
                     listNodes.addElement(node);
                     return pair;
                 }
                 // JSUtil.flag("iterating");
-                red = t.reduce(ts.state(), red);
+                red = t.reduce(ts.state(), red, vars);
                 selMet = red.selectedMethod();
             }
         }
@@ -112,7 +112,7 @@ public class JSTasks extends JSListLogicalAtoms {
     }
 
     /*   Multi plan generator */
-    public JSListPairPlanTStateNodes seekPlanAll(MCTSNode ts, boolean All) {
+    public JSListPairPlanTStateNodes seekPlanAll(MCTSNode ts, boolean All, JSJshopVars vars) {
 
         JSListPairPlanTStateNodes results, plans = new JSListPairPlanTStateNodes();
         JSPairPlanTSListNodes ptl;
@@ -124,12 +124,12 @@ public class JSTasks extends JSListLogicalAtoms {
         JSTaskAtom ta;
         JSTState tts;
 
-        if (JSJshopVars.bb_pruning(ts.plan.planCost())){
+        if (vars.bb_pruning(ts.plan.planCost())){
             return plans;
         }
 
         if (this.isEmpty()) {
-            if (JSJshopVars.flagLevel > 1)
+            if (vars.flagLevel > 1)
                 JSUtil.println("Returning successfully from find-plan : No more tasks to plan");
 
             //pair = new JSPairPlanTState((new JSPlan()), ts.tState());
@@ -137,14 +137,14 @@ public class JSTasks extends JSListLogicalAtoms {
             ptl = new JSPairPlanTSListNodes(pair, new Vector<>());
             double cost = ts.plan.planCost();
             long currentTime = System.currentTimeMillis();
-            JSJshopVars.FoundPlan(ts.plan, 0);
+            vars.foundPlan(ts.plan, 0);
             //JSUtil.println("Found plan after " + (currentTime - JSJshopVars.startTime) + " ms of cost " + cost);
             plans.addElement(ptl);
             return plans;
         }
 
         JSTaskAtom t = (JSTaskAtom) this.firstElement();
-        if (JSJshopVars.flagLevel > 2) {
+        if (vars.flagLevel > 2) {
             JSUtil.println(" ");
             JSUtil.print("Searching a plan for");
             t.print();
@@ -152,17 +152,17 @@ public class JSTasks extends JSListLogicalAtoms {
         JSTasks rest = this.cdr();
 
         if (t.isPrimitive()) {
-            pair = t.seekSimplePlanCostFunction(ts.tState());
+            pair = t.seekSimplePlanCostFunction(ts.tState(), vars);
             ans = pair.plan();
             if (ans.isFailure()) {
-                if (JSJshopVars.flagLevel > 1)
+                if (vars.flagLevel > 1)
                     JSUtil.println("Returning failure from find-plan: Can not find an operator");
                 return plans; // failure - empty list
             }
             MCTSNode tst = new MCTSNode(pair.tState(), new JSPlan() );
             tst.plan.addElements(ts.plan);
             tst.plan.addElements(ans);
-            results = rest.seekPlanAll(tst, All);
+            results = rest.seekPlanAll(tst, All, vars);
 
             if (results.isEmpty())
                 return plans;
@@ -181,26 +181,26 @@ public class JSTasks extends JSListLogicalAtoms {
         }
 
         JSAllReduction red = new JSAllReduction();
-        red = JSJshopVars.domain.methods().findAllReduction(t, ts.tState().state(), red, JSJshopVars.domain.axioms());
+        red = vars.domain.methods().findAllReduction(t, ts.tState().state(), red, vars.domain.axioms());
         JSTasks newTasks;
         JSMethod selMet = red.selectedMethod();
-        if (JSJshopVars.flagLevel > 1 && red.isDummy())
+        if (vars.flagLevel > 1 && red.isDummy())
             JSUtil.println("Returning failure from find-plan: Can not find an applicable method");
         while (!red.isDummy()) {
-            if (JSJshopVars.flagLevel > 4) {
+            if (vars.flagLevel > 4) {
                 JSUtil.println("The reductions are: ");
                 red.printReductions();
             }
 
             for (int k = 0; k < red.reductions().size(); k++) {
 
-                newTasks = (JSTasks) red.reductions().elementAt(k);
+                newTasks = red.reductions().elementAt(k);
                 node = new JSJshopNode((JSTaskAtom) t.clone(), newTasks.cloneTasks());
                 newTasks.addElements(rest);
                 JSPlan tmp = new JSPlan();
                 tmp.addElements(ts.plan);
                 MCTSNode tst = new MCTSNode(new JSTState(ts.tState()),tmp );
-                results = newTasks.seekPlanAll(tst, All);
+                results = newTasks.seekPlanAll(tst, All,vars);
 
                 if (results.isEmpty())
                     continue;
@@ -213,7 +213,7 @@ public class JSTasks extends JSListLogicalAtoms {
                         return plans;
                 }
             }
-            red = JSJshopVars.domain.methods().findAllReduction(t, ts.tState().state(), red, JSJshopVars.domain.axioms());
+            red = vars.domain.methods().findAllReduction(t, ts.tState().state(), red, vars.domain.axioms());
             selMet = red.selectedMethod();
         }
 
@@ -304,13 +304,13 @@ public class JSTasks extends JSListLogicalAtoms {
 
     }
 
-    public JSTasks standarizerTasks() {
+    public JSTasks standarizerTasks(JSJshopVars vars) {
         JSTasks newTs = new JSTasks();
         JSTaskAtom t;
 
         for (short i = 0; i < this.size(); i++) {
             t = (JSTaskAtom) this.elementAt(i);
-            newTs.addElement(t.standarizerTA());
+            newTs.addElement(t.standarizerTA(vars));
         }
         return newTs;
 

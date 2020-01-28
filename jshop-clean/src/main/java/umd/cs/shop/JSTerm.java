@@ -520,7 +520,7 @@ public class JSTerm extends Vector<Object> {
         return true;
     }
 
-    public JSTerm standardizerTerm() {
+    public JSTerm standardizerTerm(JSJshopVars vars) {
         JSTerm nt = new JSTerm();
         nt.makeEval(this.isEval);
         if (this.isConstant()) {
@@ -530,7 +530,7 @@ public class JSTerm extends Vector<Object> {
         }
 
         if (this.isVariable()) {
-            nt.addElement(this.elementAt(0) + String.valueOf(JSJshopVars.VarCounter));
+            nt.addElement(this.elementAt(0) + String.valueOf(vars.VarCounter));
             nt.makeVariable();
             return nt;
         }
@@ -540,7 +540,7 @@ public class JSTerm extends Vector<Object> {
 
         for (short i = 1; i < this.size(); i++) {
             ti = (JSTerm) this.elementAt(i);
-            nt.addElement(ti.standardizerTerm());
+            nt.addElement(ti.standardizerTerm(vars));
         }
         nt.makeFunction();
         return nt;

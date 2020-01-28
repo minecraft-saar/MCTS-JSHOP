@@ -76,11 +76,11 @@ public class JSListIfThenElse extends Vector<Object> {
 
     }
 
-    Vector evalPrecAll(JSState s, JSSubstitution alpha, JSListAxioms axioms) {
+    Vector<JSTasks> evalPrecAll(JSState s, JSSubstitution alpha, JSListAxioms axioms) {
         JSPairIfThen pair;
         JSTasks then;
         JSListSubstitution beta;
-        Vector<Object> allReductions = new Vector<>();
+        Vector<JSTasks> allReductions = new Vector<>();
 
         for (short i = 0; i < this.size(); i++) {
             pair = (JSPairIfThen) this.elementAt(i);
@@ -104,13 +104,13 @@ public class JSListIfThenElse extends Vector<Object> {
     }
 
 
-    public JSListIfThenElse standarizerListIfTE() {
+    public JSListIfThenElse standarizerListIfTE(JSJshopVars vars) {
         JSListIfThenElse newList = new JSListIfThenElse();
         JSPairIfThen pair;
 
         for (short i = 0; i < this.size(); i++) {
             pair = (JSPairIfThen) this.elementAt(i);
-            newList.addElement(pair.standarizerPIT());
+            newList.addElement(pair.standarizerPIT(vars));
         }
         return newList;
     }

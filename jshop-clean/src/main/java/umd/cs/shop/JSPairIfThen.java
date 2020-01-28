@@ -54,13 +54,13 @@ public class JSPairIfThen {
         tp.print();
     }
 
-    public JSPairIfThen standarizerPIT() {
+    public JSPairIfThen standarizerPIT(JSJshopVars vars) {
         JSListLogicalAtoms ifP = this.ifPart();
         JSTasks thenP = this.thenPart();
         JSPairIfThen newPIT = new JSPairIfThen();
 
-        newPIT.ifPart = ifP.standarizerListLogicalAtoms();
-        newPIT.thenPart = thenP.standarizerTasks();
+        newPIT.ifPart = ifP.standarizerListLogicalAtoms(vars);
+        newPIT.thenPart = thenP.standarizerTasks(vars);
 
         return newPIT;
 

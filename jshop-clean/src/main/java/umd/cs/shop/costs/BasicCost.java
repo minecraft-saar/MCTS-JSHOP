@@ -14,30 +14,9 @@ public class BasicCost implements CostFunction {
     HashMap<JSPairOperatorState, Double> realCosts = new HashMap<JSPairOperatorState, Double>(1000);
     Random noiseGen = new Random(42);*/
 
-    @Override
-    public double approximate(JSTState state, JSOperator op, JSTaskAtom grounded_operator) {
-
-/*        JSPairOperatorState pair = new JSPairOperatorState(op, state.state());
-        if(this.approxCosts.containsKey(pair)){
-            return this.approxCosts.get(pair);
-        }
-        //if(this.realCosts.containsKey(pair)){
-        //    res =  this.realCosts.get(pair);
-        //}
-        //nextInt can produce 0, but does not produce the bound
-        int noise = this.noiseGen.nextInt(25);
-        Double res = noise + 1.0;
-        //so adding 1 to noise to prevent division by 0
-        //double tmp = 1.0/(noise+1);
-        //res = res + (res*tmp);
-
-        approxCosts.put(pair,res);
-*/
-        return op.cost();
-    }
 
     @Override
-    public double realCost(JSTState state, JSOperator op, JSTaskAtom grounded_operator) {
+    public double getCost(JSTState state, JSOperator op, JSTaskAtom grounded_operator, boolean approx) {
 /*
         JSPairOperatorState pair = new JSPairOperatorState(op, state.state());
         if(realCosts.containsKey(pair)){

@@ -1,15 +1,14 @@
 package umd.cs.shop;
 
-public class UCTVersion2 implements UCTPolicy {
+public class UCTVersion2{// implements UCTPolicy {
 
     //take negative cost as reward and use best cost as exploration factor
-    @Override
-    public double computeChildValue(MCTSNode parent, MCTSNode child) {
+    public double computeChildValue(MCTSNode parent, MCTSNode child, JSJshopVars vars) {
         double exploration = (java.lang.Math.log(parent.visited())) / child.visited();
         exploration = java.lang.Math.sqrt(exploration);
         double factor;
-        if (JSJshopVars.planFound) {
-            factor = JSJshopVars.bestCost;
+        if (vars.planFound) {
+            factor = vars.bestCost;
         } else {
             factor = java.lang.Math.sqrt(2);
         }

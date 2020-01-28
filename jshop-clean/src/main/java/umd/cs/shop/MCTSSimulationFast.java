@@ -1,6 +1,5 @@
 package umd.cs.shop;
 
-import java.util.Collection;
 import java.util.Collections;
 import java.util.Vector;
 
@@ -9,11 +8,13 @@ public class MCTSSimulationFast implements MCTSSimulation {
     int budget_recursive;
     int available_budget;
 
-    double prune_bound = Double.POSITIVE_INFINITY;
+    JSJshopVars vars;
+    double prune_bound;
 
-    MCTSSimulationFast(int budget_recursive) {
+    MCTSSimulationFast(int budget_recursive, JSJshopVars vars) {
         this.budget_recursive = budget_recursive;
         this.prune_bound = Double.POSITIVE_INFINITY;
+        this.vars = vars;
     }
 
     MCTSSimulationFast(int budget_recursive, double prune_bound) {
@@ -23,26 +24,27 @@ public class MCTSSimulationFast implements MCTSSimulation {
 
 
     @Override
-    public double simulation(MCTSNode current, int depth ) {
-        Plan plan;
+    public double simulation(MCTSNode current, int depth) {
+        JSPlan plan ;
         this.available_budget = this.budget_recursive;
-        if(JSJshopVars.random || JSJshopVars.mctsRuns > 1) {
+        if (vars.random || vars.mctsRuns > 1) {
             plan = this.random_simulation(current.tState(), current.taskNetwork(), depth, current.plan.planCost());
         } else {
             plan = this.deterministic_simulation(current.tState(), current.taskNetwork(), depth, current.plan.planCost());
         }
-        if (plan.isPlan()) {
+        if (!plan.isFailure()) {
             JSPlan realPlan = new JSPlan();
             realPlan.addElements(current.plan);
-            realPlan.addElements(plan.plan);
-
-            JSJshopVars.FoundPlan(realPlan, plan.depth);
-            return  plan.cost;
+            realPlan.addElementsRev(plan);
+            realPlan.setDepth(plan.depth);
+            vars.foundPlan(realPlan, realPlan.depth);
+            return plan.planCost();
         }
 
         return Double.POSITIVE_INFINITY;
     }
 
+    /*
     class Plan {
         double cost;
         int depth;
@@ -54,9 +56,7 @@ public class MCTSSimulationFast implements MCTSSimulation {
             this.plan = new JSPlan();
         }
 
-        Plan() {
-            this.cost = Double.POSITIVE_INFINITY;
-        }
+        //Plan() {this.cost = Double.POSITIVE_INFINITY;}
 
         boolean isPlan() {
             return this.cost != Double.POSITIVE_INFINITY;
@@ -66,24 +66,18 @@ public class MCTSSimulationFast implements MCTSSimulation {
             plan.addWithCost(action, cost);
             this.cost += cost;
         }
-    }
+    }*/
 
-    public double action_cost (JSOperator op, JSSubstitution alpha, JSTState currentState){
+    public double action_cost(JSOperator op, JSSubstitution alpha, JSTState currentState) {
         JSTaskAtom head = op.head();
-        double cost;
-        if(JSJshopVars.useApproximatedCostFunction){
-            cost = JSJshopVars.costFunction.approximate(currentState, op, head.applySubstitutionTA(alpha));
-            JSJshopVars.approxUses++;
-        } else {
-            cost = JSJshopVars.costFunction.realCost(currentState, op, head.applySubstitutionTA(alpha));
-            JSJshopVars.realCostUses++;
-        }
-        return cost;
+        return vars.costFunction.getCost(currentState, op, head.applySubstitutionTA(alpha), vars.useApproximatedCostFunction);
     }
 
-    public Plan deterministic_simulation(JSTState currentState, JSTasks currentTasks, int depth, double plan_cost) {
+    public JSPlan deterministic_simulation(JSTState currentState, JSTasks currentTasks, int depth, double plan_cost) {
         if (currentTasks.isEmpty()) {
-            return new Plan(depth);
+            JSPlan ret = new JSPlan();
+            ret.setDepth(depth);
+            return ret;
         }
 
         JSTaskAtom task = (JSTaskAtom) currentTasks.firstElement();
@@ -92,30 +86,30 @@ public class MCTSSimulationFast implements MCTSSimulation {
         if (task.isPrimitive()) {
             boolean groundedTask = task.isGround();
             //task is primitive, so find applicable operators
-            for (Object obj : JSJshopVars.domain.operators()) {
+            for (Object obj : vars.domain.operators()) {
                 JSOperator op = (JSOperator) obj;
                 JSTaskAtom head = op.head();
                 if (!groundedTask) {
-                    head = head.standarizerTA();
+                    head = head.standarizerTA(vars);
                 }
                 JSSubstitution alpha = head.matches(task);
                 if (!alpha.fail()) {
-                    op = op.standarizerOp();
-                    alpha = alpha.standarizerSubs();
-                    JSJshopVars.VarCounter++;
+                    op = op.standarizerOp(vars);
+                    alpha = alpha.standarizerSubs(vars);
+                    vars.VarCounter++;
 
-                    JSListSubstitution satisfiers = JSJshopVars.domain.axioms().TheoremProver(op.precondition(), currentState.state, alpha, true);
+                    JSListSubstitution satisfiers = vars.domain.axioms().TheoremProver(op.precondition(), currentState.state, alpha, true);
                     if (!satisfiers.isEmpty()) {
                         JSTState newState = currentState.state.applyOp(op, alpha, currentState.addList(), currentState.deleteList());
                         double action_cost = this.action_cost(op, alpha, currentState);
-                        Plan result = this.deterministic_simulation(newState, rest, depth+1, plan_cost + action_cost);
-                        if (result.isPlan()) {
-                            result.addWithCost(head.applySubstitutionTA(alpha), action_cost);
+                        JSPlan result = this.deterministic_simulation(newState, rest, depth + 1, plan_cost + action_cost);
+                        if (!result.isFailure()) {
+                            result.addWithCost(op.head().applySubstitutionTA(alpha), action_cost);
                             return result;
                         } else {
                             this.available_budget--;
                             if (this.available_budget <= 0) {
-                                return new Plan();
+                                return result;
                             }
                         }
                     }
@@ -124,40 +118,49 @@ public class MCTSSimulationFast implements MCTSSimulation {
         } else {
             //Reduce task to find all applicable methods
             JSAllReduction red = new JSAllReduction();
-            red = JSJshopVars.domain.methods().findAllReduction(task, currentState.state(), red, JSJshopVars.domain.axioms());
+            red = vars.domain.methods().findAllReduction(task, currentState.state(), red, vars.domain.axioms());
             JSTasks newTasks;
             JSMethod selMet = red.selectedMethod();
             if (red.isDummy()) {
-                return new Plan();
+                JSPlan fail = new JSPlan();
+                fail.assignFailure();
+                return fail;
             }
             while (!red.isDummy()) {
                 for (int k = 0; k < red.reductions().size(); k++) {
                     newTasks = (JSTasks) red.reductions().elementAt(k);
                     newTasks.addElements(rest);
-                    Plan result = this.deterministic_simulation(currentState, newTasks, depth + 1, plan_cost);
-                    if (result.isPlan()) {
+                    JSPlan result = this.deterministic_simulation(currentState, newTasks, depth + 1, plan_cost);
+                    if (!result.isFailure()) {
                         return result;
                     } else {
                         this.available_budget--;
                         if (this.available_budget <= 0) {
-                            return new Plan();
+                            JSPlan fail = new JSPlan();
+                            fail.assignFailure();
+                            return fail;
                         }
                     }
                 }
-                red = JSJshopVars.domain.methods().findAllReduction(task, currentState.state(), red, JSJshopVars.domain.axioms());
+                red = vars.domain.methods().findAllReduction(task, currentState.state(), red, vars.domain.axioms());
             }
         }
-
-        return new Plan(); //Dead end
+        JSPlan fail = new JSPlan();
+        fail.assignFailure();
+        return fail; //Dead end
     }
 
 
-    public Plan random_simulation(JSTState currentState, JSTasks currentTasks, int depth, double plan_cost) {
+    public JSPlan random_simulation(JSTState currentState, JSTasks currentTasks, int depth, double plan_cost) {
         if (currentTasks.isEmpty()) {
-            return new Plan(depth);
+            JSPlan success = new JSPlan();
+            success.setDepth(depth);
+            return success;
         }
         if (plan_cost >= this.prune_bound) {
-            return new Plan();
+            JSPlan fail = new JSPlan();
+            fail.assignFailure();
+            return fail;
         }
 
 
@@ -168,33 +171,34 @@ public class MCTSSimulationFast implements MCTSSimulation {
             boolean groundedTask = task.isGround();
             //task is primitive, so find applicable operators
             //NOTE: We do not randomize the order because typically there is a single operator available
-            for (Object obj : JSJshopVars.domain.operators()) {
+            for (Object obj : vars.domain.operators()) {
                 JSOperator op = (JSOperator) obj;
                 JSTaskAtom head = op.head();
                 if (!groundedTask) {
-                    head = head.standarizerTA();
+                    head = head.standarizerTA(vars);
                 }
                 JSSubstitution alpha = head.matches(task);
                 if (!alpha.fail()) {
 
-                    op = op.standarizerOp();
-                    alpha = alpha.standarizerSubs();
-                    JSJshopVars.VarCounter++;
+                    op = op.standarizerOp(vars);
+                    alpha = alpha.standarizerSubs(vars);
+                    vars.VarCounter++;
 
-                    JSListSubstitution satisfiers = JSJshopVars.domain.axioms().TheoremProver(op.precondition(), currentState.state, alpha, true);
+                    JSListSubstitution satisfiers = vars.domain.axioms().TheoremProver(op.precondition(), currentState.state, alpha, true);
                     if (!satisfiers.isEmpty()) {
                         JSTState newState = currentState.state.applyOp(op, alpha, currentState.addList(), currentState.deleteList());
                         double action_cost = this.action_cost(op, alpha, currentState);
-                        Plan result = this.random_simulation(newState, rest, depth+1, plan_cost + action_cost);
-                        if (result.isPlan()) {
+                        JSPlan result = this.random_simulation(newState, rest, depth + 1, plan_cost + action_cost);
+                        if (!result.isFailure()) {
                             head = op.head();
-
                             result.addWithCost(head.applySubstitutionTA(alpha), action_cost);
                             return result;
                         } else {
                             this.available_budget--;
                             if (this.available_budget <= 0) {
-                                return new Plan();
+                                JSPlan fail = new JSPlan();
+                                fail.assignFailure();
+                                return fail;
                             }
                         }
                     }
@@ -203,28 +207,32 @@ public class MCTSSimulationFast implements MCTSSimulation {
         } else {
             //Reduce task to find all applicable methods
             Vector<JSTasks> reductions = new Vector<JSTasks>();
-            JSAllReduction red = JSJshopVars.domain.methods().findAllReduction(task, currentState.state(), new JSAllReduction(), JSJshopVars.domain.axioms());
+            JSAllReduction red = vars.domain.methods().findAllReduction(task, currentState.state(), new JSAllReduction(), vars.domain.axioms());
             while (!red.isDummy()) {
                 reductions.addAll(red.reductions());
-                red = JSJshopVars.domain.methods().findAllReduction(task, currentState.state(), red, JSJshopVars.domain.axioms());
+                red = vars.domain.methods().findAllReduction(task, currentState.state(), red, vars.domain.axioms());
             }
-            Collections.shuffle(reductions, JSJshopVars.randomGenerator);
+            Collections.shuffle(reductions, vars.randomGenerator);
             JSMethod selMet = red.selectedMethod();
             for (JSTasks newTasks : reductions) {
-               newTasks.addElements(rest);
-               Plan result = this.random_simulation(currentState, newTasks, depth + 1, plan_cost);
-               if (result.isPlan()) {
-                   return result;
-               } else {
-                   this.available_budget--;
-                   if (this.available_budget <= 0) {
-                       return new Plan();
-                   }
-               }
+                newTasks.addElements(rest);
+                JSPlan result = this.random_simulation(currentState, newTasks, depth + 1, plan_cost);
+                if (!result.isFailure()) {
+                    return result;
+                } else {
+                    this.available_budget--;
+                    if (this.available_budget <= 0) {
+                        JSPlan fail = new JSPlan();
+                        fail.assignFailure();
+                        return fail;
+                    }
+                }
             }
         }
 
-        return new Plan(); //Dead end
+        JSPlan fail = new JSPlan();
+        fail.assignFailure();
+        return fail; //Dead end
     }
 }
 

@@ -10,7 +10,7 @@ public class JSPlanningDomain {
     /*==== instance variables ====*/
     private String name;
 
-    private JSListAxioms axioms = new JSListAxioms();
+    JSListAxioms axioms = new JSListAxioms();
 
     private JSListOperators operators = new JSListOperators();
 
@@ -20,6 +20,7 @@ public class JSPlanningDomain {
     /*==== constructor ====*/
     public JSPlanningDomain() {
     }
+
 
     public JSPlanningDomain(StreamTokenizer tokenizer) {
 
@@ -98,33 +99,33 @@ public class JSPlanningDomain {
 
     }
 
-    public JSPairPlanTSListNodes solve(JSPlanningProblem prob, Vector<Object> listNodes) {
+    public JSPairPlanTSListNodes solve(JSPlanningProblem prob, Vector<Object> listNodes, JSJshopVars vars) {
         JSPairPlanTState pair = new JSPairPlanTState();
 
-        if (JSJshopVars.flagLevel > 8 && JSJshopVars.flagPlanning) {
-            JSUtil.flag("====== SOLVING A NEW PROBLEM====");
+        if (vars.flagLevel > 8) {
+            JSUtil.print("====== SOLVING A NEW PROBLEM====");
             this.print();
-            JSUtil.flag("PROBLEM");
+            JSUtil.print("PROBLEM");
             prob.print();
         }
 
         JSTasks tasks = prob.tasks();
         pair = tasks.seekPlan(new JSTState(prob.state(), new JSListLogicalAtoms(),
-                        new JSListLogicalAtoms()), new JSPlan(), listNodes);
+                        new JSListLogicalAtoms()), new JSPlan(), listNodes, vars);
 
         return new JSPairPlanTSListNodes(pair, listNodes);
     }
 
-    public void solveMCTS(JSPlanningProblem prob, int runs, long timeout, boolean printTree) {
+    public void solveMCTS(JSPlanningProblem prob, int runs, long timeout, boolean printTree, JSJshopVars vars) {
         JSTState ts = new JSTState(prob.state(), new JSListLogicalAtoms(), new JSListLogicalAtoms());
         JSTasks tasks = prob.tasks();
         JSPlan plan = new JSPlan();
         MCTSNode initial = new MCTSNode(ts, tasks, plan);
-        JSJshopVars.bestPlans.addElement(initial.plan);
-        JSJshopVars.treeDepth = 0;
-        for (JSJshopVars.mctsRuns = 1; JSJshopVars.mctsRuns <= runs; JSJshopVars.mctsRuns++) {
+        vars.treeDepth = 0;
+        MCTSAlgorithm alg = new MCTSAlgorithm(vars);
+        for (vars.mctsRuns = 1; vars.mctsRuns <= runs; vars.mctsRuns++) {
             long currentTime = System.currentTimeMillis();
-            long runningTime = currentTime - JSJshopVars.startTime;
+            long runningTime = currentTime - vars.startTime;
             if (runningTime >= timeout) {
                 JSUtil.println("Timeout");
                 break;
@@ -135,7 +136,7 @@ public class JSPlanningDomain {
                 break;
             }
             //if(!JSJshopVars.costFunction.isUnitCost()){
-            MCTSAlgorithm.runMCTS(initial, 1);
+            alg.runMCTS(initial, 1);
             //System.out.println(" !!!!!!! Finished Run number : " + i + " after " + (currentTime - JSJshopVars.startTime) + " ms");
             //}
             initial.setInTree();
@@ -149,22 +150,19 @@ public class JSPlanningDomain {
                 e.printStackTrace();
             }
         }
-        JSUtil.println("Number of Runs done: " + JSJshopVars.mctsRuns);
-        JSUtil.println("Found Plan: " + JSJshopVars.planFound);
-        if (!JSJshopVars.planFound) {
-            JSJshopVars.bestPlans.lastElement().assignFailure();
-        }
+        JSUtil.println("Number of Runs done: " + vars.mctsRuns);
+        JSUtil.println("Found Plan: " + vars.planFound);
     }
 
 
-    public JSListPairPlanTStateNodes solveAll(JSPlanningProblem prob, boolean All) {
+    public JSListPairPlanTStateNodes solveAll(JSPlanningProblem prob, boolean All, JSJshopVars vars) {
 
         JSListPairPlanTStateNodes allPlans;
         JSTasks tasks = prob.tasks();
         JSTState ts = new JSTState(prob.state(), new JSListLogicalAtoms(), new JSListLogicalAtoms());
         JSPlan plan = new JSPlan();
         MCTSNode initial = new MCTSNode(ts, plan);
-        allPlans = tasks.seekPlanAll(initial, All);
+        allPlans = tasks.seekPlanAll(initial, All, vars);
 
         return allPlans;
     }

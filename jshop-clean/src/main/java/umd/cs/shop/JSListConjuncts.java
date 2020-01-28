@@ -54,13 +54,13 @@ public class JSListConjuncts extends Vector<Object> {
         }
     }
 
-    public JSListConjuncts standarizerListConjuncts() {
+    public JSListConjuncts standarizerListConjuncts(JSJshopVars vars) {
         JSListConjuncts newList = new JSListConjuncts();
         JSListLogicalAtoms listAtoms;
 
         for (short i = 0; i < this.size(); i++) {
             listAtoms = (JSListLogicalAtoms) this.elementAt(i);
-            newList.addElement(listAtoms.standarizerListLogicalAtoms());
+            newList.addElement(listAtoms.standarizerListLogicalAtoms(vars));
         }
         return newList;
     }

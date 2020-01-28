@@ -6,27 +6,33 @@ import umd.cs.shop.JSTaskAtom;
 
 public class SDCostMinecraft implements CostFunction {
 
-
     @Override
-    public double approximate(JSTState state, JSOperator op, JSTaskAtom grounded_operator) {
-        return realCost(state, op, grounded_operator);
+    public double getCost(JSTState state, JSOperator op, JSTaskAtom groundedOperator, boolean approx){
+        if(approx){
+            return  approximate(state, op, groundedOperator);
+        } else {
+            return realCost(state, op, groundedOperator);
+        }
     }
 
-    @Override
-    public double realCost(JSTState state, JSOperator op, JSTaskAtom grounded_operator) {
-        assert grounded_operator.isGround();
-        String operator_name = grounded_operator.get(0).toString();
+    public double approximate(JSTState state, JSOperator op, JSTaskAtom groundedOperator) {
+        return realCost(state, op, groundedOperator);
+    }
+
+    public double realCost(JSTState state, JSOperator op, JSTaskAtom groundedOperator) {
+        assert groundedOperator.isGround();
+        String operator_name = groundedOperator.get(0).toString();
 
         switch (operator_name) {
             case "!place-block":
-                String block_type = grounded_operator.get(1).toString();
-                int x = (int) Double.parseDouble(grounded_operator.get(2).toString().replace("[", "").replace("]", ""));
-                int y = (int) Double.parseDouble(grounded_operator.get(3).toString().replace("[", "").replace("]", ""));
-                int z = (int) Double.parseDouble(grounded_operator.get(4).toString().replace("[", "").replace("]", ""));
+                String block_type = groundedOperator.get(1).toString();
+                int x = (int) Double.parseDouble(groundedOperator.get(2).toString().replace("[", "").replace("]", ""));
+                int y = (int) Double.parseDouble(groundedOperator.get(3).toString().replace("[", "").replace("]", ""));
+                int z = (int) Double.parseDouble(groundedOperator.get(4).toString().replace("[", "").replace("]", ""));
 
-                int lx = (int) Double.parseDouble(grounded_operator.get(5).toString().replace("[", "").replace("]", ""));
-                int ly = (int) Double.parseDouble(grounded_operator.get(6).toString().replace("[", "").replace("]", ""));
-                int lz = (int) Double.parseDouble(grounded_operator.get(7).toString().replace("[", "").replace("]", ""));
+                int lx = (int) Double.parseDouble(groundedOperator.get(5).toString().replace("[", "").replace("]", ""));
+                int ly = (int) Double.parseDouble(groundedOperator.get(6).toString().replace("[", "").replace("]", ""));
+                int lz = (int) Double.parseDouble(groundedOperator.get(7).toString().replace("[", "").replace("]", ""));
 
                 if (Math.pow(lx - x, 2) + Math.pow(ly - y, 2) + Math.pow(lz - z, 2) <= 1) {
                     return 0.5;

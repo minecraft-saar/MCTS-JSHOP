@@ -352,7 +352,7 @@ public class JSPredicateForm extends Vector<Object> {
         return hash;
     }
 
-    public JSPredicateForm standarizerPredicateForm() {
+    public JSPredicateForm standarizerPredicateForm(JSJshopVars vars) {
         JSPredicateForm nTA = new JSPredicateForm();
 
         //Added 11/28/00
@@ -361,7 +361,7 @@ public class JSPredicateForm extends Vector<Object> {
             nTA.addElement(this.elementAt(0));
             JSPredicateForm el;
             el = (JSPredicateForm) this.elementAt(1);
-            nTA.addElement(el.standarizerPredicateForm());
+            nTA.addElement(el.standarizerPredicateForm(vars));
             return nTA;
         }
 
@@ -370,7 +370,7 @@ public class JSPredicateForm extends Vector<Object> {
 
         for (short i = 1; i < this.size(); i++) {
             ti = (JSTerm) this.elementAt(i);
-            nTA.addElement(ti.standardizerTerm());
+            nTA.addElement(ti.standardizerTerm(vars));
         }
 
         return nTA;

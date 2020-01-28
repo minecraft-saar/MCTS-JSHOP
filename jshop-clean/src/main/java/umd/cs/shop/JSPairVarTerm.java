@@ -43,13 +43,13 @@ public class JSPairVarTerm {
 
     }
 
-    public JSPairVarTerm standarizerPVT() {
+    public JSPairVarTerm standarizerPVT(JSJshopVars vars) {
         JSTerm v = this.var();
         JSTerm t = this.term();
         JSPairVarTerm newPVT = new JSPairVarTerm();
 
-        newPVT.var = v.standardizerTerm();
-        newPVT.term = t.standardizerTerm();
+        newPVT.var = v.standardizerTerm(vars);
+        newPVT.term = t.standardizerTerm(vars);
 
         return newPVT;
 

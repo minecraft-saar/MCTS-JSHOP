@@ -79,17 +79,17 @@ public class JSOperator {
         return cost;
     }
 
-    public JSOperator standarizerOp() {
+    public JSOperator standarizerOp(JSJshopVars vars) {
         JSOperator newOp = new JSOperator();
         JSTaskAtom ta = this.head();
         JSListLogicalAtoms pre = this.precondition();
         JSListLogicalAtoms addL = this.addList();
         JSListLogicalAtoms delL = this.deleteList();
 
-        newOp.head = ta.standarizerTA();
-        newOp.deleteList = delL.standarizerListLogicalAtoms();
-        newOp.addList = addL.standarizerListLogicalAtoms();
-        newOp.precondition = pre.standarizerListLogicalAtoms();
+        newOp.head = ta.standarizerTA(vars);
+        newOp.deleteList = delL.standarizerListLogicalAtoms(vars);
+        newOp.addList = addL.standarizerListLogicalAtoms(vars);
+        newOp.precondition = pre.standarizerListLogicalAtoms(vars);
         newOp.cost = cost;
         return newOp;
     }

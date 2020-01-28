@@ -41,18 +41,18 @@ public class JSListMethods extends Vector<Object> {
 //		JSUtil.flag("<- evaluating method");
             tmet = met.head();
             if (!taskIsGround) {
-                tmet = tmet.standarizerTA();
+                tmet = tmet.standarizerTA(axioms.vars);
             }
             alpha = tmet.matches(task);
             if (!alpha.fail()) {
 //		    JSUtil.flag("heads match");
                 list = met.ifThenElseList();
                 if (!taskIsGround) {
-                    list = list.standarizerListIfTE();
+                    list = list.standarizerListIfTE(axioms.vars);
                 }
                 newT = list.evalPrec(s, alpha, axioms);
                 if (!newT.fail()) {//JSUtil.flag("method applicable");
-                    JSJshopVars.VarCounter++;
+                    axioms.vars.VarCounter++;
                     return new JSReduction(met, newT);
                 }
                 // JSUtil.flag("method not applicable");
@@ -69,7 +69,7 @@ public class JSListMethods extends Vector<Object> {
         JSListIfThenElse list;
         JSTasks newT;
         JSTaskAtom tmet;
-        Vector allReductions;
+        Vector<JSTasks> allReductions;
         boolean taskIsGround = task.isGround();
 
 
@@ -82,17 +82,17 @@ public class JSListMethods extends Vector<Object> {
             met = (JSMethod) this.elementAt(i);
             tmet = met.head();
             if (!taskIsGround)
-                tmet = tmet.standarizerTA();
+                tmet = tmet.standarizerTA(axioms.vars);
 
             alpha = tmet.matches(task);
             if (!alpha.fail()) {
                 list = met.ifThenElseList();
                 if (!taskIsGround) {
-                    list = list.standarizerListIfTE();
+                    list = list.standarizerListIfTE(axioms.vars);
                 }
                 allReductions = list.evalPrecAll(s, alpha, axioms);
                 if (!allReductions.isEmpty()) {
-                    JSJshopVars.VarCounter++;
+                    axioms.vars.VarCounter++;
                     return new JSAllReduction(met, allReductions);
                 }
 

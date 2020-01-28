@@ -6,13 +6,14 @@ import java.util.Vector;
 public class MCTSExpansionPrimitive implements MCTSExpand {
 
     boolean recursive;
+    JSJshopVars vars;
 
-    MCTSExpansionPrimitive(boolean recursive) {
+    MCTSExpansionPrimitive(boolean recursive, JSJshopVars vars) {
         this.recursive = recursive;
+        this.vars = vars;
     }
 
     public Vector<MCTSNode> expand(MCTSNode node) {
-        JSJshopVars.expansions ++;
         LinkedList<MCTSNode> toExpand = new LinkedList<>();
         Vector<MCTSNode> primitive = new Vector<>();
         toExpand.addAll(findChildren(node,recursive));
@@ -47,7 +48,7 @@ public class MCTSExpansionPrimitive implements MCTSExpand {
         if (node.children.size() == 0) {
             if (t.isPrimitive()) {
                 //task is primitive, so find applicable operators
-                pair = t.seekSimplePlanCostFunction(node.tState());
+                pair = t.seekSimplePlanCostFunction(node.tState(),vars);
                 ans = pair.plan();
                 if (ans.isFailure()) {
                     node.plan.assignFailure();
@@ -65,7 +66,7 @@ public class MCTSExpansionPrimitive implements MCTSExpand {
             } else {
                 //Reduce task to find all applicable methods
                 JSAllReduction red = new JSAllReduction();
-                red = JSJshopVars.domain.methods().findAllReduction(t, node.tState().state(), red, JSJshopVars.domain.axioms());
+                red = vars.domain.methods().findAllReduction(t, node.tState().state(), red, vars.domain.axioms());
                 JSTasks newTasks;
                 JSMethod selMet = red.selectedMethod();
                 if (red.isDummy()) {
@@ -81,7 +82,7 @@ public class MCTSExpansionPrimitive implements MCTSExpand {
                         MCTSNode child = new MCTSNode(node.tState(), newTasks, node.plan);
                         children.add(child);
                     }
-                    red = JSJshopVars.domain.methods().findAllReduction(t, node.tState().state(), red, JSJshopVars.domain.axioms());
+                    red = vars.domain.methods().findAllReduction(t, node.tState().state(), red, vars.domain.axioms());
                 }
             }
         }

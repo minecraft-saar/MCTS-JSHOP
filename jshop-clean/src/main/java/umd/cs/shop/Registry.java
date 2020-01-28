@@ -1,24 +1,26 @@
 package umd.cs.shop;
 
-import java.util.HashMap;
 import java.util.Hashtable;
+import java.util.LinkedList;
 
 public class Registry {
-    public Hashtable<Integer, JSState> StateRegistry;
-    public Hashtable<Integer, JSTasks> TaskNetworkRegistry;
+    public Hashtable<Integer, JSState> stateRegistry;
+    public Hashtable<Integer, JSTasks> taskNetworkRegistry;
+    public LinkedList<MCTSNode> allNodes = new LinkedList<>();
     int numStates;
 
     public Registry() {
-        this.StateRegistry = new Hashtable<>();
-        this.TaskNetworkRegistry = new Hashtable<>();
+        this.stateRegistry = new Hashtable<>();
+        this.taskNetworkRegistry = new Hashtable<>();
+
         this.numStates = 0;
     }
 
 
     public boolean addToStateRegistry(JSState state) {
         Integer key = state.hashCode();
-        if (StateRegistry.containsKey(key)) {
-            JSState mapResult = StateRegistry.get(key);
+        if (stateRegistry.containsKey(key)) {
+            JSState mapResult = stateRegistry.get(key);
             if (mapResult.equals(state)) {
                 return false;
             } else {
@@ -32,7 +34,7 @@ public class Registry {
             }
         }
         this.numStates++;
-        StateRegistry.put(key, state);
+        stateRegistry.put(key, state);
         return true;
 
         //return false;
@@ -40,8 +42,8 @@ public class Registry {
 
     public boolean addToTaskNetworkRegistry(JSTasks tasks) {
         Integer key = tasks.hashCode();
-        if (TaskNetworkRegistry.containsKey(key)) {
-            JSTasks mapResult = TaskNetworkRegistry.get(key);
+        if (taskNetworkRegistry.containsKey(key)) {
+            JSTasks mapResult = taskNetworkRegistry.get(key);
             if (mapResult.equals(tasks)) {
                 return false;
             } else {
@@ -49,17 +51,33 @@ public class Registry {
                 //System.exit(0);
             }
         } //else {
-            TaskNetworkRegistry.put(key, tasks);
-            return true;
+        taskNetworkRegistry.put(key, tasks);
+        return true;
         //}
         //return false;
     }
 
     public boolean checkStateTaskNetwork(JSState state, JSTasks tasks) {
         //JSUtil.println("Checking states and tasknetwork");
-        if (StateRegistry.containsKey(state.hashCode())) {
-            return TaskNetworkRegistry.containsKey(tasks.hashCode());
+        if (stateRegistry.containsKey(state.hashCode())) {
+            JSUtil.println("State equal");
+            if (taskNetworkRegistry.containsKey(tasks.hashCode())) {
+                JSUtil.println("Task Network equal");
+                for (MCTSNode child : allNodes) {
+                    if (child.tState().state.equals(state)) {
+                        if (child.taskNetwork().equals(tasks)) {
+                            JSUtil.println("Combination occurred before");
+                            return true;
+                        }
+                    }
+                }
+                JSUtil.println("Combination did not occur before");
+                //JSUtil.println("Size of allnodes: " + allNodes.size());
+                //allNodes.add(node);
+                return false;
+            }
         }
+        //allNodes.add(node);
         return false;
     }
 

@@ -51,14 +51,14 @@ public class JSAxiom {
         return tail;
     }
 
-    public JSAxiom standarizerAxiom() {
+    public JSAxiom standarizerAxiom(JSJshopVars vars) {
         JSAxiom newAx = new JSAxiom();
         JSPredicateForm ta = this.head();
         JSListConjuncts listPs = this.tail();
 
         newAx.notDummy = this.notDummy();
-        newAx.head = ta.standarizerPredicateForm();
-        newAx.tail = listPs.standarizerListConjuncts();
+        newAx.head = ta.standarizerPredicateForm(vars);
+        newAx.tail = listPs.standarizerListConjuncts(vars);
 
         return newAx;
     }

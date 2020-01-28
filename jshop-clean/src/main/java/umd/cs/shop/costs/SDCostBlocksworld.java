@@ -7,7 +7,7 @@ import static java.lang.Math.max;
 public class SDCostBlocksworld implements CostFunction {
 
     @Override
-    public double approximate(JSTState state, JSOperator op, JSTaskAtom grounded_operator) {
+    public double getCost(JSTState state, JSOperator op, JSTaskAtom grounded_operator, boolean approx) {
         return realCost(state, op, grounded_operator);
     }
 
@@ -38,7 +38,6 @@ public class SDCostBlocksworld implements CostFunction {
 
     }
 
-    @Override
     public double realCost(JSTState state, JSOperator op, JSTaskAtom grounded_operator) {
         assert grounded_operator.isGround();
         String operator_name = grounded_operator.get(0).toString();

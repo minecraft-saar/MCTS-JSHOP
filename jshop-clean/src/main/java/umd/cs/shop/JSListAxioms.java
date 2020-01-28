@@ -8,12 +8,15 @@ public class JSListAxioms extends Vector<Object> {
     /*==== instance variables ====*/
 
     private String label;
-
+    JSJshopVars vars;
 
     JSListAxioms() {
 
         super();
+    }
 
+    public void setVars(JSJshopVars vars){
+        this.vars = vars;
     }
 
     public void print() {
@@ -122,14 +125,14 @@ public class JSListAxioms extends Vector<Object> {
 
         for (int i = 0; i < this.size(); i++) {
 
-            axiom = ((JSAxiom) this.elementAt(i)).standarizerAxiom();
+            axiom = ((JSAxiom) this.elementAt(i)).standarizerAxiom(vars);
             gamma = axiom.head().matches(e1, alpha);
             if (!gamma.fail()) {
                 if (JSJshopVars.flagLevel > 8) {
                     JSUtil.println("Goal matches axiom:");
                     axiom.print();
                 }
-                JSJshopVars.VarCounter++;
+                this.vars.VarCounter++;
                 TailAxiom = (JSListConjuncts) axiom.tail().clone();
                 for (int k = 0; k < TailAxiom.size(); k++) {
                     conjunct = (JSListLogicalAtoms) TailAxiom.elementAt(k);

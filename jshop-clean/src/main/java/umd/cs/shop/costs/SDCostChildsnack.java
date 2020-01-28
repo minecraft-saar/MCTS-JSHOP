@@ -7,11 +7,10 @@ import umd.cs.shop.JSTaskAtom;
 public class SDCostChildsnack implements CostFunction {
 
     @Override
-    public double approximate(JSTState state, JSOperator op, JSTaskAtom grounded_operator) {
+    public double getCost(JSTState state, JSOperator op, JSTaskAtom grounded_operator, boolean approx) {
         return realCost(state, op, grounded_operator);
     }
 
-    @Override
     public double realCost(JSTState state, JSOperator op, JSTaskAtom grounded_operator) {
         String operator_name = grounded_operator.get(0).toString();
         return 0;

@@ -1,21 +1,22 @@
 package umd.cs.shop;
 
-public class UCTVersion1 implements UCTPolicy{
+public class UCTVersion1{ //implements UCTPolicy{
 
     // compute value by dividing bestCost with current child cost
 
-    @Override
-    public double computeChildValue(MCTSNode parent, MCTSNode child) {
+    double explorationFactor = java.lang.Math.sqrt(2);
+
+    public double computeChildValue(MCTSNode parent, MCTSNode child, JSJshopVars vars) {
         double exploration = (java.lang.Math.log(parent.visited())) / child.visited();
         exploration = java.lang.Math.sqrt(exploration);
         double reward;
-        if(JSJshopVars.planFound){
-            reward = JSJshopVars.bestCost/child.getCost();
+        if(vars.planFound){
+            reward = vars.bestCost/child.getCost();
         } else {
             reward = 0.5;
         }
 
-        double childValue = reward + JSJshopVars.explorationFactor * exploration; //middle part is exploration factor
+        double childValue = reward + this.explorationFactor * exploration; //middle part is exploration factor
         return childValue;
     }
 }

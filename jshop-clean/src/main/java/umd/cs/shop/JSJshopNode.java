@@ -60,14 +60,14 @@ public final class JSJshopNode {
             JSUtil.print(a.toStr() + " [");
         } else {
             a.print();
-            JSUtil.flag("");
+            JSUtil.println("");
         }
         for (short i = 0; i < c.size(); i++) {
             child = (JSJshopNode) c.elementAt(i);
             child.print();
         }
         if (c.size() > 0) {
-            JSUtil.flag("] " + a.toStr());
+            JSUtil.print("] " + a.toStr());
         }
     }
 

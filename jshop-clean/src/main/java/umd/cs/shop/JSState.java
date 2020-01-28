@@ -66,7 +66,7 @@ public class JSState {
             if (ta.size() != 0) {
                 atoms.add(ta);
             } else {
-                JSUtil.flag("Line : " + tokenizer.lineno() + " ListLogicalAtoms: unexpected Atom");
+                JSUtil.println("Line : " + tokenizer.lineno() + " ListLogicalAtoms: unexpected Atom");
                 throw new JSParserError(); //return;
             }
             if (!JSUtil.readToken(tokenizer, "Expecting ')' "))
@@ -85,7 +85,7 @@ public class JSState {
         JSListLogicalAtoms nDelL = new JSListLogicalAtoms();
         JSPredicateForm el;
 
-        if (JSJshopVars.flagLevel > 3) {
+        /*if (JSJshopVars.flagLevel > 3) {
 
             JSUtil.print(" Matching Operator : (");
             JSUtil.print(":Operator ");
@@ -95,7 +95,7 @@ public class JSState {
             JSUtil.print("+: ");
             opAddL.print();
             JSUtil.println(")");
-        }
+        } */
         //  JSUtil.flagPlanning("<-- ndelete list");
 
         JSState ns = new JSState(this.atoms);
@@ -129,11 +129,11 @@ public class JSState {
         }
         nDelL.addElements(opDelL);
 
-        if (JSJshopVars.flagLevel > 3) {
+        /*if (JSJshopVars.flagLevel > 3) {
             JSUtil.println("The resulting state :");
             ns.print();
             JSUtil.println("-----------");
-        }
+        }*/
         return new JSTState(ns, nAddL, nDelL);
 
     }
@@ -209,24 +209,24 @@ public class JSState {
         //JSPredicateForm el;
         JSSubstitution subs;
         JSListSubstitution answers = new JSListSubstitution();
-        if (JSJshopVars.flagLevel > 7)
-            System.out.println(" ");
+        //if (JSJshopVars.flagLevel > 7)
+        //    System.out.println(" ");
         for (JSPredicateForm el : this.atoms) {
             //int i = 0; i < atoms.size(); i++) {
             //el = (JSPredicateForm) atoms.elementAt(i);
             subs = t.matches(el, alpha);
             if (!subs.fail()) {
-                if (JSJshopVars.flagLevel > 7) {
+                /*if (JSJshopVars.flagLevel > 7) {
                     JSUtil.println(" Goal matches atom: ");
                     el.print();
-                }
+                }*/
                 answers.addElement(subs);
             }
 
         }
 //        JSUtil.flagPlanning(" NO!");
-        if (JSJshopVars.flagLevel > 7 && answers.isEmpty())
-            JSUtil.println(" Goal does not match any atom.");
+        /*if (JSJshopVars.flagLevel > 7 && answers.isEmpty())
+            JSUtil.println(" Goal does not match any atom.");*/
         return answers;
     }
 

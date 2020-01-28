@@ -5,9 +5,7 @@ import java.util.Vector;
 
 public class MCTSNode {
     static int NEXT_ID = 0;
-    static int TREE_ID = 0;
     private int id;
-    private int idTree;
 
     private JSTState tState;
     private JSTasks taskNetwork;
@@ -94,13 +92,11 @@ public class MCTSNode {
     }
 
     void setFullyExplored() {
-        if (JSJshopVars.useFullyExplored)
-            this.fullyExplored = true;
+        this.fullyExplored = true;
     }
 
     void setInTree() {
         this.inTree = true;
-        this.idTree = TREE_ID++;
     }
 
     boolean isDeadEnd() {
@@ -198,7 +194,7 @@ public class MCTSNode {
         }
     }
 
-    void expand() {
+    void expand(JSJshopVars vars) {
     /*if (plan.planCost() >= JSJshopVars.bestCost) {
             this.setDeadEnd();
             return;
@@ -208,17 +204,17 @@ public class MCTSNode {
             //Node was already expanded
             return;
         }
-        Vector<MCTSNode> newChildren = JSJshopVars.expansionPolicy.expand(this);
-        if(JSJshopVars.registry != null){
+        Vector<MCTSNode> newChildren = vars.expansionPolicy.expand(this);
+        if(vars.registry != null){
             for(int i = 0; i< newChildren.size(); i++){
                 MCTSNode child = newChildren.get(i);
                 JSState state = child.tState().state();
                 JSTasks tasks = child.taskNetwork();
 
                 //TODO Check if the g-value is better!
-                if(!JSJshopVars.registry.checkStateTaskNetwork(state, tasks)){
-                    JSJshopVars.registry.addToStateRegistry(state);
-                    JSJshopVars.registry.addToTaskNetworkRegistry(tasks);
+                if(!vars.registry.checkStateTaskNetwork(state, tasks)){
+                    vars.registry.addToStateRegistry(state);
+                    vars.registry.addToTaskNetworkRegistry(tasks);
                 } else {
                     newChildren.remove(child);
                 }
@@ -233,8 +229,8 @@ public class MCTSNode {
     }
 
 
-    public void setGoal() {
-        JSJshopVars.policy.computeCost(this); // sets cost
+    public void setGoal(JSJshopVars vars) {
+        vars.policy.computeCost(this); // sets cost
         this.setFullyExplored();
         if (this.isInTree()) {
             this.incSolvedVisits();

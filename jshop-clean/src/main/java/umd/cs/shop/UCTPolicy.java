@@ -3,13 +3,21 @@ package umd.cs.shop;
 import java.util.Random;
 import java.util.Vector;
 
-public interface UCTPolicy extends MCTSPolicy {
+public class UCTPolicy implements MCTSPolicy {
 
+    JSJshopVars vars;
+    boolean useMin;
+    double explorationFactor;
 
+    UCTPolicy(JSJshopVars vars, boolean minimum, double explor){
+        this.useMin = minimum;
+        this.vars = vars;
+        this.explorationFactor = explor;
+    }
 
     @Override
-    public default MCTSNode randomChild(MCTSNode parent) {
-        if(!JSJshopVars.random && JSJshopVars.mctsRuns <= 1) {
+    public MCTSNode randomChild(MCTSNode parent) {
+        if(!vars.random && vars.mctsRuns <= 1) {
             for(int i = 0; i<parent.children.size(); i++){
                 MCTSNode child = parent.children.get(i);
                 if(child.isFullyExplored()){
@@ -22,15 +30,15 @@ public interface UCTPolicy extends MCTSPolicy {
             System.err.println("Error: randomly selecting children of fully explored node");
             System.exit(-1);
         }
-        int rand = JSJshopVars.randomGenerator.nextInt(parent.children.size());
+        int rand = vars.randomGenerator.nextInt(parent.children.size());
         while (parent.children.get(rand).isFullyExplored()) {
-            rand = JSJshopVars.randomGenerator.nextInt(parent.children.size());
+            rand = vars.randomGenerator.nextInt(parent.children.size());
         }
         return parent.children.get(rand);
     }
 
     @Override
-    public default MCTSNode bestChild(MCTSNode parent) {
+    public MCTSNode bestChild(MCTSNode parent) {
 
         if (parent.isFullyExplored()) {
             System.err.println("Error: randomly selecting children of fully explored node");
@@ -74,17 +82,28 @@ public interface UCTPolicy extends MCTSPolicy {
         return bestChild;
     }
 
-    public double computeChildValue(MCTSNode parent, MCTSNode child);
+    public double computeChildValue(MCTSNode parent, MCTSNode child) {
+        double exploration = (java.lang.Math.log(parent.visited())) / child.visited();
+        exploration = java.lang.Math.sqrt(exploration);
+        double reward;
+        if(vars.planFound){
+            reward = vars.bestCost/child.getCost();
+        } else {
+            reward = 0.5;
+        }
 
+        double childValue = reward + this.explorationFactor * exploration; //middle part is exploration factor
+        return childValue;
+    }
 
     @Override
-    public default void updateCostAndVisits(MCTSNode node, double cost) {
+    public void updateCostAndVisits(MCTSNode node, double cost) {
         double newCost;
 
         if (!Double.isInfinite(cost)) {
             if (node.solvedVisits() == 0) {
                 newCost = cost;
-            } else if (JSJshopVars.updateMaximum) {
+            } else if (this.useMin) {
                 newCost = Math.min(node.getCost(), cost);
             } else {
                 newCost = (cost + node.getCost() * (node.solvedVisits())) / (node.solvedVisits() + 1);
@@ -96,7 +115,7 @@ public interface UCTPolicy extends MCTSPolicy {
     }
 
     @Override
-    public default void computeCost(MCTSNode node) {
+    public void computeCost(MCTSNode node) {
         double cost = 0.0;
         for (int i = 0; i < node.plan.size(); i++) {
             cost = cost + node.plan.elementCost(i);

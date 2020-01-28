@@ -13,7 +13,7 @@ public final class JSUtil {
         System.out.println(str);
     }
 
-    static void flagParser(String line) {
+    /*static void flagParser(String line) {
         if (JSJshopVars.flagParser) {
             JSUtil.flag10(line);
         }
@@ -35,7 +35,7 @@ public final class JSUtil {
         if (JSJshopVars.flagPlanning) {
             JSUtil.flag10(line, i);
         }
-    }
+    } */
    /*
    static void verbose10(String line)
     {
@@ -55,48 +55,7 @@ public final class JSUtil {
       
     */
 
-    static void flag(String line) {
-        JSUtil.flag10(line);
-    }
 
-    static void flag10(String line) {
-        if (JSJshopVars.flagLevel > 0)
-            System.out.println(line);
-        if (JSJshopVars.flagLevel > 10) {
-            try {
-                System.in.read();
-            } catch (IOException e) {
-                System.out.println("Error flag1 : " + e);
-                return;
-            }
-        }
-    }
-
-    static void flag10(String line, int i) {
-        if (JSJshopVars.flagLevel > i)
-            System.out.println(line);
-        if (JSJshopVars.flagLevel > 10) {
-            try {
-                System.in.read();
-            } catch (IOException e) {
-                System.out.println("Error flag1 : " + e);
-                return;
-            }
-        }
-    }
-
-    static void flag2(String line) {
-    }
-
-    static void flag20(String line) {
-        System.out.println(line);
-        try {
-            System.in.read();
-        } catch (IOException e) {
-            System.out.println("Error flag1 : " + e);
-            return;
-        }
-    }
 
     static boolean readToken(StreamTokenizer tokenizer, String name) {
         try {
@@ -156,8 +115,7 @@ public final class JSUtil {
 
     static void printTokenizer(StreamTokenizer tokenizer) {
         if (tokenizer.ttype == StreamTokenizer.TT_NUMBER) {
-            System.out.print(new
-                    Integer((int) tokenizer.nval).toString() + " ");
+            System.out.print(tokenizer.nval + " ");
         }
         if (tokenizer.ttype == JSJshopVars.leftPar) {
             System.out.print("( ");
@@ -226,7 +184,7 @@ public final class JSUtil {
         if (tokenizer.ttype == StreamTokenizer.TT_WORD) {
             System.out.print(tokenizer.sval + " ");
         }
-        JSUtil.flag("");//flag
+        JSUtil.print("");//flag
     }
 
     static String stringTokenizer(StreamTokenizer tokenizer) {
@@ -280,8 +238,8 @@ public final class JSUtil {
         if (tokenizer.ttype == StreamTokenizer.TT_WORD)
             return tokenizer.sval;
         if (tokenizer.ttype == JSJshopVars.whiteSpace)
-            JSUtil.flag("the tokenizer is SPACE!");
-        JSUtil.flag("JSUtil>>stringTokenizer is returning %%%");
+            JSUtil.print("the tokenizer is SPACE!");
+        JSUtil.print("JSUtil>>stringTokenizer is returning %%%");
         return "%%%";
     }
 

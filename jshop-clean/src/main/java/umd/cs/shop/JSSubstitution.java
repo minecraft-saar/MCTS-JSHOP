@@ -94,13 +94,13 @@ public class JSSubstitution extends Vector<Object> {
         JSUtil.println("]");
     }
 
-    public JSSubstitution standarizerSubs() {
+    public JSSubstitution standarizerSubs(JSJshopVars vars) {
         JSSubstitution newSubs = new JSSubstitution();
         JSPairVarTerm pair;
 
         for (short i = 0; i < this.size(); i++) {
             pair = (JSPairVarTerm) this.elementAt(i);
-            newSubs.addElement(pair.standarizerPVT());
+            newSubs.addElement(pair.standarizerPVT(vars));
         }
         return newSubs;
     }

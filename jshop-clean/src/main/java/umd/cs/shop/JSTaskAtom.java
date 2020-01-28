@@ -46,11 +46,11 @@ public class JSTaskAtom extends JSPredicateForm {
         super();
     }
 
-    public JSPairPlanTState seekSimplePlan(JSTState ts) {
+    public JSPairPlanTState seekSimplePlan(JSTState ts, JSJshopVars vars) {
         //JSPairPlanTState pair;
         JSSubstitution alpha;
         JSOperator op;
-        JSListOperators list = JSJshopVars.domain.operators();
+        JSListOperators list = vars.domain.operators();
         JSTaskAtom top;
         //JSState ns;
         JSTState tState;
@@ -61,15 +61,15 @@ public class JSTaskAtom extends JSPredicateForm {
             op = (JSOperator) list.elementAt(i);
             top = op.head();
             if (!thisIsGround) {
-                top = top.standarizerTA();
+                top = top.standarizerTA(vars);
             }
             alpha = top.matches(this);
             if (!alpha.fail()) {
-                op = op.standarizerOp();
-                alpha = alpha.standarizerSubs();
-                JSJshopVars.VarCounter++;
+                op = op.standarizerOp(vars);
+                alpha = alpha.standarizerSubs(vars);
+                vars.VarCounter++;
 
-                JSListSubstitution satisfiers = JSJshopVars.domain.axioms().TheoremProver(op.precondition(), ts.state(), alpha, true);
+                JSListSubstitution satisfiers = vars.domain.axioms().TheoremProver(op.precondition(), ts.state(), alpha, true);
                 if (!satisfiers.isEmpty()) {
 
                     tState = ts.state().applyOp(op, alpha, ts.addList(), ts.deleteList());
@@ -85,11 +85,11 @@ public class JSTaskAtom extends JSPredicateForm {
 
     }
 
-    public JSPairPlanTState seekSimplePlanCostFunction(JSTState ts) {
+    public JSPairPlanTState seekSimplePlanCostFunction(JSTState ts, JSJshopVars vars) {
         //JSPairPlanTState pair;
         JSSubstitution alpha;
         JSOperator op;
-        JSListOperators list = JSJshopVars.domain.operators();
+        JSListOperators list = vars.domain.operators();
         JSTaskAtom top;
         //JSState ns;
         JSTState tState;
@@ -100,27 +100,21 @@ public class JSTaskAtom extends JSPredicateForm {
             op = (JSOperator) list.elementAt(i);
             top = op.head();
             if (!thisIsGround) {
-                top = top.standarizerTA();
+                top = top.standarizerTA(vars);
             }
             alpha = top.matches(this);
             if (!alpha.fail()) {
-                op = op.standarizerOp();
-                alpha = alpha.standarizerSubs();
-                JSJshopVars.VarCounter++;
+                op = op.standarizerOp(vars);
+                alpha = alpha.standarizerSubs(vars);
+                vars.VarCounter++;
 
-                JSListSubstitution satisfiers = JSJshopVars.domain.axioms().TheoremProver(op.precondition(), ts.state(), alpha, true);
+                JSListSubstitution satisfiers = vars.domain.axioms().TheoremProver(op.precondition(), ts.state(), alpha, true);
                 if (!satisfiers.isEmpty()) {
                     tState = ts.state().applyOp(op, alpha, ts.addList(), ts.deleteList());
                     //ns = tState.state();
                     top = op.head();
                     double cost;
-                    if(JSJshopVars.useApproximatedCostFunction){
-                        cost = JSJshopVars.costFunction.approximate(ts, op, top.applySubstitutionTA(alpha));
-                        JSJshopVars.approxUses++;
-                    } else {
-                        cost = JSJshopVars.costFunction.realCost(ts, op, top.applySubstitutionTA(alpha));
-                        JSJshopVars.realCostUses++;
-                    }
+                    cost = vars.costFunction.getCost(ts, op, top.applySubstitutionTA(alpha), vars.useApproximatedCostFunction);
                     pl.addWithCost(top.applySubstitutionTA(alpha), cost);
                     return new JSPairPlanTState(pl, tState);
                 }
@@ -130,12 +124,12 @@ public class JSTaskAtom extends JSPredicateForm {
         return new JSPairPlanTState(pl, new JSTState());
     }
 
-    public JSReduction reduce(JSState s, JSReduction red) {
+    public JSReduction reduce(JSState s, JSReduction red, JSJshopVars vars) {
         //JSUtil.flag("reduce(PlanningDomain dom,State s,Reduction red)");
 
-        JSListMethods mets = JSJshopVars.domain.methods();
+        JSListMethods mets = vars.domain.methods();
 
-        return mets.findReduction(this, s, red, JSJshopVars.domain.axioms());
+        return mets.findReduction(this, s, red, vars.domain.axioms());
 
     }
 
@@ -223,7 +217,7 @@ public class JSTaskAtom extends JSPredicateForm {
 
     }
 
-    public JSTaskAtom standarizerTA() {
+    public JSTaskAtom standarizerTA(JSJshopVars vars) {
         JSTaskAtom nTA = new JSTaskAtom();
 
         if (this.isPrimitive()) {
@@ -238,7 +232,7 @@ public class JSTaskAtom extends JSPredicateForm {
 
         for (short i = 1; i < this.size(); i++) {
             ti = (JSTerm) this.elementAt(i);
-            nTA.addElement(ti.standardizerTerm());
+            nTA.addElement(ti.standardizerTerm(vars));
         }
 
         return nTA;

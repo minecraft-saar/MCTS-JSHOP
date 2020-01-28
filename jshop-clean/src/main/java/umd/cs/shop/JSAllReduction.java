@@ -5,16 +5,16 @@ import java.util.*;
 
 public class JSAllReduction {
     private JSMethod selectedMethod;
-    private Vector reduction;
+    private Vector<JSTasks> reduction;
 
 
     JSAllReduction() {
         super();
         selectedMethod = new JSMethod();
-        reduction = new Vector();
+        reduction = new Vector<JSTasks>();
     }
 
-    JSAllReduction(JSMethod met, Vector red) {
+    JSAllReduction(JSMethod met, Vector<JSTasks> red) {
         super();
         selectedMethod = met;
         reduction = red;
@@ -25,7 +25,7 @@ public class JSAllReduction {
     }
 
 
-    public Vector reductions() {
+    public Vector<JSTasks> reductions() {
         return reduction;
     }
 
@@ -37,14 +37,14 @@ public class JSAllReduction {
     public void print() {
         selectedMethod.print();
         for (int i = 0; i < reduction.size(); i++)
-            ((JSTasks) reduction.elementAt(i)).print();
+            (reduction.elementAt(i)).print();
 
     }
 
     public void printReductions() {
         for (int i = 0; i < reduction.size(); i++) {
             JSUtil.print("#" + (i + 1) + "  ");
-            ((JSTasks) reduction.elementAt(i)).print();
+            (reduction.elementAt(i)).print();
         }
 
     }

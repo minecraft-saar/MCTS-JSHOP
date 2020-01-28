@@ -10,6 +10,7 @@ public class JSPlan extends JSTasks {
     private boolean isFailure;
     Vector<Object> costs;
     double planCost;
+    int depth;
 
     JSPlan() {
 
@@ -21,6 +22,7 @@ public class JSPlan extends JSTasks {
 
     }
 
+    public void setDepth(int depth) { this.depth = depth;}
 
     public void assignFailure() {
         isFailure = true;
@@ -32,6 +34,15 @@ public class JSPlan extends JSTasks {
 
     public void addElements(JSPlan pl) {
         for (short i = 0; i < pl.size(); i++) {
+            this.addElement(pl.elementAt(i));
+            // Added in May 2
+            costs.addElement(pl.costs.elementAt(i));
+        }
+        planCost += pl.planCost;
+    }
+
+    public void addElementsRev(JSPlan pl) {
+        for (int i = pl.size()-1; i >= 0; i--) {
             this.addElement(pl.elementAt(i));
             // Added in May 2
             costs.addElement(pl.costs.elementAt(i));

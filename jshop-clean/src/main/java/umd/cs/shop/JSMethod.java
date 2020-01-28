@@ -55,7 +55,7 @@ public class JSMethod {
     public JSListIfThenElse ifThenElseList() {
         return ifThenElseList;
     }
-
+    /*
     public JSMethod standarizerMet() {
         JSMethod newMet = new JSMethod();
         JSTaskAtom ta = this.head();
@@ -66,6 +66,6 @@ public class JSMethod {
         newMet.ifThenElseList = ifTEList.standarizerListIfTE();
 
         return newMet;
-    }
+    }*/
 }
 

@@ -78,7 +78,7 @@ public class JSListLogicalAtoms extends Vector<Object> {
             if (ta.size() != 0) {
                 this.addElement(ta);
             } else {
-                JSUtil.flag("Line : " + tokenizer.lineno() + " ListLogicalAtoms: unexpected Atom");
+                JSUtil.print("Line : " + tokenizer.lineno() + " ListLogicalAtoms: unexpected Atom");
                 throw new JSParserError(); //return;
             }
             if (!JSUtil.readToken(tokenizer, "Expecting ')' "))
@@ -113,13 +113,13 @@ public class JSListLogicalAtoms extends Vector<Object> {
         JSUtil.println(")  ");
     }
 
-    public JSListLogicalAtoms standarizerListLogicalAtoms() {
+    public JSListLogicalAtoms standarizerListLogicalAtoms(JSJshopVars vars) {
         JSListLogicalAtoms newTs = new JSListLogicalAtoms();
         JSTerm vart;
 
         if (varlist) {
             vart = (JSTerm) this.elementAt(0);
-            newTs.addElement(vart.standardizerTerm());
+            newTs.addElement(vart.standardizerTerm(vars));
             newTs.varlist = true;
             return newTs;
         }
@@ -129,7 +129,7 @@ public class JSListLogicalAtoms extends Vector<Object> {
 
         for (short i = 0; i < this.size(); i++) {
             t = (JSPredicateForm) this.elementAt(i);
-            newTs.addElement(t.standarizerPredicateForm());
+            newTs.addElement(t.standarizerPredicateForm(vars));
         }
         return newTs;
 
