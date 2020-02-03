@@ -137,7 +137,7 @@ public class JSTasks extends JSListLogicalAtoms {
             ptl = new JSPairPlanTSListNodes(pair, new Vector<>());
             double cost = ts.plan.planCost();
             long currentTime = System.currentTimeMillis();
-            JSJshopVars.FoundPlan(ts.plan, 0);
+            JSJshopVars.foundPlan(ts.plan, 0);
             //JSUtil.println("Found plan after " + (currentTime - JSJshopVars.startTime) + " ms of cost " + cost);
             plans.addElement(ptl);
             return plans;

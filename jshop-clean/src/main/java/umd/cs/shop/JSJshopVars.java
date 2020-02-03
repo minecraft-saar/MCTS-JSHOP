@@ -78,7 +78,7 @@ public final class JSJshopVars {
 
     static JSPlanningDomain domain;
 
-    static void FoundPlan(JSPlan plan, int depth){
+    static void foundPlan(JSPlan plan, int depth){
         //Get current best reward if it exists
         Double foundCost = plan.planCost();
         long currentTime = System.currentTimeMillis();

@@ -37,7 +37,7 @@ public class MCTSSimulationExpand implements MCTSSimulation {
     public double simulation_rec(MCTSNode current, int depth) {
         if (current.taskNetwork().isEmpty()) {
             current.setGoal();
-            JSJshopVars.FoundPlan(current.plan, depth);
+            JSJshopVars.foundPlan(current.plan, depth);
             return current.getCost();
         }
 

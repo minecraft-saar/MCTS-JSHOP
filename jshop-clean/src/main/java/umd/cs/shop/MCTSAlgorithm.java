@@ -1,7 +1,5 @@
 package umd.cs.shop;
 
-import java.util.Vector;
-
 public class MCTSAlgorithm {
 
     public static double runMCTS(MCTSNode tst, int depth) {
@@ -11,7 +9,7 @@ public class MCTSAlgorithm {
         }
         if (tst.taskNetwork().isEmpty()) {
             tst.setGoal();
-            JSJshopVars.FoundPlan(tst.plan, depth);
+            JSJshopVars.foundPlan(tst.plan, depth);
             return tst.getCost();
         }
 
