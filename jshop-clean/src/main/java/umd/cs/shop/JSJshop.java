@@ -1,5 +1,6 @@
 package umd.cs.shop;
 
+import javax.print.DocFlavor;
 import javax.swing.*;
 import java.io.*;
 import java.net.MalformedURLException;
@@ -252,15 +253,15 @@ public final class JSJshop implements Runnable {
 
 
     //Calls mcts search but returns the plan insteasd of printing it for use in the NLG System
-    public JSPlan nlgSearch(int mctsruns, long timeout, InputStream world) {
-        InputStream domain = JSJshop.class.getResourceAsStream("domain.shp");
+    public JSPlan nlgSearch(int mctsruns, long timeout, InputStream world, String problem, InputStream domain) {
+        //InputStream domain = JSJshop.class.getResourceAsStream("domain.shp");
         //InputStream world = JSJshop.class.getResourceAsStream("/de/saar/minecraft/worlds/artengis.csv");
 
         boolean parseSuccess = parserFile(domain);
         if (!parseSuccess) {
             JSUtil.println("Domain File not parsed correctly");
         }
-        InputStream transformedProblem = transformWorld(world);
+        InputStream transformedProblem = transformWorld(world, problem);
         parseSuccess = parserFile(transformedProblem);
         if (!parseSuccess) {
             JSUtil.println("Problem File not parsed correctly");
@@ -279,12 +280,13 @@ public final class JSJshop implements Runnable {
         this.fastSimulation = false;
         this.bbPruningFast = true;
         this.recursiveSimulationBudget = 0;
+        vars.costFunction = CostFunction.getCostFunction(CostFunction.CostFunctionType.STATEDEPENDENT, "house");
 
         mctsSearch(vars);
         return vars.bestPlans.lastElement();
     }
 
-    public InputStream transformWorld(InputStream world) {
+    public InputStream transformWorld(InputStream world, String problem) {
 
         BufferedReader reader = new BufferedReader(new InputStreamReader(world));
         String line = "";
@@ -310,7 +312,7 @@ public final class JSJshop implements Runnable {
             e.printStackTrace();
         }
 
-        result = result.concat(") ((build-house 0 2 0 4 4 3)) )");
+        result = result.concat(") ((").concat(problem).concat(")) )");
         JSUtil.println(result);
         return new ByteArrayInputStream(result.getBytes());
     }
