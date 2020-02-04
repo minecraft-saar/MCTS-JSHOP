@@ -127,7 +127,8 @@ public class JSPlanningDomain {
             long currentTime = System.currentTimeMillis();
             long runningTime = currentTime - vars.startTime;
             if (runningTime >= timeout) {
-                JSUtil.println("Timeout");
+                if(vars.print)
+                    JSUtil.println("Timeout");
                 break;
             }
 
@@ -150,8 +151,10 @@ public class JSPlanningDomain {
                 e.printStackTrace();
             }
         }
-        JSUtil.println("Number of Runs done: " + vars.mctsRuns);
-        JSUtil.println("Found Plan: " + vars.planFound);
+        if(vars.print) {
+            JSUtil.println("Number of Runs done: " + vars.mctsRuns);
+            JSUtil.println("Found Plan: " + vars.planFound);
+        }
     }
 
 

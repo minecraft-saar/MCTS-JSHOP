@@ -57,8 +57,8 @@ public final class JSJshop implements Runnable {
     @Option(names = {"--approx"}, defaultValue = "false", description = "use approximated cost function")
     boolean useApproximatedCostFunction;
 
-    @Option(names = {"-p", "--policy"}, defaultValue = "uct1", description = "can be uct1 or uct2")
-    String policy;
+    //@Option(names = {"-p", "--policy"}, defaultValue = "uct1", description = "can be uct1 or uct2")
+    //String policy;
 
     @Option(names = {"-t", "--timeout"}, defaultValue = "30000", description = "Timeout in milliseconds")
     long timeout;
@@ -100,7 +100,7 @@ public final class JSJshop implements Runnable {
         if(plan != null){
             return;
         }*/
-        JSJshopVars variables = new JSJshopVars(bbPruning, useApproximatedCostFunction, random);
+        JSJshopVars variables = new JSJshopVars(bbPruning, useApproximatedCostFunction, random, true);
         variables.startTime = System.currentTimeMillis();
         variables.initRandGen(this.randomSeed);
         JSUtil.println("Reading file " + nameDomainFile);
@@ -166,7 +166,7 @@ public final class JSJshop implements Runnable {
         if(explorationFactor == 1.41421){
             explorationFactor = java.lang.Math.sqrt(2);
         }
-        vars.policy = MCTSPolicy.getPolicy(policy, vars, updateMinimum, explorationFactor);
+        vars.policy = MCTSPolicy.getPolicy(vars, updateMinimum, explorationFactor);
         vars.expansionPolicy = MCTSExpand.getPolicy(expansionPolicy, recursive, vars);
         vars.simulationPolicy = MCTSSimulation.getPolicy(!fastSimulation, recursiveSimulationBudget, bbPruning, bbPruningFast,vars);
 
@@ -176,9 +176,14 @@ public final class JSJshop implements Runnable {
 
         for (int k = 0; k < probSet.size(); k++) {
             prob = (JSPlanningProblem) probSet.elementAt(k);
-            JSUtil.println("Solving Problem :" + prob.Name() + " with mcts");
-            JSUtil.println("time till timeout: " + timeout);
+            if(vars.print) {
+                JSUtil.println("Solving Problem :" + prob.Name() + " with mcts");
+                JSUtil.println("time till timeout: " + timeout);
+            }
             vars.domain.solveMCTS(prob, mctsruns, timeout, printTree, vars);
+            if(!vars.print){
+                return;
+            }
             final long searchTime = System.currentTimeMillis();
             JSUtil.println("Total Time: " + (searchTime - vars.startTime));
             JSUtil.println("Number of Nodes generated: " + MCTSNode.NEXT_ID);
@@ -266,13 +271,13 @@ public final class JSJshop implements Runnable {
         if (!parseSuccess) {
             JSUtil.println("Problem File not parsed correctly");
         }
-        JSJshopVars vars = new JSJshopVars(false, true, false);
+        JSJshopVars vars = new JSJshopVars(false, true, false, false);
+        vars.initRandGen(42);
         this.domain.axioms.setVars(vars);
         vars.domain = this.domain;
         vars.startTime = System.currentTimeMillis();
         this.mctsruns = mctsruns;
         this.timeout = timeout;
-        this.policy="uct";
         this.updateMinimum = true;
         this.explorationFactor = java.lang.Math.sqrt(2);
         this.expansionPolicy="simple";
@@ -290,7 +295,7 @@ public final class JSJshop implements Runnable {
 
         BufferedReader reader = new BufferedReader(new InputStreamReader(world));
         String line = "";
-        String result = "(defproblem problem-house build-house ( (last-placed dummy dummy dummy) ";
+        String result = "(defproblem problem-house build-house ( (last-placed 150 150 150) ";
         try {
             while ((line = reader.readLine()) != null) {
                 String[] data = line.split(",");
@@ -313,7 +318,6 @@ public final class JSJshop implements Runnable {
         }
 
         result = result.concat(") ((").concat(problem).concat(")) )");
-        JSUtil.println(result);
         return new ByteArrayInputStream(result.getBytes());
     }
 

@@ -47,7 +47,7 @@ public class JSJshopVars {
     // in the following methods in JSUtil:
     // stringTokenizer/1, initParseTable/1 and printTokenizer/1
 
-    JSJshopVars(boolean bbPruning, boolean approx, boolean random){
+    JSJshopVars(boolean bbPruning, boolean approx, boolean random, boolean print){
         this.bbPruning = bbPruning;
         this.useApproximatedCostFunction = approx;
         this.random = random;
@@ -57,11 +57,13 @@ public class JSJshopVars {
         this.treeDepth = 0;
         this.mctsRuns = 1;
         this.VarCounter = 0;
+        this.print = print;
     }
 
     long startTime;
     int treeDepth;
     int mctsRuns;
+    boolean print;
 
     double bestCost;
 
@@ -87,13 +89,15 @@ public class JSJshopVars {
         //JSUtil.println("Found plan of cost " + foundCost + " in run " + mctsRuns + " after " + (currentTime - startTime) + " ms at depth " + depth);
         if (!planFound) {
             planFound = true;
-            JSUtil.println("Found first plan of cost " + foundCost + " in run " + mctsRuns + " after " + (currentTime - startTime) + " ms at depth " + depth);
+            if(print)
+                JSUtil.println("Found first plan of cost " + foundCost + " in run " + mctsRuns + " after " + (currentTime - startTime) + " ms at depth " + depth);
             bestCost = foundCost;
             this.bestPlans.addElement(plan);
         } else if (foundCost.compareTo(bestCost) < 0) {
             this.bestPlans.addElement(plan);
             bestCost = foundCost;
-            JSUtil.println("Found better plan of cost " + foundCost + " in run " + mctsRuns + " after " + (currentTime - startTime) + " ms at depth " + depth);
+            if(print)
+                JSUtil.println("Found better plan of cost " + foundCost + " in run " + mctsRuns + " after " + (currentTime - startTime) + " ms at depth " + depth);
         }
     }
 

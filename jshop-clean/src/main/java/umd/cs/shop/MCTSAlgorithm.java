@@ -49,7 +49,8 @@ public class MCTSAlgorithm {
             if (depth > vars.treeDepth) {
                 vars.treeDepth = depth;
                 long currentTime = System.currentTimeMillis();
-                JSUtil.println("Increased tree depth to " + depth + " at run " + this.vars.mctsRuns + " after " + (currentTime - this.vars.startTime) + " ms");
+                if(vars.print)
+                    JSUtil.println("Increased tree depth to " + depth + " at run " + this.vars.mctsRuns + " after " + (currentTime - this.vars.startTime) + " ms");
             }
 
             return reward;
