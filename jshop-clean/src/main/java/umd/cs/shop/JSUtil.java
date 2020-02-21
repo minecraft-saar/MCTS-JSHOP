@@ -77,8 +77,8 @@ public final class JSUtil {
             return false;
         }
         if (tokenizer.ttype != type) {
-            System.out.println(name + ": "
-                    + JSUtil.stringTokenizer(tokenizer) + " expected");
+            System.out.println(name + ": " + tokenizer.toString());
+                    //+ JSUtil.stringTokenizer(tokenizer) + " expected at line " + tokenizer.lineno());
             return false;
         }
         return true;

@@ -43,10 +43,16 @@ public class SDCostMinecraft implements CostFunction {
                 return 0;
             case "!build-row":
                 return 4;
+            case "!build-column":
+                return 4;
+            case "!build-railing":
+                return 10;
             case "!build-wall":
                 return 20;
+            case "!build-plane":
+                return 20;
             default:
-                System.err.println("Unrecognized action name");
+                System.err.println("Unrecognized action name: " + operator_name);
                 System.exit(-1);
                 return 0;
         }
