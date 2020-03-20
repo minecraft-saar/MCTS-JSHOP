@@ -137,7 +137,7 @@ public final class JSJshop implements Runnable {
         //CommandLine.run(new JSJshop(), args);
     }
 
-    private JSPlanningProblem prob;
+    public JSPlanningProblem prob;
 
     JSPlanningDomain domain;
 
@@ -266,7 +266,9 @@ public final class JSJshop implements Runnable {
         if (!parseSuccess) {
             JSUtil.println("Domain File not parsed correctly");
         }
+        //creating Problem file from world info
         InputStream transformedProblem = transformWorld(world, problem);
+        //parseFile initializes probSet, a list of all problems, prob.elementAt(0).state() is initial state
         parseSuccess = parserFile(transformedProblem);
         if (!parseSuccess) {
             JSUtil.println("Problem File not parsed correctly");
