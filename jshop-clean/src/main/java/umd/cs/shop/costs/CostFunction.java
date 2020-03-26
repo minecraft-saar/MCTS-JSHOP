@@ -6,7 +6,7 @@ import umd.cs.shop.JSTaskAtom;
 
 public interface CostFunction {
 
-    double getCost(JSTState state, JSOperator op, JSTaskAtom grounded_operator, boolean approx);
+    double getCost(JSTState state, JSOperator op, JSTaskAtom groundedOperator, boolean approx);
 
     boolean isUnitCost();
 
@@ -16,6 +16,11 @@ public interface CostFunction {
         STATEDEPENDENT
     }
 
+    enum InstructionLevel{
+        BLOCK,
+        MEDIUM,
+        HIGHLEVEL
+    }
 
     public static CostFunction getCostFunction(CostFunctionType costFunctionName, String domainName) {
         switch (costFunctionName) {
@@ -34,6 +39,22 @@ public interface CostFunction {
                     System.err.println("No state dependent cost function defined for " + domainName);
                     System.exit(-1);
                 }
+            default:
+                System.err.println("Unknown cost function: " + costFunctionName);
+                System.err.println("Options are: unit basic stateDependent");
+                System.exit(-1);
+        }
+        return null;
+    }
+
+    public static CostFunction getCostFunction(CostFunctionType costFunctionName, String domainName, InstructionLevel level) {
+        switch (level) {
+            case BLOCK:
+                return new SDMCBlock();
+            case MEDIUM:
+                return new BasicCost(); //TODO
+            case HIGHLEVEL:
+                return new SDMCHighLevel();
             default:
                 System.err.println("Unknown cost function: " + costFunctionName);
                 System.err.println("Options are: unit basic stateDependent");

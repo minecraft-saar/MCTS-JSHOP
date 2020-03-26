@@ -51,6 +51,8 @@ public class SDCostMinecraft implements CostFunction {
                 return 20;
             case "!build-plane":
                 return 20;
+            case "!remove":
+                return 5;
             default:
                 System.err.println("Unrecognized action name: " + operator_name);
                 System.exit(-1);

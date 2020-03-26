@@ -258,10 +258,11 @@ public final class JSJshop implements Runnable {
 
 
     //Calls mcts search but returns the plan insteasd of printing it for use in the NLG System
-    public JSPlan nlgSearch(int mctsruns, long timeout, InputStream world, String problem, InputStream domain) {
+    public JSPlan nlgSearch(int mctsruns, long timeout, InputStream world, String problem, InputStream domain, CostFunction.InstructionLevel level) {
         //InputStream domain = JSJshop.class.getResourceAsStream("domain.shp");
         //InputStream world = JSJshop.class.getResourceAsStream("/de/saar/minecraft/worlds/artengis.csv");
 
+        CostFunction.InstructionLevel leve = CostFunction.InstructionLevel.BLOCK;
         boolean parseSuccess = parserFile(domain);
         if (!parseSuccess) {
             JSUtil.println("Domain File not parsed correctly");
@@ -287,7 +288,7 @@ public final class JSJshop implements Runnable {
         this.fastSimulation = false;
         this.bbPruningFast = true;
         this.recursiveSimulationBudget = 0;
-        vars.costFunction = CostFunction.getCostFunction(CostFunction.CostFunctionType.STATEDEPENDENT, "house");
+        vars.costFunction = CostFunction.getCostFunction(CostFunction.CostFunctionType.STATEDEPENDENT, "house", level);
 
         mctsSearch(vars);
         return vars.bestPlans.lastElement();
