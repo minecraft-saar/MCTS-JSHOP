@@ -117,7 +117,7 @@ public final class JSJshop implements Runnable {
         final long parseTime = System.currentTimeMillis();
         JSUtil.println("Parsing Time: " + (parseTime - variables.startTime));
 
-        variables.costFunction = CostFunction.getCostFunction(costFunctionName, variables.domain.getName());
+        variables.costFunction = CostFunction.getCostFunction(costFunctionName, variables.domain.getName(), CostFunction.InstructionLevel.MEDIUM);
 
 
         if (standardSearch) {

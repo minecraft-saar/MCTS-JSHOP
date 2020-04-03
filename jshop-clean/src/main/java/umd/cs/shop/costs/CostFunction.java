@@ -52,7 +52,7 @@ public interface CostFunction {
             case BLOCK:
                 return new SDMCBlock();
             case MEDIUM:
-                return new BasicCost(); //TODO
+                return new SDMCMedium();
             case HIGHLEVEL:
                 return new SDMCHighLevel();
             default:

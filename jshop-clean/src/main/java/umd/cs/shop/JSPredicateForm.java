@@ -157,7 +157,7 @@ public class JSPredicateForm extends Vector<Object> {
         res.append("(");
         // Added 11/28/200
         String str = (String) this.elementAt(0);
-        res.append(str);
+        res.append(str).append(" ");
         if (str.equalsIgnoreCase("not")) {
             JSPredicateForm el;
             el = (JSPredicateForm) this.elementAt(1);
