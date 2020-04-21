@@ -10,10 +10,16 @@ public class SDMCHighLevel implements CostFunction{
     @Override
     public double getCost(JSTState state, JSOperator op, JSTaskAtom groundedOperator, boolean approx) {
         assert groundedOperator.isGround();
-        String operator_name = groundedOperator.get(0).toString();
+        String operatorName = groundedOperator.get(0).toString();
 
-        switch (operator_name) {
+        switch (operatorName) {
             case "!place-block-hidden":
+            case "!build-wall-starting":
+            case "!build-wall-finished":
+            case "!build-railing-finished":
+            case "!build-railing-starting":
+            case "!build-floor-finished":
+            case "!build-floor-starting":
                 return 0;
             case "!place-block":
                return 100000;
@@ -25,12 +31,12 @@ public class SDMCHighLevel implements CostFunction{
                 return 1;
             case "!build-wall":
                 return 1;
-            case "!build-plane":
+            case "!build-floor":
                 return 1;
             case "!remove":
                 return 5;
             default:
-                System.err.println("Unrecognized action name: " + operator_name);
+                System.err.println("Unrecognized action name: " + operatorName);
                 System.exit(-1);
                 return 0;
         }

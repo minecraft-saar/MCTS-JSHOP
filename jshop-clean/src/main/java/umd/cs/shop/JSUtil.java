@@ -9,7 +9,7 @@ public final class JSUtil {
         System.out.print(str);
     }
 
-    static void println(String str) {
+    public  static void println(String str) {
         System.out.println(str);
     }
 

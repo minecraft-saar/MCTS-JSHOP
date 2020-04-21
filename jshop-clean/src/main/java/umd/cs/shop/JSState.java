@@ -9,7 +9,8 @@ import java.util.Set;
 public class JSState {
 
     Set<JSPredicateForm> atoms;
-
+    public boolean wallBuilt = false;
+    public boolean railingBuilt = false;
     // This is a Vector over JSPredicateForm (call terms count as JSPredicateForm but should not end up in the state)
 
     /*==== instance variables ====*/
@@ -118,6 +119,7 @@ public class JSState {
             }
         }
         nAddL.addElements(opAddL);
+        ns.updateBoolFlags(this, add);
 
 
         for (short i = 0; i < delL.size(); i++)//creates a new del list
@@ -136,6 +138,26 @@ public class JSState {
         }*/
         return new JSTState(ns, nAddL, nDelL);
 
+    }
+
+    public void updateBoolFlags(JSState oldState, JSListLogicalAtoms addList){
+        if(oldState.wallBuilt){
+            this.wallBuilt = true;
+        } else if (oldState.railingBuilt) {
+            this.railingBuilt = true;
+        } else {
+            for (int i = 0; i < addList.size(); i++) {
+                JSPredicateForm pred = (JSPredicateForm) addList.elementAt(i);
+                if (pred.elementAt(0).equals("wall-at")) {
+                    this.wallBuilt = true;
+                    break;
+                }
+                if (pred.elementAt(0).equals("railing-at")) {
+                    this.railingBuilt = true;
+                    break;
+                }
+            }
+        }
     }
 
     public JSSubstitution satisfies(JSListLogicalAtoms conds, JSSubstitution alpha,
