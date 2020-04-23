@@ -43,7 +43,19 @@ public class SDMCMedium implements CostFunction {
         } else {
             switch (operatorName) {
                 case "!place-block":
-                    return 1;
+                    int x = (int) Double.parseDouble(groundedOperator.get(2).toString().replace("[", "").replace("]", ""));
+                    int y = (int) Double.parseDouble(groundedOperator.get(3).toString().replace("[", "").replace("]", ""));
+                    int z = (int) Double.parseDouble(groundedOperator.get(4).toString().replace("[", "").replace("]", ""));
+
+                    int lx = (int) Double.parseDouble(groundedOperator.get(5).toString().replace("[", "").replace("]", ""));
+                    int ly = (int) Double.parseDouble(groundedOperator.get(6).toString().replace("[", "").replace("]", ""));
+                    int lz = (int) Double.parseDouble(groundedOperator.get(7).toString().replace("[", "").replace("]", ""));
+
+                    if (Math.pow(lx - x, 2) + Math.pow(ly - y, 2) + Math.pow(lz - z, 2) <= 1) {
+                        return 0.5;
+                    } else {
+                        return 2;
+                    }
                 case "!place-block-hidden":
                 case "!build-wall-starting":
                 case "!build-wall-finished":

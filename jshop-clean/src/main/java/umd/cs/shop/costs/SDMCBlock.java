@@ -12,7 +12,7 @@ public class SDMCBlock implements CostFunction {
         String operatorName = groundedOperator.get(0).toString();
 
         switch (operatorName) {
-            case "place-block":
+            case "!place-block":
                 String block_type = groundedOperator.get(1).toString();
                 int x = (int) Double.parseDouble(groundedOperator.get(2).toString().replace("[", "").replace("]", ""));
                 int y = (int) Double.parseDouble(groundedOperator.get(3).toString().replace("[", "").replace("]", ""));
@@ -29,10 +29,15 @@ public class SDMCBlock implements CostFunction {
                 }
 
             case "!build-wall-starting":
+                return 0;
             case "!build-wall-finished":
+                return 0;
             case "!build-railing-finished":
+                return 0;
             case "!build-railing-starting":
+                return 0;
             case "!build-floor-finished":
+                return 0;
             case "!build-floor-starting":
                 return 0;
             default:

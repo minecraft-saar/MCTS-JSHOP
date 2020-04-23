@@ -117,7 +117,7 @@ public final class JSJshop implements Runnable {
         final long parseTime = System.currentTimeMillis();
         JSUtil.println("Parsing Time: " + (parseTime - variables.startTime));
 
-        variables.costFunction = CostFunction.getCostFunction(costFunctionName, variables.domain.getName(), CostFunction.InstructionLevel.MEDIUM);
+        variables.costFunction = CostFunction.getCostFunction(costFunctionName, variables.domain.getName(), CostFunction.InstructionLevel.BLOCK);
 
 
         if (standardSearch) {
@@ -262,7 +262,6 @@ public final class JSJshop implements Runnable {
         //InputStream domain = JSJshop.class.getResourceAsStream("domain.shp");
         //InputStream world = JSJshop.class.getResourceAsStream("/de/saar/minecraft/worlds/artengis.csv");
 
-        CostFunction.InstructionLevel leve = CostFunction.InstructionLevel.BLOCK;
         boolean parseSuccess = parserFile(domain);
         if (!parseSuccess) {
             JSUtil.println("Domain File not parsed correctly");
