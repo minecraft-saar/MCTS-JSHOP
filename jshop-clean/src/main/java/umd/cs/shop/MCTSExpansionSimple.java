@@ -33,7 +33,7 @@ public class MCTSExpansionSimple implements MCTSExpand{
                 if (ans.isFailure()) {
                     node.plan.assignFailure();
                     //JSUtil.println("New dead end at depth: " + depth);
-                    node.setDeadEnd();
+                    node.setDeadEnd(vars);
                     return children;
                 } else {
                     JSPlan pl = new JSPlan();
@@ -52,7 +52,7 @@ public class MCTSExpansionSimple implements MCTSExpand{
                 if (red.isDummy()) {
                     assert (!node.taskNetwork().isEmpty());
                     node.plan.assignFailure();
-                    node.setDeadEnd();
+                    node.setDeadEnd(vars);
                     return children;
                 }
                 while (!red.isDummy()) {
@@ -96,7 +96,7 @@ public class MCTSExpansionSimple implements MCTSExpand{
             if (ans.isFailure()) {
                 node.plan.assignFailure();
                 //JSUtil.println("New dead end at depth: " + depth);
-                node.setDeadEnd();
+                node.setDeadEnd(vars);
                 return true;
             }
             return false;
@@ -109,7 +109,7 @@ public class MCTSExpansionSimple implements MCTSExpand{
         if (red.isDummy()) {
             assert (!node.taskNetwork().isEmpty());
             node.plan.assignFailure();
-            node.setDeadEnd();
+            node.setDeadEnd(vars);
             return true;
         }
         return false;

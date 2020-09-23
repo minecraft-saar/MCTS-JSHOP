@@ -53,7 +53,7 @@ public class MCTSExpansionPrimitive implements MCTSExpand {
                 if (ans.isFailure()) {
                     node.plan.assignFailure();
                     //JSUtil.println("New dead end at depth: " + depth);
-                    node.setDeadEnd();
+                    node.setDeadEnd(vars);
                     return children;
                 } else {
                     JSPlan pl = new JSPlan();
@@ -72,7 +72,7 @@ public class MCTSExpansionPrimitive implements MCTSExpand {
                 if (red.isDummy()) {
                     assert (!node.taskNetwork().isEmpty());
                     node.plan.assignFailure();
-                    node.setDeadEnd();
+                    node.setDeadEnd(vars);
                     return children;
                 }
                 while (!red.isDummy()) {

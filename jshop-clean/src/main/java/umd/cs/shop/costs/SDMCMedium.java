@@ -14,7 +14,7 @@ public class SDMCMedium implements CostFunction {
         if (wall_built || railing_built) {
             switch (operatorName) {
                 case "!place-block":
-                    return 100000;
+                    return 100;
                 case "!place-block-hidden":
                 case "!build-wall-finished":
                 case "!build-wall-starting":
@@ -24,9 +24,9 @@ public class SDMCMedium implements CostFunction {
                 case "!build-floor-starting":
                     return 0;
                 case "!build-row":
-                    return 10;
+                    return 1;
                 case "!build-column":
-                    return 10;
+                    return 1;
                 case "!build-railing":
                     return 1;
                 case "!build-wall":
@@ -71,7 +71,7 @@ public class SDMCMedium implements CostFunction {
                 case "!build-railing":
                     return 1000;
                 case "!build-wall":
-                    return 1000;
+                    return 10000;
                 case "!build-floor":
                     return 1000;
                 case "!remove":

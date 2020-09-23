@@ -96,7 +96,10 @@ public final class JSUtil {
         if (!JSUtil.readToken(tokenizer, name))
             return "%%%";
         while (tokenizer.ttype != JSJshopVars.whiteSpace &&
-                tokenizer.ttype != JSJshopVars.rightPar) {
+                tokenizer.ttype != JSJshopVars.rightPar &&
+                tokenizer.ttype != JSJshopVars.coma &&
+                tokenizer.ttype != JSJshopVars.rightBrac &&
+                tokenizer.ttype != JSJshopVars.leftBrac) {
             wT = JSUtil.stringTokenizer(tokenizer);
             if (!wT.equals("%%%")) {
                 //return "%%%";

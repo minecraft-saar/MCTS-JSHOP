@@ -70,7 +70,7 @@ public class UCTPolicy implements MCTSPolicy {
         if (bestChild == null /*&& !allDeadEnd*/) {
             JSUtil.println("NO CHILD SELECTED");
             for (MCTSNode child : parent.children) {
-                JSUtil.println("This child  has cost: " + child.getCost() + " is dead-end: " + child.isDeadEnd() + " is fully explored: " + child.isFullyExplored());
+                JSUtil.println("This child  has cost: " + child.getCost(vars) + " is dead-end: " + child.isDeadEnd() + " is fully explored: " + child.isFullyExplored());
             }
             System.exit(0);
         }
@@ -87,7 +87,7 @@ public class UCTPolicy implements MCTSPolicy {
         exploration = java.lang.Math.sqrt(exploration);
         double reward;
         if(vars.planFound){
-            reward = vars.bestCost/child.getCost();
+            reward = vars.bestCost/child.getCost(vars);
         } else {
             reward = 0.5;
         }
@@ -104,9 +104,9 @@ public class UCTPolicy implements MCTSPolicy {
             if (node.solvedVisits() == 0) {
                 newCost = cost;
             } else if (this.useMin) {
-                newCost = Math.min(node.getCost(), cost);
+                newCost = Math.min(node.getCost(vars), cost);
             } else {
-                newCost = (cost + node.getCost() * (node.solvedVisits())) / (node.solvedVisits() + 1);
+                newCost = (cost + node.getCost(vars) * (node.solvedVisits())) / (node.solvedVisits() + 1);
             }
             node.incSolvedVisits();
             node.setCost(newCost);

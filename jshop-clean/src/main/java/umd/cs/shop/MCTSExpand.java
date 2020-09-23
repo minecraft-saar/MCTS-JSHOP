@@ -14,6 +14,8 @@ public interface MCTSExpand {
                 return new MCTSExpansionPrimitive(recursive, vars);
             case "deadEnd":
                 return new MCTSExpansionSimple(recursive, true, vars);
+            case "landmark":
+                return new MCTSExpansionLandmark(recursive, false, vars);
             default:
                 System.err.println("Unknown expansion policy name: " + policy);
                 System.err.println("Options are: simple primitive deadEnd");

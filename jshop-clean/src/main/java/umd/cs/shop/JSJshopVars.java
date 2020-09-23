@@ -47,7 +47,7 @@ public class JSJshopVars {
     // in the following methods in JSUtil:
     // stringTokenizer/1, initParseTable/1 and printTokenizer/1
 
-    JSJshopVars(boolean bbPruning, boolean approx, boolean random, boolean print){
+    JSJshopVars(boolean bbPruning, boolean approx, boolean random, boolean print, boolean landmarks){
         this.bbPruning = bbPruning;
         this.useApproximatedCostFunction = approx;
         this.random = random;
@@ -58,6 +58,7 @@ public class JSJshopVars {
         this.mctsRuns = 1;
         this.VarCounter = 0;
         this.print = print;
+        this.landmarks = landmarks;
     }
 
     long startTime;
@@ -71,6 +72,7 @@ public class JSJshopVars {
     boolean random;
     boolean useApproximatedCostFunction;
     boolean bbPruning;
+    boolean landmarks;
 
     Vector<JSPlan> bestPlans;
     CostFunction costFunction;

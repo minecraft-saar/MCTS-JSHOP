@@ -43,12 +43,16 @@ public class MCTSSimulationExpand implements MCTSSimulation {
     public double simulation_rec(MCTSNode current, int depth) {
         if (current.taskNetwork().isEmpty()) {
             current.setGoal(vars);
+            if(vars.landmarks) {
+                JSUtil.println("Task Landmark cost at Goal: " + current.tState().state().taskLandmarks.size() + " Fact landmark cost: " + current.tState().state().factLandmarks.size());
+                JSUtil.println(current.tState().state.factLandmarks.toString());
+            }
             vars.foundPlan(current.plan, depth);
-            return current.getCost();
+            return current.getCost(vars);
         }
 
         if (vars.bb_pruning(current.plan.planCost())) {
-            double cost = current.getCost();
+            double cost = current.getCost(vars);
             if (this.bbPruningFast) {
                 MCTSSimulationFast simulation_fast = new MCTSSimulationFast(this.available_budget, cost);
                 cost = simulation_fast.simulation(current, depth);
@@ -59,7 +63,7 @@ public class MCTSSimulationExpand implements MCTSSimulation {
 
         current.expand(vars);
         if (current.isDeadEnd()) {
-            return current.getCost();
+            return current.getCost(vars);
         }
 
         return simulation_rec_expanded(current, depth);

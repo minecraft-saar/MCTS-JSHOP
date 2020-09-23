@@ -121,6 +121,9 @@ public class JSPlanningDomain {
         JSTasks tasks = prob.tasks();
         JSPlan plan = new JSPlan();
         MCTSNode initial = new MCTSNode(ts, tasks, plan);
+        //JSUtil.println("Initial Task Landmark cost at Goal: " + initial.tState().state().taskLandmarks.size() + " Fact landmark cost: " + initial.tState().state().factLandmarks.size());
+        //JSUtil.println(initial.tState().state().factLandmarks.toString());
+        //JSUtil.println(initial.tState().state().atoms.toString());
         vars.treeDepth = 0;
         MCTSAlgorithm alg = new MCTSAlgorithm(vars);
         for (vars.mctsRuns = 1; vars.mctsRuns <= runs; vars.mctsRuns++) {

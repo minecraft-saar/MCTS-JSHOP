@@ -60,7 +60,10 @@ public class MCTSNode {
         this.solvedVisits += 1;
     }
 
-    double getCost() {
+    double getCost(JSJshopVars vars) {
+        if(vars.landmarks){
+            return tState().state().taskLandmarks.size() + tState.state().factLandmarks.size()+this.cost;
+        }
         return this.cost;
     }
 
@@ -75,10 +78,15 @@ public class MCTSNode {
     /**
      * Also sets fullyExplored
      **/
-    void setDeadEnd() {
+    void setDeadEnd(JSJshopVars vars) {
         this.deadEnd = true;
         this.fullyExplored = true;
-        this.setCost(Double.POSITIVE_INFINITY);
+        if(vars.landmarks) {
+            //JSUtil.println("Task Landmark cost at Dead End: " + tState().state().taskLandmarks.size() + " Fact landmark cost: " + tState().state().factLandmarks.size());
+            this.setCost((tState().state().taskLandmarks.size() + tState.state().factLandmarks.size()) * 2 + this.cost);
+        }
+        else
+            this.setCost(Double.POSITIVE_INFINITY);
     }
 
     void setCost(double r) {
@@ -224,7 +232,7 @@ public class MCTSNode {
         this.children.addAll(newChildren);
         this.checkFullyExplored();
         if(this.children.isEmpty()) {
-            this.setDeadEnd();
+            this.setDeadEnd(vars);
         }
     }
 

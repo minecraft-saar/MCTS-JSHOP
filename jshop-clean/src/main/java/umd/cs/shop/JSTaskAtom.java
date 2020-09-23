@@ -72,7 +72,7 @@ public class JSTaskAtom extends JSPredicateForm {
                 JSListSubstitution satisfiers = vars.domain.axioms().TheoremProver(op.precondition(), ts.state(), alpha, true);
                 if (!satisfiers.isEmpty()) {
 
-                    tState = ts.state().applyOp(op, alpha, ts.addList(), ts.deleteList());
+                    tState = ts.state().applyOp(op, alpha, ts.addList(), ts.deleteList(), vars);
                     //ns = tState.state();
                     top = op.head();
                     pl.addWithCost(top.applySubstitutionTA(alpha), op.cost());
@@ -110,7 +110,7 @@ public class JSTaskAtom extends JSPredicateForm {
 
                 JSListSubstitution satisfiers = vars.domain.axioms().TheoremProver(op.precondition(), ts.state(), alpha, true);
                 if (!satisfiers.isEmpty()) {
-                    tState = ts.state().applyOp(op, alpha, ts.addList(), ts.deleteList());
+                    tState = ts.state().applyOp(op, alpha, ts.addList(), ts.deleteList(),vars);
                     //ns = tState.state();
                     top = op.head();
                     double cost;

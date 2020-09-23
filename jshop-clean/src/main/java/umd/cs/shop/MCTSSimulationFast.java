@@ -100,7 +100,7 @@ public class MCTSSimulationFast implements MCTSSimulation {
 
                     JSListSubstitution satisfiers = vars.domain.axioms().TheoremProver(op.precondition(), currentState.state, alpha, true);
                     if (!satisfiers.isEmpty()) {
-                        JSTState newState = currentState.state.applyOp(op, alpha, currentState.addList(), currentState.deleteList());
+                        JSTState newState = currentState.state.applyOp(op, alpha, currentState.addList(), currentState.deleteList(),vars);
                         double action_cost = this.action_cost(op, alpha, currentState);
                         JSPlan result = this.deterministic_simulation(newState, rest, depth + 1, plan_cost + action_cost);
                         if (!result.isFailure()) {
@@ -186,7 +186,7 @@ public class MCTSSimulationFast implements MCTSSimulation {
 
                     JSListSubstitution satisfiers = vars.domain.axioms().TheoremProver(op.precondition(), currentState.state, alpha, true);
                     if (!satisfiers.isEmpty()) {
-                        JSTState newState = currentState.state.applyOp(op, alpha, currentState.addList(), currentState.deleteList());
+                        JSTState newState = currentState.state.applyOp(op, alpha, currentState.addList(), currentState.deleteList(), vars);
                         double action_cost = this.action_cost(op, alpha, currentState);
                         JSPlan result = this.random_simulation(newState, rest, depth + 1, plan_cost + action_cost);
                         if (!result.isFailure()) {

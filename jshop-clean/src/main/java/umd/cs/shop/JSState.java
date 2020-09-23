@@ -12,12 +12,28 @@ public class JSState {
     public boolean wallBuilt = false;
     public boolean railingBuilt = false;
     // This is a Vector over JSPredicateForm (call terms count as JSPredicateForm but should not end up in the state)
+    public Set<JSTaskLandmark> taskLandmarks;
+    Set<JSFactLandmark> factLandmarks;
+
 
     /*==== instance variables ====*/
 
     public JSState(Set<JSPredicateForm> atoms) {
         this.atoms = new HashSet<JSPredicateForm>();
         this.atoms.addAll(atoms);
+    }
+
+    public JSState(Set<JSPredicateForm> atoms, Set<JSFactLandmark> facts, Set<JSTaskLandmark> tasks) {
+        this.atoms = new HashSet<JSPredicateForm>();
+        this.atoms.addAll(atoms);
+        this.factLandmarks = new HashSet<JSFactLandmark>();
+        this.factLandmarks.addAll(facts);
+        //for(JSPredicateForm pred : this.atoms){
+        //    this.factLandmarks.removeIf(landmark -> landmark.compare(pred, true));
+        //}
+        this.taskLandmarks = new HashSet<JSTaskLandmark>();
+        this.taskLandmarks.addAll(tasks);
+
     }
 
     public JSState(StreamTokenizer tokenizer) {
@@ -77,7 +93,7 @@ public class JSState {
     }
 
     JSTState applyOp(JSOperator op, JSSubstitution alpha, JSListLogicalAtoms addL,
-                     JSListLogicalAtoms delL) {
+                     JSListLogicalAtoms delL, JSJshopVars vars) {
         JSListLogicalAtoms add = op.addList();
         JSListLogicalAtoms del = op.deleteList();
         JSListLogicalAtoms opAddL = add.applySubstitutionListLogicalAtoms(alpha);
@@ -98,16 +114,25 @@ public class JSState {
             JSUtil.println(")");
         } */
         //  JSUtil.flagPlanning("<-- ndelete list");
-
-        JSState ns = new JSState(this.atoms);
+        JSState ns;
+        if(vars.landmarks)
+            ns = new JSState(this.atoms, this.factLandmarks, this.taskLandmarks);
+        else
+            ns = new JSState(this.atoms);
 
         for (Object o : opDelL){
-            ns.atoms.remove(o);
+            JSPredicateForm pred = (JSPredicateForm) o;
+            ns.atoms.remove(pred);
+            if(vars.landmarks)
+                ns.factLandmarks.removeIf(landmark -> landmark.compare(pred, false));
         }
 
 
         for (Object o : opAddL) {
-            ns.atoms.add((JSPredicateForm) o);
+            JSPredicateForm pred = (JSPredicateForm) o;
+            ns.atoms.add(pred);
+            if(vars.landmarks)
+                ns.factLandmarks.removeIf(landmark -> landmark.compare(pred, true));
         }
 
 
@@ -117,6 +142,11 @@ public class JSState {
             if (!opDelL.contains(el)) {
                 nAddL.addElement(el);
             }
+            if(vars.landmarks) {
+                JSPredicateForm pred = (JSPredicateForm) addL.elementAt(i);
+                ns.factLandmarks.removeIf(landmark -> landmark.compare(pred, true));
+            }
+
         }
         nAddL.addElements(opAddL);
         ns.updateBoolFlags(this, add);
@@ -127,6 +157,10 @@ public class JSState {
             el = (JSPredicateForm) delL.elementAt(i);
             if (!opAddL.contains(el)) {
                 nDelL.addElement(el);
+            }
+            if(vars.landmarks) {
+                JSPredicateForm pred = (JSPredicateForm) delL.elementAt(i);
+                ns.factLandmarks.removeIf(landmark -> landmark.compare(pred, false));
             }
         }
         nDelL.addElements(opDelL);

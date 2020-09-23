@@ -1,10 +1,11 @@
 package umd.cs.shop;
 
-import javax.print.DocFlavor;
 import javax.swing.*;
 import java.io.*;
 import java.net.MalformedURLException;
 import java.net.URL;
+import java.util.HashSet;
+import java.util.Set;
 import java.util.Vector;
 
 import picocli.CommandLine;
@@ -94,13 +95,19 @@ public final class JSJshop implements Runnable {
     @Option(names = {"--randomSeed"}, defaultValue = "42", description = "use this number as seed for random Generator")
     int randomSeed;
 
+    @Option(names = {"-l", "--landmarks"}, defaultValue = "false", description = "Use landmarks")
+    boolean landmarks;
+
+    @Option(names = {"-lf", "--landmarkFile"}, defaultValue = "", description = "Name of Landmark File")
+    String landmarkFile;
+
     @Override
     public void run() {
         /*JSPlan plan = nlgSearch(mctsruns, timeout);
         if(plan != null){
             return;
         }*/
-        JSJshopVars variables = new JSJshopVars(bbPruning, useApproximatedCostFunction, random, true);
+        JSJshopVars variables = new JSJshopVars(bbPruning, useApproximatedCostFunction, random, true, landmarks);
         variables.startTime = System.currentTimeMillis();
         variables.initRandGen(this.randomSeed);
         JSUtil.println("Reading file " + nameDomainFile);
@@ -116,8 +123,21 @@ public final class JSJshop implements Runnable {
         JSUtil.println("Problem file parsed successfully");
         final long parseTime = System.currentTimeMillis();
         JSUtil.println("Parsing Time: " + (parseTime - variables.startTime));
+        if(!variables.domain.getName().equals("minecraft"))
+            variables.costFunction = CostFunction.getCostFunction(costFunctionName, variables.domain.getName());
+        else
+            variables.costFunction = CostFunction.getCostFunction(costFunctionName, variables.domain.getName(), CostFunction.InstructionLevel.MEDIUM);
 
-        variables.costFunction = CostFunction.getCostFunction(costFunctionName, variables.domain.getName(), CostFunction.InstructionLevel.BLOCK);
+        if(landmarks){
+            JSUtil.println("Starting landmark parsing");
+            if(!parserFileLandmarks(landmarkFile))
+                System.exit(0);
+            JSUtil.println("Initial Fact Landmarks: ");
+            JSUtil.println(initialFactLandmarks.toString());
+            JSUtil.println("initial Task Landmarks: ");
+            JSUtil.println(initialTaskLandmarks.toString());
+
+        }
 
 
         if (standardSearch) {
@@ -140,6 +160,9 @@ public final class JSJshop implements Runnable {
     public JSPlanningProblem prob;
 
     JSPlanningDomain domain;
+
+    Set<JSFactLandmark> initialFactLandmarks;
+    Set<JSTaskLandmark> initialTaskLandmarks;
 
     private JSListPlanningProblem probSet = new JSListPlanningProblem();
 
@@ -179,6 +202,13 @@ public final class JSJshop implements Runnable {
             if(vars.print) {
                 JSUtil.println("Solving Problem :" + prob.Name() + " with mcts");
                 JSUtil.println("time till timeout: " + timeout);
+            }
+            if(landmarks) {
+                prob.state().factLandmarks = initialFactLandmarks;
+                for(JSPredicateForm pred : prob.state().atoms){
+                    prob.state().factLandmarks.removeIf(landmark -> landmark.compare(pred, true));
+                }
+                prob.state().taskLandmarks = initialTaskLandmarks;
             }
             vars.domain.solveMCTS(prob, mctsruns, timeout, printTree, vars);
             if(!vars.print){
@@ -273,7 +303,7 @@ public final class JSJshop implements Runnable {
         if (!parseSuccess) {
             JSUtil.println("Problem File not parsed correctly");
         }
-        JSJshopVars vars = new JSJshopVars(false, true, false, false);
+        JSJshopVars vars = new JSJshopVars(false, true, false, false, false);
         vars.initRandGen(42);
         this.domain.axioms.setVars(vars);
         vars.domain = this.domain;
@@ -543,6 +573,81 @@ public final class JSJshop implements Runnable {
             throw new JSParserError(); //return;
         }
     }
+
+
+    public boolean parserFileLandmarks(String libraryFile) {
+        String libraryDirectory = ".";
+
+        try {
+            FileReader fr = new FileReader(libraryFile);
+            StreamTokenizer tokenizer = new StreamTokenizer(fr);
+            tokenizer.lowerCaseMode(true);
+            //JSUtil.initParseTable(tokenizer);
+            if (fr == null) {
+                JSUtil.println("Can not open file : " + libraryFile);
+                return false;
+            }
+            if (tokenizer.nextToken() != StreamTokenizer.TT_EOF)
+                processTokenLandmarks(tokenizer);
+            fr.close();
+        } catch (IOException e) {
+            System.out.println("Error in readFile() : " + e);
+            return false;
+        } catch (JSParserError parserError) {
+            System.out.println("Error in parsing file");
+            return false;
+        }
+        return true;
+    }
+
+
+    public void processTokenLandmarks(StreamTokenizer tokenizer) {
+        initialFactLandmarks = new HashSet<JSFactLandmark>() ;
+        initialTaskLandmarks = new HashSet<>();
+        while (tokenizer.ttype != StreamTokenizer.TT_EOF) {
+            if (tokenizer.ttype == JSJshopVars.leftBrac) {
+                if (!JSUtil.expectTokenType(StreamTokenizer.TT_WORD, tokenizer,
+                        "Expected landmark description "))
+                    throw new JSParserError(); //return;
+
+                tokenizer.pushBack();
+
+                String w = JSUtil.readWord(tokenizer, "JSJshop>>processToken");
+                if (w.equals("%%%"))
+                    throw new JSParserError(); //return;
+
+                if (w.equalsIgnoreCase("factlm")) {
+                    JSUtil.readToken(tokenizer, "rightBrac");
+                    JSFactLandmark tmp= new JSFactLandmark(tokenizer);
+                    initialFactLandmarks.add(tmp);
+                } else if (w.equalsIgnoreCase("tasklm")) {
+                    JSUtil.readToken(tokenizer, "rightBrac");
+                    JSTaskLandmark tmp = new JSTaskLandmark(tokenizer, false);
+                    initialTaskLandmarks.add(tmp);
+                } else if (w.equalsIgnoreCase("actionlm")) {
+                    JSUtil.readToken(tokenizer, "rightBrac");
+                    JSTaskLandmark tmp = new JSTaskLandmark(tokenizer, true);
+                    initialTaskLandmarks.add(tmp);
+                } else if (w.equalsIgnoreCase("methodlm")){
+                    while (tokenizer.ttype != StreamTokenizer.TT_EOL && tokenizer.ttype != StreamTokenizer.TT_EOF && tokenizer.ttype != JSJshopVars.leftBrac)
+                        JSUtil.readToken(tokenizer, "reading methodLMs");
+                    tokenizer.pushBack();
+                } else {
+                    System.err.println("Line : " + tokenizer.lineno() + " Expected '('");
+                    throw new JSParserError(); //return;
+                }
+
+            } else {
+                System.err.println("Line : " + tokenizer.lineno() + " Expected '('");
+                throw new JSParserError(); //return;
+            }
+
+            JSUtil.readToken(tokenizer, "nextToken");
+            //tokenizer.pushBack();
+
+        }
+    }
+
 
     public JSPlanningProblem prob() {
         return prob;
