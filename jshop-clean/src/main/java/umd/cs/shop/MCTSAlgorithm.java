@@ -15,7 +15,7 @@ public class MCTSAlgorithm {
         }
         if (tst.taskNetwork().isEmpty()) {
             tst.setGoal(vars);
-            JSUtil.println("Task Landmark cost at Goal: " + tst.tState().state().taskLandmarks.size() + " Fact landmark cost: " + tst.tState().state().factLandmarks.size());
+            //JSUtil.println("Task Landmark cost at Goal: " + tst.tState().state().taskLandmarks.size() + " Fact landmark cost: " + tst.tState().state().factLandmarks.size());
             //tst.plan.printPlan();
             this.vars.foundPlan(tst.plan, depth);
             return tst.getCost(vars);

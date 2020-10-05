@@ -12,7 +12,11 @@ public interface MCTSPolicy {
 
     public static MCTSPolicy getPolicy(JSJshopVars vars, boolean min, double explor) {
         //if ("uct1".equals(policy)) {
+        if(vars.landmarks){
+            return new LandmarksPolicy(vars, min, explor);
+        } else
             return new UCTPolicy(vars, min, explor);
+            //return new LandmarksPolicy(vars, min, explor);
             //case "uct2":
             //    return new UCTVersion2();
         //}

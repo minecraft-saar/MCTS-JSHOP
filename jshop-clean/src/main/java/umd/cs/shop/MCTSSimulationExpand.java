@@ -44,8 +44,8 @@ public class MCTSSimulationExpand implements MCTSSimulation {
         if (current.taskNetwork().isEmpty()) {
             current.setGoal(vars);
             if(vars.landmarks) {
-                JSUtil.println("Task Landmark cost at Goal: " + current.tState().state().taskLandmarks.size() + " Fact landmark cost: " + current.tState().state().factLandmarks.size());
-                JSUtil.println(current.tState().state.factLandmarks.toString());
+                //JSUtil.println("Task Landmark cost at Goal: " + current.tState().state().taskLandmarks.size() + " Fact landmark cost: " + current.tState().state().factLandmarks.size());
+                //JSUtil.println(current.tState().state.factLandmarks.toString());
             }
             vars.foundPlan(current.plan, depth);
             return current.getCost(vars);
