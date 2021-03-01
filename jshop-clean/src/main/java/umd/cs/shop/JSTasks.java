@@ -112,31 +112,31 @@ public class JSTasks extends JSListLogicalAtoms {
     }
 
     /*   Multi plan generator */
-    public JSListPairPlanTStateNodes seekPlanAll(MCTSNode ts, boolean All, JSJshopVars vars) {
+    public Vector<JSPairPlanTSListNodes> seekPlanAll(MCTSNode ts, boolean All, JSJshopVars vars) {
 
-        JSListPairPlanTStateNodes results, plans = new JSListPairPlanTStateNodes();
+        Vector<JSPairPlanTSListNodes> results, plans = new Vector<>();
         JSPairPlanTSListNodes ptl;
         JSPlan ans;
         JSPairPlanTState pair;
-        JSPlan sol;
+        //JSPlan sol;
         JSJshopNode node;
-        Vector listnodes;
+        //Vector listnodes;
         JSTaskAtom ta;
-        JSTState tts;
+        //JSTState tts;
 
         if (vars.bb_pruning(ts.plan.planCost())){
             return plans;
         }
 
         if (this.isEmpty()) {
-            if (vars.flagLevel > 1)
+            if (JSJshopVars.flagLevel > 1)
                 JSUtil.println("Returning successfully from find-plan : No more tasks to plan");
 
             //pair = new JSPairPlanTState((new JSPlan()), ts.tState());
             pair = new JSPairPlanTState(ts.plan, ts.tState());
             ptl = new JSPairPlanTSListNodes(pair, new Vector<>());
-            double cost = ts.plan.planCost();
-            long currentTime = System.currentTimeMillis();
+            //double cost = ts.plan.planCost();
+            //long currentTime = System.currentTimeMillis();
             vars.foundPlan(ts.plan, 0);
             //JSUtil.println("Found plan after " + (currentTime - JSJshopVars.startTime) + " ms of cost " + cost);
             plans.addElement(ptl);
@@ -144,7 +144,7 @@ public class JSTasks extends JSListLogicalAtoms {
         }
 
         JSTaskAtom t = (JSTaskAtom) this.firstElement();
-        if (vars.flagLevel > 2) {
+        if (JSJshopVars.flagLevel > 2) {
             JSUtil.println(" ");
             JSUtil.print("Searching a plan for");
             t.print();
@@ -155,7 +155,7 @@ public class JSTasks extends JSListLogicalAtoms {
             pair = t.seekSimplePlanCostFunction(ts.tState(), vars);
             ans = pair.plan();
             if (ans.isFailure()) {
-                if (vars.flagLevel > 1)
+                if (JSJshopVars.flagLevel > 1)
                     JSUtil.println("Returning failure from find-plan: Can not find an operator");
                 return plans; // failure - empty list
             }
@@ -171,7 +171,7 @@ public class JSTasks extends JSListLogicalAtoms {
             node = new JSJshopNode(t, new Vector<>());
 
             for (int i = 0; i < results.size(); i++) {
-                ptl = (JSPairPlanTSListNodes) results.elementAt(i);
+                ptl = results.elementAt(i);
                 //ptl.planS().plan().insertWithCost(0, ta, ans.elementCost(0));
                 ptl.listNodes().insertElementAt(node, 0);
                 plans.addElement(ptl);
@@ -184,10 +184,10 @@ public class JSTasks extends JSListLogicalAtoms {
         red = vars.domain.methods().findAllReduction(t, ts.tState().state(), red, vars.domain.axioms());
         JSTasks newTasks;
         JSMethod selMet = red.selectedMethod();
-        if (vars.flagLevel > 1 && red.isDummy())
+        if (JSJshopVars.flagLevel > 1 && red.isDummy())
             JSUtil.println("Returning failure from find-plan: Can not find an applicable method");
         while (!red.isDummy()) {
-            if (vars.flagLevel > 4) {
+            if (JSJshopVars.flagLevel > 4) {
                 JSUtil.println("The reductions are: ");
                 red.printReductions();
             }
@@ -206,7 +206,7 @@ public class JSTasks extends JSListLogicalAtoms {
                     continue;
 
                 for (int j = 0; j < results.size(); j++) {
-                    ptl = (JSPairPlanTSListNodes) results.elementAt(j);
+                    ptl = results.elementAt(j);
                     ptl.listNodes().addElement(node);
                     plans.addElement(ptl);
                     if (plans.size() >= 1 && !All)

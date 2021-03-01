@@ -5,10 +5,15 @@ import java.util.*;
 import java.io.*;
 
 
-public class JSListConjuncts extends Vector<Object> {
+public class JSListConjuncts {
 
+    Vector<JSListLogicalAtoms> listLogicalAtomsVector;
     JSListConjuncts() {
-        super();
+        listLogicalAtomsVector = new Vector<>();
+    }
+
+    JSListConjuncts(Vector<JSListLogicalAtoms> inputVec){
+        listLogicalAtomsVector = inputVec;
     }
 
 
@@ -36,7 +41,7 @@ public class JSListConjuncts extends Vector<Object> {
             }
             listAtoms = new JSListLogicalAtoms(tokenizer);
             listAtoms.setName(name);
-            this.addElement(listAtoms);
+            listLogicalAtomsVector.addElement(listAtoms);
             if (!JSUtil.readToken(tokenizer, "Expecting ) for axiom definition"))
                 throw new JSParserError();//return;
             index++;
@@ -47,8 +52,8 @@ public class JSListConjuncts extends Vector<Object> {
     public void print() {
 
         JSListLogicalAtoms el;
-        for (short i = 0; i < this.size(); i++) {
-            el = (JSListLogicalAtoms) this.elementAt(i);
+        for (short i = 0; i < listLogicalAtomsVector.size(); i++) {
+            el = listLogicalAtomsVector.elementAt(i);
             JSUtil.println(el.Name());
             el.print();
         }
@@ -58,9 +63,9 @@ public class JSListConjuncts extends Vector<Object> {
         JSListConjuncts newList = new JSListConjuncts();
         JSListLogicalAtoms listAtoms;
 
-        for (short i = 0; i < this.size(); i++) {
-            listAtoms = (JSListLogicalAtoms) this.elementAt(i);
-            newList.addElement(listAtoms.standarizerListLogicalAtoms(vars));
+        for (short i = 0; i < listLogicalAtomsVector.size(); i++) {
+            listAtoms = listLogicalAtomsVector.elementAt(i);
+            newList.listLogicalAtomsVector.addElement(listAtoms.standarizerListLogicalAtoms(vars));
         }
         return newList;
     }

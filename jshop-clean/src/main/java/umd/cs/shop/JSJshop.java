@@ -164,7 +164,7 @@ public final class JSJshop implements Runnable {
     Set<JSFactLandmark> initialFactLandmarks;
     Set<JSTaskLandmark> initialTaskLandmarks;
 
-    private JSListPlanningProblem probSet = new JSListPlanningProblem();
+    private Vector<JSPlanningProblem> probSet = new Vector<>();
 
     private JSPlan sol;
 
@@ -241,7 +241,7 @@ public final class JSJshop implements Runnable {
         vars.allPlans = allPlans;
         JSJshopVars.flagLevel = detail;
         JSPairPlanTSListNodes pair;
-        JSListPairPlanTStateNodes allPlans;
+        Vector<JSPairPlanTSListNodes> allPlans;
 
         for (int k = 0; k < probSet.size(); k++) {
 

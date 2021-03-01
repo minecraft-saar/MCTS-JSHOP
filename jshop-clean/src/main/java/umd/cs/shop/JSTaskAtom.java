@@ -50,7 +50,7 @@ public class JSTaskAtom extends JSPredicateForm {
         //JSPairPlanTState pair;
         JSSubstitution alpha;
         JSOperator op;
-        JSListOperators list = vars.domain.operators();
+        Vector<JSOperator> list = vars.domain.operators();
         JSTaskAtom top;
         //JSState ns;
         JSTState tState;
@@ -58,7 +58,7 @@ public class JSTaskAtom extends JSPredicateForm {
         boolean thisIsGround = this.isGround();
 
         for (short i = 0; i < list.size(); i++) {
-            op = (JSOperator) list.elementAt(i);
+            op = list.elementAt(i);
             top = op.head();
             if (!thisIsGround) {
                 top = top.standarizerTA(vars);
@@ -70,7 +70,7 @@ public class JSTaskAtom extends JSPredicateForm {
                 vars.VarCounter++;
 
                 JSListSubstitution satisfiers = vars.domain.axioms().TheoremProver(op.precondition(), ts.state(), alpha, true);
-                if (!satisfiers.isEmpty()) {
+                if (!satisfiers.substitutionVector.isEmpty()) {
 
                     tState = ts.state().applyOp(op, alpha, ts.addList(), ts.deleteList(), vars);
                     //ns = tState.state();
@@ -89,7 +89,7 @@ public class JSTaskAtom extends JSPredicateForm {
         //JSPairPlanTState pair;
         JSSubstitution alpha;
         JSOperator op;
-        JSListOperators list = vars.domain.operators();
+        Vector<JSOperator> list = vars.domain.operators();
         JSTaskAtom top;
         //JSState ns;
         JSTState tState;
@@ -97,7 +97,7 @@ public class JSTaskAtom extends JSPredicateForm {
         boolean thisIsGround = this.isGround();
 
         for (short i = 0; i < list.size(); i++) {
-            op = (JSOperator) list.elementAt(i);
+            op = list.elementAt(i);
             top = op.head();
             if (!thisIsGround) {
                 top = top.standarizerTA(vars);
@@ -109,7 +109,7 @@ public class JSTaskAtom extends JSPredicateForm {
                 vars.VarCounter++;
 
                 JSListSubstitution satisfiers = vars.domain.axioms().TheoremProver(op.precondition(), ts.state(), alpha, true);
-                if (!satisfiers.isEmpty()) {
+                if (!satisfiers.substitutionVector.isEmpty()) {
                     tState = ts.state().applyOp(op, alpha, ts.addList(), ts.deleteList(),vars);
                     //ns = tState.state();
                     top = op.head();

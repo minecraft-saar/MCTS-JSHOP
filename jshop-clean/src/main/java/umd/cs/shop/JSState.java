@@ -215,7 +215,7 @@ public class JSState {
 
         } else {
             answer = (JSSubstitution) alpha.clone();
-            answer.addElements((JSSubstitution) satisfiers.elementAt(0));
+            answer.addElements((JSSubstitution) satisfiers.substitutionVector.elementAt(0));
        /*  if (conds.size() >0){
             this.print();
              }*/
@@ -242,11 +242,11 @@ public class JSState {
         JSSubstitution beta;
         JSListSubstitution answers = new JSListSubstitution();
         JSListSubstitution satisfiers = axioms.TheoremProver(conds, this, alpha, findfirst);
-        for (i = 0; i < satisfiers.size(); i++) {
+        for (i = 0; i < satisfiers.substitutionVector.size(); i++) {
 
-            beta = (JSSubstitution) ((JSSubstitution) satisfiers.elementAt(i)).clone();
+            beta = (JSSubstitution) (satisfiers.substitutionVector.elementAt(i)).clone();
             beta.addElements((JSSubstitution) alpha.clone());
-            answers.addElement(beta);
+            answers.substitutionVector.addElement(beta);
 
         }
 
@@ -276,7 +276,7 @@ public class JSState {
                     JSUtil.println(" Goal matches atom: ");
                     el.print();
                 }*/
-                answers.addElement(subs);
+                answers.substitutionVector.addElement(subs);
             }
 
         }

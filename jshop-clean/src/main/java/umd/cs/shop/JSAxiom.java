@@ -65,8 +65,8 @@ public class JSAxiom {
 
     public void setName(String mName) {
         JSListLogicalAtoms listAtom;
-        for (int i = 0; i < tail.size(); i++) {
-            listAtom = (JSListLogicalAtoms) tail.elementAt(i);
+        for (int i = 0; i < tail.listLogicalAtomsVector.size(); i++) {
+            listAtom = (JSListLogicalAtoms) tail.listLogicalAtomsVector.elementAt(i);
             listAtom.setName(mName + listAtom.Name());
         }
     }

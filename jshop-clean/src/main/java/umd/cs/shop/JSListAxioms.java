@@ -3,16 +3,15 @@ package umd.cs.shop;
 import java.util.*;
 
 
-public class JSListAxioms extends Vector<Object> {
+public class JSListAxioms  {
 
     /*==== instance variables ====*/
 
     private String label;
     JSJshopVars vars;
-
+    Vector<JSAxiom> axiomsVec;
     JSListAxioms() {
-
-        super();
+        axiomsVec = new Vector<>();
     }
 
     public void setVars(JSJshopVars vars){
@@ -21,9 +20,8 @@ public class JSListAxioms extends Vector<Object> {
 
     public void print() {
 
-        JSAxiom el;
-        for (short i = 0; i < this.size(); i++) {
-            el = (JSAxiom) this.elementAt(i);
+        for (short i = 0; i < axiomsVec.size(); i++) {
+            JSAxiom el = axiomsVec.elementAt(i);
             el.print();
         }
     }
@@ -42,7 +40,7 @@ public class JSListAxioms extends Vector<Object> {
         String str;
         answers = new JSListSubstitution();
         if (conds.size() == 0) {
-            answers.addElement(new JSSubstitution());
+            answers.substitutionVector.addElement(new JSSubstitution());
             if (JSJshopVars.flagLevel > 5)
                 JSUtil.println("Returning successfully from find-satisfiers : No more goals to satisfy");
             return answers;
@@ -102,30 +100,30 @@ public class JSListAxioms extends Vector<Object> {
 
         subanswers1 = S.satisfiesTAm(e1, alpha);
         if (!subanswers1.fail()) {
-            for (int i = 0; i < subanswers1.size(); i++) {
+            for (int i = 0; i < subanswers1.substitutionVector.size(); i++) {
            /* tetha= (JSSubstitution)alpha.clone();
             tetha.addElements((JSSubstitution)subanswers1.elementAt(i)); */
-                tetha = (JSSubstitution) ((JSSubstitution) subanswers1.elementAt(i)).clone();
+                tetha = (JSSubstitution) ( subanswers1.substitutionVector.elementAt(i)).clone();
                 tetha.addElements((JSSubstitution) alpha.clone());
 
                 subanswers2 = TheoremProver(Rest, S, tetha, findall);
                 if (!subanswers2.fail())
-                    for (int j = 0; j < subanswers2.size(); j++) {
+                    for (int j = 0; j < subanswers2.substitutionVector.size(); j++) {
                  /*  kappa= (JSSubstitution)((JSSubstitution)subanswers1.elementAt(i)).clone();
                    kappa.addElements((JSSubstitution)subanswers2.elementAt(j));*/
-                        kappa = (JSSubstitution) ((JSSubstitution) subanswers2.elementAt(j)).clone();
-                        kappa.addElements((JSSubstitution) subanswers1.elementAt(i));
-                        answers.addElement(kappa);
-                        if ((answers.size() == 1) && (!findall))
+                        kappa = (JSSubstitution) (subanswers2.substitutionVector.elementAt(j)).clone();
+                        kappa.addElements(subanswers1.substitutionVector.elementAt(i));
+                        answers.substitutionVector.addElement(kappa);
+                        if ((answers.substitutionVector.size() == 1) && (!findall))
                             return answers;
                     }
             }
         }
 
 
-        for (int i = 0; i < this.size(); i++) {
+        for (int i = 0; i < axiomsVec.size(); i++) {
 
-            axiom = ((JSAxiom) this.elementAt(i)).standarizerAxiom(vars);
+            axiom = axiomsVec.elementAt(i).standarizerAxiom(vars);
             gamma = axiom.head().matches(e1, alpha);
             if (!gamma.fail()) {
                 if (JSJshopVars.flagLevel > 8) {
@@ -133,9 +131,9 @@ public class JSListAxioms extends Vector<Object> {
                     axiom.print();
                 }
                 this.vars.VarCounter++;
-                TailAxiom = (JSListConjuncts) axiom.tail().clone();
-                for (int k = 0; k < TailAxiom.size(); k++) {
-                    conjunct = (JSListLogicalAtoms) TailAxiom.elementAt(k);
+                TailAxiom = new JSListConjuncts((Vector<JSListLogicalAtoms>) (axiom.tail().listLogicalAtomsVector).clone()) ;
+                for (int k = 0; k < TailAxiom.listLogicalAtomsVector.size(); k++) {
+                    conjunct =  TailAxiom.listLogicalAtomsVector.elementAt(k);
                     conjunct.addElements(Rest);
                /* tetha= (JSSubstitution)alpha.clone();
                 tetha.addElements(gamma);*/
@@ -143,13 +141,13 @@ public class JSListAxioms extends Vector<Object> {
                     tetha.addElements(alpha);
                     subanswers2 = TheoremProver(conjunct, S, tetha, findall);
                     if (!subanswers2.fail()) {
-                        for (int j = 0; j < subanswers2.size(); j++) {
+                        for (int j = 0; j < subanswers2.substitutionVector.size(); j++) {
                    /*  kappa= (JSSubstitution)gamma.clone();
                      kappa.addElements((JSSubstitution)subanswers2.elementAt(j));*/
-                            kappa = (JSSubstitution) ((JSSubstitution) subanswers2.elementAt(j)).clone();
+                            kappa = (JSSubstitution) ( subanswers2.substitutionVector.elementAt(j)).clone();
                             kappa.addElements((JSSubstitution) gamma.clone());
-                            answers.addElement(kappa);
-                            if ((answers.size() == 0) && (!findall))
+                            answers.substitutionVector.addElement(kappa);
+                            if ((answers.substitutionVector.size() == 0) && (!findall))
                                 return answers;
                         }
                         break;

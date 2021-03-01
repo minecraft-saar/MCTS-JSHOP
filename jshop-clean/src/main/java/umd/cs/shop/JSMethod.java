@@ -30,8 +30,8 @@ public class JSMethod {
 
     public void setName(String mName) {
         JSPairIfThen pair;
-        for (int i = 0; i < ifThenElseList.size(); i++) {
-            pair = (JSPairIfThen) ifThenElseList.elementAt(i);
+        for (int i = 0; i < ifThenElseList.ifThenVector.size(); i++) {
+            pair = ifThenElseList.ifThenVector.elementAt(i);
             pair.setName(mName + pair.Name());
         }
     }

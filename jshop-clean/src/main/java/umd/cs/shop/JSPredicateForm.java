@@ -269,7 +269,7 @@ public class JSPredicateForm extends Vector<Object> {
 
         JSTerm ti;
         JSSubstitution gama = new JSSubstitution();
-        JSSubstitution newAlpha = (JSSubstitution) alpha.cloneS();
+        JSSubstitution newAlpha = alpha.cloneS();
 
         for (short i = 1; i < this.size(); i++) {
             ti = (JSTerm) this.elementAt(i);

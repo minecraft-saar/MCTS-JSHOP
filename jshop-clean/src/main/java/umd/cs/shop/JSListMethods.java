@@ -2,19 +2,21 @@ package umd.cs.shop;
 
 import java.util.*;
 
-public class JSListMethods extends Vector<Object> {
+public class JSListMethods {
     /*==== instance variables ====*/
     private String label;
+    Vector<JSMethod> methodsVec;
 
     JSListMethods() {
-        super();
+        methodsVec = new Vector<>();
+
     }
 
     public void print() {
 
         JSMethod el;
-        for (short i = 0; i < this.size(); i++) {
-            el = (JSMethod) this.elementAt(i);
+        for (short i = 0; i < methodsVec.size(); i++) {
+            el = methodsVec.elementAt(i);
             el.print();
         }
     }
@@ -33,10 +35,10 @@ public class JSListMethods extends Vector<Object> {
         if (red.isDummy()) {//JSUtil.flag("dummy");
             base = 0;
         } else {//JSUtil.flag("not dummy");
-            base = this.indexOf(red.selectedMethod()) + 1;
+            base = methodsVec.indexOf(red.selectedMethod()) + 1;
         }
-        for (int i = base; i < this.size(); i++) {
-            met = (JSMethod) this.elementAt(i);
+        for (int i = base; i < methodsVec.size(); i++) {
+            met = methodsVec.elementAt(i);
             //met.print();
 //		JSUtil.flag("<- evaluating method");
             tmet = met.head();
@@ -67,7 +69,7 @@ public class JSListMethods extends Vector<Object> {
         JSMethod met;
         int base;
         JSListIfThenElse list;
-        JSTasks newT;
+        //JSTasks newT;
         JSTaskAtom tmet;
         Vector<JSTasks> allReductions;
         boolean taskIsGround = task.isGround();
@@ -76,10 +78,10 @@ public class JSListMethods extends Vector<Object> {
         if (red.isDummy()) {
             base = 0;
         } else {
-            base = this.indexOf(red.selectedMethod()) + 1;
+            base = methodsVec.indexOf(red.selectedMethod()) + 1;
         }
-        for (int i = base; i < this.size(); i++) {
-            met = (JSMethod) this.elementAt(i);
+        for (int i = base; i < methodsVec.size(); i++) {
+            met = methodsVec.elementAt(i);
             tmet = met.head();
             if (!taskIsGround)
                 tmet = tmet.standarizerTA(axioms.vars);

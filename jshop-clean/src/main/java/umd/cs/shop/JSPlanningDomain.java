@@ -12,7 +12,7 @@ public class JSPlanningDomain {
 
     JSListAxioms axioms = new JSListAxioms();
 
-    private JSListOperators operators = new JSListOperators();
+    private final Vector<JSOperator> operators = new Vector<>();
 
     private JSListMethods methods = new JSListMethods();
 
@@ -64,8 +64,8 @@ public class JSPlanningDomain {
 
             if (tokenizer.ttype == JSJshopVars.minus) {
                 ax = new JSAxiom(tokenizer);
-                ax.setName("Axiom_" + (axioms.size() + 1) + "_");
-                axioms.addElement(ax);
+                ax.setName("Axiom_" + (axioms.axiomsVec.size() + 1) + "_");
+                axioms.axiomsVec.addElement(ax);
             } else {
                 if (tokenizer.ttype != StreamTokenizer.TT_WORD) {
                     JSUtil.println("Line : " + tokenizer.lineno() + " method/operator expected");
@@ -77,8 +77,8 @@ public class JSPlanningDomain {
                     } else {
                         if (tokenizer.sval.equalsIgnoreCase("method")) {
                             met = new JSMethod(tokenizer);
-                            met.setName("Method_" + (methods.size() + 1) + "_");
-                            methods.addElement(met);
+                            met.setName("Method_" + (methods.methodsVec.size() + 1) + "_");
+                            methods.methodsVec.addElement(met);
 
                         } else {
                             JSUtil.println("Line : " + tokenizer.lineno() + " Expecting method or operator found text:" + tokenizer.sval);
@@ -102,7 +102,7 @@ public class JSPlanningDomain {
     public JSPairPlanTSListNodes solve(JSPlanningProblem prob, Vector<Object> listNodes, JSJshopVars vars) {
         JSPairPlanTState pair = new JSPairPlanTState();
 
-        if (vars.flagLevel > 8) {
+        if (JSJshopVars.flagLevel > 8) {
             JSUtil.print("====== SOLVING A NEW PROBLEM====");
             this.print();
             JSUtil.print("PROBLEM");
@@ -161,9 +161,9 @@ public class JSPlanningDomain {
     }
 
 
-    public JSListPairPlanTStateNodes solveAll(JSPlanningProblem prob, boolean All, JSJshopVars vars) {
+    public Vector<JSPairPlanTSListNodes> solveAll(JSPlanningProblem prob, boolean All, JSJshopVars vars) {
 
-        JSListPairPlanTStateNodes allPlans;
+        Vector<JSPairPlanTSListNodes> allPlans;
         JSTasks tasks = prob.tasks();
         JSTState ts = new JSTState(prob.state(), new JSListLogicalAtoms(), new JSListLogicalAtoms());
         JSPlan plan = new JSPlan();
@@ -179,7 +179,10 @@ public class JSPlanningDomain {
         JSUtil.print("make-domain ");
         JSUtil.println(name + " ");
         axioms.print();
-        operators.print();
+        for (short i = 0; i < operators.size(); i++) {
+            JSOperator el = (JSOperator) operators.elementAt(i);
+            el.print();
+        }
         methods.print();
         JSUtil.println(")");
     }
@@ -192,7 +195,7 @@ public class JSPlanningDomain {
         return axioms;
     }
 
-    public JSListOperators operators() {
+    public Vector<JSOperator> operators() {
         return operators;
     }
 

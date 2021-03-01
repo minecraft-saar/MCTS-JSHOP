@@ -5,21 +5,22 @@ import java.util.*;
 import java.io.*;
 
 
-public class JSListSubstitution extends Vector<Object> {
+public class JSListSubstitution {
 
     /*==== instance variables ====*/
 
     private String label;
+    Vector<JSSubstitution> substitutionVector;
 
 
     JSListSubstitution() {
-        super();
+        substitutionVector = new Vector<>();
 
     }
 
 
     public boolean fail() {
-        return (this.size() == 0);
+        return (substitutionVector.size() == 0);
     }
 
     public void print() {
@@ -27,9 +28,9 @@ public class JSListSubstitution extends Vector<Object> {
         JSUtil.print("(");
 
         JSSubstitution s1;
-        Enumeration s = elements();
+        Enumeration<JSSubstitution> s = substitutionVector.elements();
         while (s.hasMoreElements()) {
-            s1 = (JSSubstitution) s.nextElement();
+            s1 = s.nextElement();
             if (s1 != null)
                 s1.print();
         }
