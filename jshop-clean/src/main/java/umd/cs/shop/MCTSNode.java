@@ -60,10 +60,7 @@ public class MCTSNode {
         this.solvedVisits += 1;
     }
 
-    double getCost(JSJshopVars vars) {
-        if(vars.landmarks){
-            return tState().state().taskLandmarks.size() + tState.state().factLandmarks.size()+this.cost;
-        }
+    double getCost() {
         return this.cost;
     }
 
@@ -81,12 +78,16 @@ public class MCTSNode {
     void setDeadEnd(JSJshopVars vars) {
         this.deadEnd = true;
         this.fullyExplored = true;
-        if(vars.landmarks) {
-            //JSUtil.println("Task Landmark cost at Dead End: " + tState().state().taskLandmarks.size() + " Fact landmark cost: " + tState().state().factLandmarks.size());
-            this.setCost((tState().state().taskLandmarks.size() + tState.state().factLandmarks.size()) * 2 + this.cost);
-        }
-        else
+        if (vars.landmarks) {
+            double sum = (tState().state().taskLandmarks.size() + tState.state().factLandmarks.size()) + this.plan.planCost;
+            JSUtil.println("Sum: " + sum);
+            double multiple = sum * 3;
+            this.setCost(multiple);
+            JSUtil.println("Task Landmark cost at Dead End: " + tState().state().taskLandmarks.size() + " Fact landmark cost: " + tState().state().factLandmarks.size() + " Plan Cost: " + this.plan.planCost + " Node ID: " + this.id);
+            JSUtil.println("Node Cost: " + this.cost);
+        } else {
             this.setCost(Double.POSITIVE_INFINITY);
+        }
     }
 
     void setCost(double r) {
@@ -111,12 +112,58 @@ public class MCTSNode {
         return this.deadEnd;
     }
 
-
     boolean isInTree() {
         return this.inTree;
     }
 
-    String dotTree() {
+    public boolean isFullyExplored() {
+        return fullyExplored || deadEnd;
+    }
+
+    public void checkFullyExplored(JSJshopVars vars) {
+        this.fullyExplored = true;
+        this.deadEnd = true;
+        for (MCTSNode c : children) {
+            if (!c.fullyExplored) {
+                this.fullyExplored = false;
+                this.deadEnd = false;
+                return;
+            }
+            if (!c.deadEnd) {
+                this.deadEnd = false;
+            }
+        }
+        if (this.deadEnd){
+            this.setDeadEnd(vars);
+        }
+    }
+
+    void expand(JSJshopVars vars) {
+
+        if (!this.children.isEmpty() || this.isDeadEnd()) {
+            //Node was already expanded
+            return;
+        }
+        Vector<MCTSNode> newChildren = vars.expansionPolicy.expand(this);
+        this.children.addAll(newChildren);
+        this.checkFullyExplored(vars);
+        if (this.children.isEmpty()) {
+            this.setDeadEnd(vars);
+        }
+    }
+
+
+    public void setGoal(JSJshopVars vars) {
+        vars.policy.computeCost(this); // sets cost
+        this.setFullyExplored();
+        if (this.isInTree()) {
+            this.incSolvedVisits();
+            this.incVisited();
+        }
+    }
+
+
+    public String dotTree() {
         String result = "digraph UCT {";
         result += dotNode();
         result += "}";
@@ -124,17 +171,17 @@ public class MCTSNode {
 
     }
 
-    String tasks_string() {
+    public String tasks_string() {
         String res = "";
         for (Object o : this.taskNetwork) {
-            res +=  o.toString() + "   ";
+            res += o.toString() + "   ";
         }
         return res;
 
 
     }
 
-    String dotNode() {
+    public String dotNode() {
         String color = "";
         String taskName = "";
         if (!this.taskNetwork.isEmpty()) {
@@ -145,7 +192,7 @@ public class MCTSNode {
         }
         String label = taskName + this.cost + " " + this.visited + " " + this.id;
         if (!this.inTree) {
-            //label = "";
+            label = label + " n";
         }
         if (this.deadEnd) {
             color = " style=filled fillcolor=red";
@@ -180,70 +227,6 @@ public class MCTSNode {
         }
 
         return result;
-    }
-
-    public boolean isFullyExplored() {
-        return fullyExplored || deadEnd;
-    }
-
-
-    public void checkFullyExplored() {
-        this.fullyExplored = true;
-        this.deadEnd = true;
-        for (MCTSNode c : children) {
-            if (!c.fullyExplored) {
-                this.fullyExplored = false;
-                this.deadEnd = false;
-                return;
-            }
-            if (!c.deadEnd) {
-                this.deadEnd = false;
-            }
-        }
-    }
-
-    void expand(JSJshopVars vars) {
-    /*if (plan.planCost() >= JSJshopVars.bestCost) {
-            this.setDeadEnd();
-            return;
-        }*/
-
-        if (!this.children.isEmpty() || this.isDeadEnd()) {
-            //Node was already expanded
-            return;
-        }
-        Vector<MCTSNode> newChildren = vars.expansionPolicy.expand(this);
-        if(vars.registry != null){
-            for(int i = 0; i< newChildren.size(); i++){
-                MCTSNode child = newChildren.get(i);
-                JSState state = child.tState().state();
-                JSTasks tasks = child.taskNetwork();
-
-                //TODO Check if the g-value is better!
-                if(!vars.registry.checkStateTaskNetwork(state, tasks)){
-                    vars.registry.addToStateRegistry(state);
-                    vars.registry.addToTaskNetworkRegistry(tasks);
-                } else {
-                    newChildren.remove(child);
-                }
-            }
-        }
-
-        this.children.addAll(newChildren);
-        this.checkFullyExplored();
-        if(this.children.isEmpty()) {
-            this.setDeadEnd(vars);
-        }
-    }
-
-
-    public void setGoal(JSJshopVars vars) {
-        vars.policy.computeCost(this); // sets cost
-        this.setFullyExplored();
-        if (this.isInTree()) {
-            this.incSolvedVisits();
-            this.incVisited();
-        }
     }
 
 }

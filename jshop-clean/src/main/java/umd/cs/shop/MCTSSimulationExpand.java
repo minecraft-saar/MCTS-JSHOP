@@ -26,13 +26,16 @@ public class MCTSSimulationExpand implements MCTSSimulation {
         MCTSNode child = vars.policy.randomChild(current);
         double result = this.simulation_rec(child, depth +1);
 
-        current.checkFullyExplored();
+        current.checkFullyExplored(vars);
 
         while (child.isDeadEnd() && !current.isFullyExplored() && this.available_budget > 0) {
+            if(vars.landmarks){
+                vars.policy.recordDeadEndCost(current, result);
+            }
             this.available_budget --;
             child = vars.policy.randomChild(current);
             result = this.simulation_rec(child, depth +1);
-            current.checkFullyExplored();
+            current.checkFullyExplored(vars);
         }
         current.setCost(result);
         return result;
@@ -48,11 +51,11 @@ public class MCTSSimulationExpand implements MCTSSimulation {
                 //JSUtil.println(current.tState().state.factLandmarks.toString());
             }
             vars.foundPlan(current.plan, depth);
-            return current.getCost(vars);
+            return current.getCost();
         }
 
         if (vars.bb_pruning(current.plan.planCost())) {
-            double cost = current.getCost(vars);
+            double cost = current.getCost();
             if (this.bbPruningFast) {
                 MCTSSimulationFast simulation_fast = new MCTSSimulationFast(this.available_budget, cost);
                 cost = simulation_fast.simulation(current, depth);
@@ -63,7 +66,7 @@ public class MCTSSimulationExpand implements MCTSSimulation {
 
         current.expand(vars);
         if (current.isDeadEnd()) {
-            return current.getCost(vars);
+            return current.getCost();
         }
 
         return simulation_rec_expanded(current, depth);

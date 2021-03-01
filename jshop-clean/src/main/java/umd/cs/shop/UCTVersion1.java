@@ -11,7 +11,7 @@ public class UCTVersion1{ //implements UCTPolicy{
         exploration = java.lang.Math.sqrt(exploration);
         double reward;
         if(vars.planFound){
-            reward = vars.bestCost/child.getCost(vars);
+            reward = vars.bestCost/child.getCost();
         } else {
             reward = 0.5;
         }

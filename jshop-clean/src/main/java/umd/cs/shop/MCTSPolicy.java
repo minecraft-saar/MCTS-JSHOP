@@ -8,6 +8,10 @@ public interface MCTSPolicy {
 
     void updateCostAndVisits(MCTSNode parent, double reward);
 
+    default void recordDeadEndCost(MCTSNode parent, double reward){
+        return;
+    }
+
     void computeCost(MCTSNode child);
 
     public static MCTSPolicy getPolicy(JSJshopVars vars, boolean min, double explor) {

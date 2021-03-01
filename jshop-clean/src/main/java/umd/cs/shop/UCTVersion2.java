@@ -12,7 +12,7 @@ public class UCTVersion2{// implements UCTPolicy {
         } else {
             factor = java.lang.Math.sqrt(2);
         }
-        double reward = 0 - child.getCost(vars);
+        double reward = 0 - child.getCost();
         double childValue = reward + factor * exploration; //middle part is exploration factor
         return childValue;
     }

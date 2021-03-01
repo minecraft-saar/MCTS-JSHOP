@@ -56,7 +56,7 @@ public class MCTSExpansionLandmark implements MCTSExpand{
                         assert (!node.taskNetwork().isEmpty());
                         node.plan.assignFailure();
                         node.setDeadEnd(vars);
-                        JSUtil.println("DeadEnd after no applicable task with cost: " + node.getCost(vars));
+                        JSUtil.println("DeadEnd after no applicable task with cost: " + node.getCost());
                         return children;
                     }
                     while (!red.isDummy()) {
