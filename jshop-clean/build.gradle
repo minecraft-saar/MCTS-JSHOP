@@ -46,6 +46,7 @@ repositories {
 
 dependencies {
 	compile 'info.picocli:picocli:3.9.3'
+	compile group: 'com.github.minecraft-saar', name: 'minecraft-nlg', version: 'd4b637682f266a04c2096e974d23a8b5ffb9678f'
 	//compile 'de.saar.minecraft:shared-resources:1.1.1'
 }
 

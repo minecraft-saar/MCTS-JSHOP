@@ -1,5 +1,6 @@
 package umd.cs.shop.costs;
 
+import de.saar.coli.minecraft.MinecraftRealizer;
 import umd.cs.shop.JSOperator;
 import umd.cs.shop.JSTState;
 import umd.cs.shop.JSTaskAtom;
@@ -13,7 +14,8 @@ public interface CostFunction {
     enum CostFunctionType {
         UNIT,
         BASIC,
-        STATEDEPENDENT
+        STATEDEPENDENT,
+        NLG
     }
 
     enum InstructionLevel{
@@ -29,15 +31,16 @@ public interface CostFunction {
             case BASIC:
                 return new BasicCost();
             case STATEDEPENDENT:
-                if (domainName.equals("house")) {
-                    return new SDCostMinecraft();
-                }else if (domainName.equals("blocksworld")) {
-                    return new SDCostBlocksworld();
-                }else if (domainName.equals("childsnack")) {
-                    return new SDCostChildsnack();
-                } else {
-                    System.err.println("No state dependent cost function defined for " + domainName);
-                    System.exit(-1);
+                switch (domainName) {
+                    case "house":
+                        return new SDCostMinecraft();
+                    case "blocksworld":
+                        return new SDCostBlocksworld();
+                    case "childsnack":
+                        return new SDCostChildsnack();
+                    default:
+                        System.err.println("No state dependent cost function defined for " + domainName);
+                        System.exit(-1);
                 }
             default:
                 System.err.println("Unknown cost function: " + costFunctionName);
@@ -48,6 +51,9 @@ public interface CostFunction {
     }
 
     public static CostFunction getCostFunction(CostFunctionType costFunctionName, String domainName, InstructionLevel level) {
+        if(costFunctionName == CostFunctionType.NLG){
+            return new NLGCost(level);
+        }
         switch (level) {
             case BLOCK:
                 return new SDMCBlock();

@@ -52,10 +52,10 @@ public final class JSJshop implements Runnable {
     @Option(names = {"-m", "--monteCarloRuns"}, defaultValue = "10000", description = "Number of runs for the monte carlo search")
     int mctsruns;
 
-    @Option(names = {"-x", "--max", "--min"}, defaultValue = "false", description = "take maximum when updating the reward")
+    @Option(names = {"--min"}, defaultValue = "false", description = "take minimum when updating the reward")
     boolean updateMinimum;
 
-    @Option(names = {"--approx"}, defaultValue = "false", description = "use approximated cost function")
+    @Option(names = {"--approx"}, defaultValue = "false", description = "HAS NO EFFECT since nlg can not do approximations yet")
     boolean useApproximatedCostFunction;
 
     //@Option(names = {"-p", "--policy"}, defaultValue = "uct1", description = "can be uct1 or uct2")
@@ -67,16 +67,19 @@ public final class JSJshop implements Runnable {
     @Option(names = {"-c", "--costFunction"}, defaultValue = "BASIC", description = "Which cost function should be used:  ${COMPLETION-CANDIDATES}")
     CostFunction.CostFunctionType costFunctionName;
 
+    @Option(names = {"--level"}, defaultValue = "MEDIUM", description = "Which instruction level should be used:  ${COMPLETION-CANDIDATES}")
+    CostFunction.InstructionLevel level;
+
     @Option(names = {"-d", "--detail"}, defaultValue = "1", description = "Integer from 1 to 10 for more details during standard search")
     int detail;
 
     @Option(names = {"-a", "--all"}, defaultValue = "false", description = "Find all plans in standard search")
     boolean allPlans;
 
-    @Option(names = {"--duplicateDetection"}, defaultValue = "false", description = "Use duplicate Detection")
+    @Option(names = {"--duplicateDetection"}, defaultValue = "false", description = "Deprecated  was intended for duplicate Detection")
     boolean duplicate;
 
-    @Option(names = {"--fastSimulation"}, defaultValue = "false", description = "Use duplicate Detection")
+    @Option(names = {"--fastSimulation"}, defaultValue = "false", description = "The states generated in simulations are not saved")
     boolean fastSimulation;
 
 
@@ -126,7 +129,7 @@ public final class JSJshop implements Runnable {
         if(!variables.domain.getName().equals("minecraft"))
             variables.costFunction = CostFunction.getCostFunction(costFunctionName, variables.domain.getName());
         else
-            variables.costFunction = CostFunction.getCostFunction(costFunctionName, variables.domain.getName(), CostFunction.InstructionLevel.MEDIUM);
+            variables.costFunction = CostFunction.getCostFunction(costFunctionName, variables.domain.getName(), level);
 
         if(landmarks){
             JSUtil.println("Starting landmark parsing");
