@@ -30,7 +30,8 @@ java -jar PathToJAR DOMAINFILE PROBLEMFILE -m MCTSRUNS -c COSTFUNCTION -e EXPANS
   + "BASIC": Actions have cost as specified in the domain file.  
   + "STATEDEPENDENT": Uses hand crafted costfunctions for Minecraft, Blocksworld and Rovers domains does not work for other domains.  
   + "NLG": Only usable with Minecraft domain, calls the NLG System for cost estimates.  
-If the option "NLG" is chosen, the abstraction level for Minecraft instructions can be chosen by adding option "--level ABSTRACTION". ABSTARCTION can be "BLOCK", "MEDIUM" or "HIGHLEVEL".  
+  
+  If the option "NLG" or "STATEDEPENDENT" is chosen, the abstraction level for Minecraft instructions can be chosen by adding option "--level ABSTRACTION". ABSTARCTION can be "BLOCK", "MEDIUM" or "HIGHLEVEL".  
 
 Additional options for MCTS, their default is already set according to best performance:  
 * "--noRec": Disables the collapsing of MCTS Search Nodes. Really bad for performance  
