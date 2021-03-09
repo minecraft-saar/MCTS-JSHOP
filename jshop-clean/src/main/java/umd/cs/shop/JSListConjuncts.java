@@ -19,6 +19,7 @@ public class JSListConjuncts {
 
     JSListConjuncts(StreamTokenizer tokenizer) {
         super();
+        listLogicalAtomsVector = new Vector<>();
         JSListLogicalAtoms listAtoms;
         String name;
         int index = 1;

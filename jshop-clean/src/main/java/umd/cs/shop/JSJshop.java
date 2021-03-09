@@ -67,7 +67,7 @@ public final class JSJshop implements Runnable {
     @Option(names = {"-c", "--costFunction"}, defaultValue = "BASIC", description = "Which cost function should be used:  ${COMPLETION-CANDIDATES}")
     CostFunction.CostFunctionType costFunctionName;
 
-    @Option(names = {"--level"}, defaultValue = "MEDIUM", description = "Which instruction level should be used:  ${COMPLETION-CANDIDATES}")
+    @Option(names = {"--level"}, defaultValue = "NONE", description = "Which instruction level should be used:  ${COMPLETION-CANDIDATES}")
     CostFunction.InstructionLevel level;
 
     @Option(names = {"-d", "--detail"}, defaultValue = "1", description = "Integer from 1 to 10 for more details during standard search")
@@ -126,7 +126,7 @@ public final class JSJshop implements Runnable {
         JSUtil.println("Problem file parsed successfully");
         final long parseTime = System.currentTimeMillis();
         JSUtil.println("Parsing Time: " + (parseTime - variables.startTime));
-        if(!variables.domain.getName().equals("minecraft"))
+        if(level == CostFunction.InstructionLevel.NONE)
             variables.costFunction = CostFunction.getCostFunction(costFunctionName, variables.domain.getName());
         else
             variables.costFunction = CostFunction.getCostFunction(costFunctionName, variables.domain.getName(), level);

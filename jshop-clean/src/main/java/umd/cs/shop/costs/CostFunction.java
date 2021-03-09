@@ -21,7 +21,8 @@ public interface CostFunction {
     enum InstructionLevel{
         BLOCK,
         MEDIUM,
-        HIGHLEVEL
+        HIGHLEVEL,
+        NONE
     }
 
     public static CostFunction getCostFunction(CostFunctionType costFunctionName, String domainName) {
