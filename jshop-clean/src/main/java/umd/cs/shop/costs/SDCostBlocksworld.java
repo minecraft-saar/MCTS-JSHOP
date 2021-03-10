@@ -7,7 +7,7 @@ import static java.lang.Math.max;
 public class SDCostBlocksworld implements CostFunction {
 
     @Override
-    public double getCost(JSTState state, JSOperator op, JSTaskAtom grounded_operator, boolean approx) {
+    public Double getCost(JSTState state, JSOperator op, JSTaskAtom grounded_operator, boolean approx) {
         return realCost(state, op, grounded_operator);
     }
 

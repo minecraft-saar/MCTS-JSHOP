@@ -8,7 +8,7 @@ import umd.cs.shop.JSUtil;
 public class SDMCHighLevel implements CostFunction{
 
     @Override
-    public double getCost(JSTState state, JSOperator op, JSTaskAtom groundedOperator, boolean approx) {
+    public Double getCost(JSTState state, JSOperator op, JSTaskAtom groundedOperator, boolean approx) {
         assert groundedOperator.isGround();
         String operatorName = groundedOperator.get(0).toString();
 
@@ -20,25 +20,25 @@ public class SDMCHighLevel implements CostFunction{
             case "!build-railing-starting":
             case "!build-floor-finished":
             case "!build-floor-starting":
-                return 0;
+                return 0.0;
             case "!place-block":
-               return 100000;
+               return 100000.0;
             case "!build-row":
-                return 10;
+                return 10.0;
             case "!build-column":
-                return 10;
+                return 10.0;
             case "!build-railing":
-                return 1;
+                return 1.0;
             case "!build-wall":
-                return 1;
+                return 1.0;
             case "!build-floor":
-                return 1;
+                return 1.0;
             case "!remove":
-                return 5;
+                return 5.0;
             default:
                 System.err.println("Unrecognized action name: " + operatorName);
                 System.exit(-1);
-                return 0;
+                return 0.0;
         }
 
     }

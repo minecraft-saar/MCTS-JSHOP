@@ -6,7 +6,7 @@ public class SDMCMedium implements CostFunction {
 
 
     @Override
-    public double getCost(JSTState state, JSOperator op, JSTaskAtom groundedOperator, boolean approx) {
+    public Double getCost(JSTState state, JSOperator op, JSTaskAtom groundedOperator, boolean approx) {
         assert groundedOperator.isGround();
         String operatorName = groundedOperator.get(0).toString();
         boolean wall_built = state.state().wallBuilt;
@@ -14,7 +14,7 @@ public class SDMCMedium implements CostFunction {
         if (wall_built || railing_built) {
             switch (operatorName) {
                 case "!place-block":
-                    return 100;
+                    return 100.0;
                 case "!place-block-hidden":
                 case "!build-wall-finished":
                 case "!build-wall-starting":
@@ -22,23 +22,23 @@ public class SDMCMedium implements CostFunction {
                 case "!build-railing-starting":
                 case "!build-floor-finished":
                 case "!build-floor-starting":
-                    return 0;
+                    return 0.0;
                 case "!build-row":
-                    return 1;
+                    return 1.0;
                 case "!build-column":
-                    return 1;
+                    return 1.0;
                 case "!build-railing":
-                    return 1;
+                    return 1.0;
                 case "!build-wall":
-                    return 1;
+                    return 1.0;
                 case "!build-floor":
-                    return 1;
+                    return 1.0;
                 case "!remove":
-                    return 5;
+                    return 5.0;
                 default:
                     System.err.println("Unrecognized action name: " + operatorName);
                     System.exit(-1);
-                    return 0;
+                    return 0.0;
             }
         } else {
             switch (operatorName) {
@@ -54,7 +54,7 @@ public class SDMCMedium implements CostFunction {
                     if (Math.pow(lx - x, 2) + Math.pow(ly - y, 2) + Math.pow(lz - z, 2) <= 1) {
                         return 0.5;
                     } else {
-                        return 2;
+                        return 2.0;
                     }
                 case "!place-block-hidden":
                 case "!build-wall-starting":
@@ -63,23 +63,23 @@ public class SDMCMedium implements CostFunction {
                 case "!build-railing-starting":
                 case "!build-floor-finished":
                 case "!build-floor-starting":
-                    return 0;
+                    return 0.0;
                 case "!build-row":
-                    return 1000;
+                    return 1000.0;
                 case "!build-column":
-                    return 1000;
+                    return 1000.0;
                 case "!build-railing":
-                    return 1000;
+                    return 1000.0;
                 case "!build-wall":
-                    return 10000;
+                    return 10000.0;
                 case "!build-floor":
-                    return 1000;
+                    return 1000.0;
                 case "!remove":
-                    return 5;
+                    return 5.0;
                 default:
                     System.err.println("Unrecognized action name: " + operatorName);
                     System.exit(-1);
-                    return 0;
+                    return 0.0;
             }
         }
 

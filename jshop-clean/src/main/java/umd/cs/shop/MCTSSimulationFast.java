@@ -68,7 +68,7 @@ public class MCTSSimulationFast implements MCTSSimulation {
         }
     }*/
 
-    public double action_cost(JSOperator op, JSSubstitution alpha, JSTState currentState) {
+    public Double action_cost(JSOperator op, JSSubstitution alpha, JSTState currentState) {
         JSTaskAtom head = op.head();
         return vars.costFunction.getCost(currentState, op, head.applySubstitutionTA(alpha), vars.useApproximatedCostFunction);
     }
@@ -101,7 +101,12 @@ public class MCTSSimulationFast implements MCTSSimulation {
                     JSListSubstitution satisfiers = vars.domain.axioms().TheoremProver(op.precondition(), currentState.state, alpha, true);
                     if (!satisfiers.substitutionVector.isEmpty()) {
                         JSTState newState = currentState.state.applyOp(op, alpha, currentState.addList(), currentState.deleteList(),vars);
-                        double action_cost = this.action_cost(op, alpha, currentState);
+                        Double action_cost = this.action_cost(op, alpha, currentState);
+                        if(action_cost.isNaN()){
+                            JSPlan fail = new JSPlan();
+                            fail.assignFailure();
+                            return fail; //Dead end
+                        }
                         JSPlan result = this.deterministic_simulation(newState, rest, depth + 1, plan_cost + action_cost);
                         if (!result.isFailure()) {
                             result.addWithCost(op.head().applySubstitutionTA(alpha), action_cost);
@@ -187,7 +192,12 @@ public class MCTSSimulationFast implements MCTSSimulation {
                     JSListSubstitution satisfiers = vars.domain.axioms().TheoremProver(op.precondition(), currentState.state, alpha, true);
                     if (!satisfiers.substitutionVector.isEmpty()) {
                         JSTState newState = currentState.state.applyOp(op, alpha, currentState.addList(), currentState.deleteList(), vars);
-                        double action_cost = this.action_cost(op, alpha, currentState);
+                        Double action_cost = this.action_cost(op, alpha, currentState);
+                        if(action_cost.isNaN()){
+                            JSPlan fail = new JSPlan();
+                            fail.assignFailure();
+                            return fail; //Dead end
+                        }
                         JSPlan result = this.random_simulation(newState, rest, depth + 1, plan_cost + action_cost);
                         if (!result.isFailure()) {
                             head = op.head();

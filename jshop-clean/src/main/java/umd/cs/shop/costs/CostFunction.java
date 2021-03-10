@@ -7,7 +7,7 @@ import umd.cs.shop.JSTaskAtom;
 
 public interface CostFunction {
 
-    double getCost(JSTState state, JSOperator op, JSTaskAtom groundedOperator, boolean approx);
+    Double getCost(JSTState state, JSOperator op, JSTaskAtom groundedOperator, boolean approx);
 
     boolean isUnitCost();
 

@@ -7,8 +7,8 @@ import umd.cs.shop.JSTaskAtom;
 public class UnitCost implements CostFunction {
 
     @Override
-    public double getCost(JSTState state, JSOperator op, JSTaskAtom grounded_operator, boolean approx) {
-        return 1;
+    public Double getCost(JSTState state, JSOperator op, JSTaskAtom grounded_operator, boolean approx) {
+        return 1.0;
     }
 
     @Override

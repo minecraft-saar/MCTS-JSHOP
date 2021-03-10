@@ -1,5 +1,6 @@
 package umd.cs.shop.costs;
 
+import de.saar.basic.Pair;
 import de.saar.coli.minecraft.relationextractor.*;
 import de.saar.coli.minecraft.MinecraftRealizer;
 import umd.cs.shop.*;
@@ -20,12 +21,18 @@ public class NLGCost implements CostFunction {
     }
 
     @Override
-    public double getCost(JSTState state, JSOperator op, JSTaskAtom groundedOperator, boolean approx) {
-
+    public Double getCost(JSTState state, JSOperator op, JSTaskAtom groundedOperator, boolean approx) {
+        if(groundedOperator.get(0).equals("!place-block-hidden")){
+            return 0.0;
+        }
         MinecraftObject currentObject = createCurrentMinecraftObject(op, groundedOperator);
-        Set<MinecraftObject> world = createWorldFromState(state);
-        HashSet<MinecraftObject> it = new HashSet<>();
-        double returnValue = nlgSystem.estimateCostForPlanningSystem(world, currentObject, it);
+        if(currentObject instanceof IntroductionMessage ){
+            return 0.0;
+        }
+        Pair<Set<MinecraftObject>,Set<MinecraftObject>> pair = createWorldFromState(state);
+        Set<MinecraftObject> world = pair.getRight();
+        Set<MinecraftObject> it = pair.getLeft();
+        Double returnValue = nlgSystem.estimateCostForPlanningSystem(world, currentObject, it);
 
         return returnValue;
     }
@@ -35,28 +42,50 @@ public class NLGCost implements CostFunction {
         return false;
     }
 
-    private Set<MinecraftObject> createWorldFromState(JSTState state) {
+    private Pair<Set<MinecraftObject>,Set<MinecraftObject>> createWorldFromState(JSTState state) {
         Set<MinecraftObject> world = new HashSet<>();
+        HashSet<MinecraftObject> it = new HashSet<MinecraftObject>();
         for (JSPredicateForm term : state.state().atoms()) {
             String name = (String) term.elementAt(0);
+            JSTerm data;
+            String type;
+            JSTerm tmp;
+            int x, y, z;
             switch (name) {
                 case "block-at":
-                    JSTerm data = (JSTerm) term.elementAt(1);
-                    String type = (String) data.elementAt(0);
+                    data = (JSTerm) term.elementAt(1);
+                    type = (String) data.elementAt(0);
                     if (type.equals("water")) {
                         // water behaves differently from normal blocks,
                         // e.g. you can still put blocks into water blocks
                         // this confuses the tracking and we therefore ignore water.
                         continue;
                     }
-                    JSTerm tmp = (JSTerm) term.elementAt(2);
-                    int x = (int) Double.parseDouble(tmp.toStr().toString());
+                    tmp = (JSTerm) term.elementAt(2);
+                    x = (int) Double.parseDouble(tmp.toStr().toString());
                     tmp = (JSTerm) term.elementAt(3);
-                    int y = (int) Double.parseDouble(tmp.toStr().toString());
+                    y = (int) Double.parseDouble(tmp.toStr().toString());
                     tmp = (JSTerm) term.elementAt(4);
-                    int z = (int) Double.parseDouble(tmp.toStr().toString());
+                    z = (int) Double.parseDouble(tmp.toStr().toString());
                     //System.out.println("Block: " + type + " " + x + " " + y + " "+ z);
-                    world.add(new UniqueBlock(type, x, y, z));
+                    if(type.equals("stone")){
+                        world.add(new Block(x, y, z));
+                    } else {
+                        world.add(new UniqueBlock(type, x, y, z));
+                    }
+                    break;
+                case "last-placed":
+                    data = (JSTerm) term.elementAt(1);
+                    tmp = (JSTerm) term.elementAt(1);
+                    x = (int) Double.parseDouble(tmp.toStr().toString());
+                    tmp = (JSTerm) term.elementAt(2);
+                    y = (int) Double.parseDouble(tmp.toStr().toString());
+                    tmp = (JSTerm) term.elementAt(3);
+                    z = (int) Double.parseDouble(tmp.toStr().toString());
+                    //System.out.println("Block: " + type + " " + x + " " + y + " "+ z);
+                    if(!(x == 100 && y == 100 && z == 100)){
+                        it.add(new UniqueBlock("stone", x, y, z));
+                    }
                     break;
                 case "wall-at":
                     world.add(createWall(term));
@@ -72,7 +101,8 @@ public class NLGCost implements CostFunction {
                     break;
             }
         }
-        return world;
+        Pair<Set<MinecraftObject>, Set<MinecraftObject>> ret = new Pair<Set<MinecraftObject>, Set<MinecraftObject>>(it, world);
+        return ret;
     }
 
     public MinecraftObject createFloor(JSPredicateForm term) {

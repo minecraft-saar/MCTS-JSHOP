@@ -7,7 +7,7 @@ import umd.cs.shop.JSTaskAtom;
 public class SDCostMinecraft implements CostFunction {
 
     @Override
-    public double getCost(JSTState state, JSOperator op, JSTaskAtom groundedOperator, boolean approx){
+    public Double getCost(JSTState state, JSOperator op, JSTaskAtom groundedOperator, boolean approx){
         if(approx){
             return  approximate(state, op, groundedOperator);
         } else {

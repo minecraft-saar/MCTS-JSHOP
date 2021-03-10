@@ -113,9 +113,11 @@ public class JSTaskAtom extends JSPredicateForm {
                     tState = ts.state().applyOp(op, alpha, ts.addList(), ts.deleteList(),vars);
                     //ns = tState.state();
                     top = op.head();
-                    double cost;
-                    cost = vars.costFunction.getCost(ts, op, top.applySubstitutionTA(alpha), vars.useApproximatedCostFunction);
+                    Double cost = vars.costFunction.getCost(ts, op, top.applySubstitutionTA(alpha), vars.useApproximatedCostFunction);
                     pl.addWithCost(top.applySubstitutionTA(alpha), cost);
+                    if(cost.isNaN()){
+                        pl.assignFailure();
+                    }
                     return new JSPairPlanTState(pl, tState);
                 }
             }

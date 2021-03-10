@@ -16,7 +16,7 @@ public class BasicCost implements CostFunction {
 
 
     @Override
-    public double getCost(JSTState state, JSOperator op, JSTaskAtom grounded_operator, boolean approx) {
+    public Double getCost(JSTState state, JSOperator op, JSTaskAtom grounded_operator, boolean approx) {
 /*
         JSPairOperatorState pair = new JSPairOperatorState(op, state.state());
         if(realCosts.containsKey(pair)){
