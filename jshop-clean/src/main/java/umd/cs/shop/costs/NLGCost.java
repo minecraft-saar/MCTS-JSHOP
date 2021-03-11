@@ -84,7 +84,7 @@ public class NLGCost implements CostFunction {
                     z = (int) Double.parseDouble(tmp.toStr().toString());
                     //System.out.println("Block: " + type + " " + x + " " + y + " "+ z);
                     if(!(x == 100 && y == 100 && z == 100)){
-                        it.add(new UniqueBlock("stone", x, y, z));
+                        it.add(new Block( x, y, z));
                     }
                     break;
                 case "wall-at":
