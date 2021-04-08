@@ -114,7 +114,7 @@ public class UCTPolicy implements MCTSPolicy {
     @Override
     public void computeCost(MCTSNode node) {
         double cost = 0.0;
-        for (int i = 0; i < node.plan.size(); i++) {
+        for (int i = 0; i < node.plan.predicates.size(); i++) {
             cost = cost + node.plan.elementCost(i);
         }
         node.setCost(cost);

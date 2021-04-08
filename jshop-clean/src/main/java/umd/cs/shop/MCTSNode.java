@@ -173,7 +173,7 @@ public class MCTSNode {
 
     public String tasks_string() {
         String res = "";
-        for (Object o : this.taskNetwork) {
+        for (Object o : this.taskNetwork.predicates) {
             res += o.toString() + "   ";
         }
         return res;
@@ -184,8 +184,8 @@ public class MCTSNode {
     public String dotNode() {
         String color = "";
         String taskName = "";
-        if (!this.taskNetwork.isEmpty()) {
-            taskName = this.taskNetwork.firstElement().toString() + " ";
+        if (!this.taskNetwork.predicates.isEmpty()) {
+            taskName = this.taskNetwork.predicates.firstElement().toString() + " ";
             // for (Object o : this.taskNetwork) {
             //     taskName += o.toString() + " ";
             // }

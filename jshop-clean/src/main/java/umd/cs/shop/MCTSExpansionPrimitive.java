@@ -19,11 +19,11 @@ public class MCTSExpansionPrimitive implements MCTSExpand {
         toExpand.addAll(findChildren(node,recursive));
         while (!toExpand.isEmpty()){
             MCTSNode next = toExpand.removeFirst();
-            if(next.taskNetwork().isEmpty()){
+            if(next.taskNetwork().predicates.isEmpty()){
                 primitive.add(next);
                 continue;
             }
-            JSTaskAtom t = (JSTaskAtom) next.taskNetwork().firstElement();
+            JSTaskAtom t = (JSTaskAtom) next.taskNetwork().predicates.firstElement();
             if(t.isPrimitive){
                 primitive.addAll(findChildren(next, false));
                 continue;
@@ -31,7 +31,7 @@ public class MCTSExpansionPrimitive implements MCTSExpand {
             toExpand.addAll(findChildren(next,recursive));
         }
 
-        if (recursive && primitive.size() == 1 && !primitive.get(0).taskNetwork().isEmpty()) {
+        if (recursive && primitive.size() == 1 && !primitive.get(0).taskNetwork().predicates.isEmpty()) {
             return expand(primitive.get(0));
         }
 
@@ -41,7 +41,7 @@ public class MCTSExpansionPrimitive implements MCTSExpand {
     public Vector<MCTSNode> findChildren(MCTSNode node, boolean applyRecursion) {
         JSPairPlanTState pair;
         JSPlan ans;
-        JSTaskAtom t = (JSTaskAtom) node.taskNetwork().firstElement();
+        JSTaskAtom t = (JSTaskAtom) node.taskNetwork().predicates.firstElement();
         JSTasks rest = node.taskNetwork().cdr();
 
         Vector<MCTSNode> children = new Vector<>();
@@ -70,7 +70,7 @@ public class MCTSExpansionPrimitive implements MCTSExpand {
                 JSTasks newTasks;
                 JSMethod selMet = red.selectedMethod();
                 if (red.isDummy()) {
-                    assert (!node.taskNetwork().isEmpty());
+                    assert (!node.taskNetwork().predicates.isEmpty());
                     node.plan.assignFailure();
                     node.setDeadEnd(vars);
                     return children;
@@ -88,10 +88,10 @@ public class MCTSExpansionPrimitive implements MCTSExpand {
         }
         if (applyRecursion && children.size() == 1) {
             MCTSNode child = children.get(0);
-            if (child.taskNetwork().isEmpty()) {
+            if (child.taskNetwork().predicates.isEmpty()) {
                 return children;
             }
-            JSTaskAtom newTask = (JSTaskAtom) child.taskNetwork().firstElement();
+            JSTaskAtom newTask = (JSTaskAtom) child.taskNetwork().predicates.firstElement();
             if(newTask.isPrimitive){
                 return children;
             }

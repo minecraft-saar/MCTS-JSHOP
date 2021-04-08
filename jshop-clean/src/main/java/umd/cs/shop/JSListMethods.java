@@ -20,7 +20,7 @@ public class JSListMethods {
             el.print();
         }
     }
-
+/*
     public JSReduction findReduction(JSTaskAtom task, JSState s, JSReduction red, JSListAxioms axioms) {
         JSSubstitution alpha;
         JSMethod met;
@@ -61,7 +61,7 @@ public class JSListMethods {
             }
         }
         return new JSReduction();
-    }
+    }*/
 
 
     public JSAllReduction findAllReduction(JSTaskAtom task, JSState s, JSAllReduction red, JSListAxioms axioms) {

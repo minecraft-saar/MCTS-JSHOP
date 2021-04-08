@@ -33,7 +33,7 @@ public class SDMCMedium implements CostFunction {
                     return 1.0;
                 case "!build-floor":
                     return 1.0;
-                case "!remove":
+                case "!remove-block":
                     return 5.0;
                 default:
                     System.err.println("Unrecognized action name: " + operatorName);
@@ -74,7 +74,7 @@ public class SDMCMedium implements CostFunction {
                     return 10000.0;
                 case "!build-floor":
                     return 1000.0;
-                case "!remove":
+                case "!remove-block":
                     return 5.0;
                 default:
                     System.err.println("Unrecognized action name: " + operatorName);

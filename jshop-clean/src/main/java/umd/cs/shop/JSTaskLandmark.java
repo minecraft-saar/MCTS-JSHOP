@@ -39,7 +39,7 @@ public class JSTaskLandmark {
                 JSUtil.readToken(tokenizer, "next TaskLandmark Parameter");
                 continue;
             } else if (tokenizer.ttype == StreamTokenizer.TT_NUMBER) {
-                tmp.addElement(new Double(tokenizer.nval).toString());
+                tmp.addElement(Double.toString(tokenizer.nval));
                 JSUtil.readToken(tokenizer, "next TaskLandmark Parameter");
 
             } else if (tokenizer.ttype == StreamTokenizer.TT_WORD) {

@@ -13,7 +13,7 @@ public class MCTSAlgorithm {
             System.err.println("Error: we are coming back to a fully explored node");
             System.exit(-1);
         }
-        if (tst.taskNetwork().isEmpty()) {
+        if (tst.taskNetwork().predicates.isEmpty()) {
             tst.setGoal(vars);
             //JSUtil.println("Task Landmark cost at Goal: " + tst.tState().state().taskLandmarks.size() + " Fact landmark cost: " + tst.tState().state().factLandmarks.size());
             //tst.plan.printPlan();

@@ -19,8 +19,8 @@ public class JSTState {
     JSTState(JSTState st) {
         super();
         state = new JSState(st.state.atoms());
-        addList = (JSListLogicalAtoms) st.addList.clone();
-        deleteList = (JSListLogicalAtoms) st.deleteList.clone();
+        addList = st.addList.clone();
+        deleteList = st.deleteList.clone();
     }
 
     public JSState state() {

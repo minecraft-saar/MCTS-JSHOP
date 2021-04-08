@@ -5,18 +5,21 @@ import java.util.*;
 import java.io.*;
 
 
-public class JSListLogicalAtoms extends Vector<Object> {
+public class JSListLogicalAtoms {
 
     /*==== instance variables ====*/
 
     private String label;
     private boolean varlist;
     private String name = "";
+    JSTerm term;
+    Vector<JSPredicateForm> predicates;
 
     JSListLogicalAtoms() {
-        super();
         label = "";
         varlist = false;
+        predicates = new Vector<>();
+        term = new JSTerm();
     }
 
 
@@ -28,7 +31,7 @@ public class JSListLogicalAtoms extends Vector<Object> {
         JSPredicateForm ta;
         label = "";
         varlist = false;
-
+        predicates = new Vector<>();
 
         if (!JSUtil.readToken(tokenizer, "ListLogicalAtoms"))
             throw new JSParserError(); //return;
@@ -41,7 +44,7 @@ public class JSListLogicalAtoms extends Vector<Object> {
             JSTerm t = new JSTerm(tokenizer);
             if (t.isEmpty())
                 throw new JSParserError(); //return;
-            this.addElement(t);
+            this.term = t;
             varlist = true;
             return;
         }
@@ -76,7 +79,7 @@ public class JSListLogicalAtoms extends Vector<Object> {
             tokenizer.pushBack();
             ta = new JSPredicateForm(tokenizer);
             if (ta.size() != 0) {
-                this.addElement(ta);
+                this.predicates.addElement(ta);
             } else {
                 JSUtil.print("Line : " + tokenizer.lineno() + " ListLogicalAtoms: unexpected Atom");
                 throw new JSParserError(); //return;
@@ -88,8 +91,8 @@ public class JSListLogicalAtoms extends Vector<Object> {
     }
 
     public void addElements(JSListLogicalAtoms l) {
-        for (short i = 0; i < l.size(); i++) {
-            this.addElement(l.elementAt(i));
+        for (short i = 0; i < l.predicates.size(); i++) {
+            this.predicates.addElement(l.predicates.elementAt(i));
         }
 
     }
@@ -98,15 +101,15 @@ public class JSListLogicalAtoms extends Vector<Object> {
     public void print() {
 
         if (varlist) {
-            ((JSTerm) this.elementAt(0)).print();
+            this.term.print();
             return;
         }
         JSUtil.print("(");
 
         JSPredicateForm el;
-        Enumeration e = elements();
+        Enumeration<JSPredicateForm> e = predicates.elements();
         while (e.hasMoreElements()) {
-            el = (JSPredicateForm) e.nextElement();
+            el = e.nextElement();
             if (el != null)
                 el.print();
         }
@@ -118,8 +121,8 @@ public class JSListLogicalAtoms extends Vector<Object> {
         JSTerm vart;
 
         if (varlist) {
-            vart = (JSTerm) this.elementAt(0);
-            newTs.addElement(vart.standardizerTerm(vars));
+            vart = this.term;
+            newTs.term = vart.standardizerTerm(vars);
             newTs.varlist = true;
             return newTs;
         }
@@ -127,9 +130,9 @@ public class JSListLogicalAtoms extends Vector<Object> {
 
         JSPredicateForm t;
 
-        for (short i = 0; i < this.size(); i++) {
-            t = (JSPredicateForm) this.elementAt(i);
-            newTs.addElement(t.standarizerPredicateForm(vars));
+        for (short i = 0; i < this.predicates.size(); i++) {
+            t = this.predicates.elementAt(i);
+            newTs.predicates.addElement(t.standarizerPredicateForm(vars));
         }
         return newTs;
 
@@ -150,26 +153,26 @@ public class JSListLogicalAtoms extends Vector<Object> {
     }*/
 
         if (varlist) {
-            t = (JSTerm) this.elementAt(0);
+            t = this.term;
             newt = alpha.instance(t);
 
             while (!newt.isEmpty()) {
                 if (!((String) newt.elementAt(0)).equals("."))
                     break;
                 ///nti=(JSPredicateForm)newt.elementAt(1);
-                nt.addElement(newt.elementAt(1));
+                nt.term.addElement(newt.elementAt(1));
                 newt = (JSTerm) newt.elementAt(2);
             }
             return nt;
         }
-        for (short i = 0; i < this.size(); i++) {
-            ti = (JSPredicateForm) this.elementAt(i);
+        for (short i = 0; i < this.predicates.size(); i++) {
+            ti = this.predicates.elementAt(i);
             //if (JSJshopVars.flagLevel > 8)
             //    ti.print();
             nti = ti.applySubstitutionPF(alpha);
             //  if (JSJshopVars.flagLevel > 8)
             //       nti.print();
-            nt.addElement(nti);
+            nt.predicates.addElement(nti);
           /*  if (JSJshopVars.flagLevel > 8){
                   nt.print();
                   JSUtil.flag("<-- applyJSListLogicalAtoms");
@@ -194,9 +197,9 @@ public class JSListLogicalAtoms extends Vector<Object> {
             return newLA;
         // additions end
 
-        for (short i = 1; i < this.size(); i++) {
-            t = (JSPredicateForm) this.elementAt(i);
-            newLA.addElement(t);
+        for (short i = 1; i < this.predicates.size(); i++) {
+            t = (JSPredicateForm) this.predicates.elementAt(i);
+            newLA.predicates.addElement(t);
         }
 
         return newLA;
@@ -215,6 +218,19 @@ public class JSListLogicalAtoms extends Vector<Object> {
         name = new String(val);
     }
 
+    public JSListLogicalAtoms clone(){
+        JSListLogicalAtoms ret = new JSListLogicalAtoms();
+        ret.label = this.label;
+        ret.name = this.name;
+        ret.varlist = this.varlist;
+        if(this.varlist){
+            ret.term = this.term.cloneT();
+        } else {
+            ret.predicates.addAll(this.predicates);
+        }
+        return  ret;
+    }
+
     public boolean equals(Object o) {
         if (!(o instanceof JSListLogicalAtoms))
             return false;
@@ -230,18 +246,18 @@ public class JSListLogicalAtoms extends Vector<Object> {
         if (!name.equals(otherList.name))
             return false;
 
-        if (this.size() != otherList.size())
+        if (this.predicates.size() != otherList.predicates.size())
             return false;
 
         if (varlist) {
-            JSTerm term = (JSTerm) this.elementAt(0);
-            JSTerm otherTerm = (JSTerm) otherList.elementAt(0);
+            JSTerm term = this.term;
+            JSTerm otherTerm = otherList.term;
             return term.equals(otherTerm);
         }
 
-        for (int i = 0; i < this.size(); i++) {
-            JSPredicateForm pred = (JSPredicateForm) this.elementAt(i);
-            JSPredicateForm otherPred = (JSPredicateForm) otherList.elementAt(i);
+        for (int i = 0; i < this.predicates.size(); i++) {
+            JSPredicateForm pred = (JSPredicateForm) this.predicates.elementAt(i);
+            JSPredicateForm otherPred = (JSPredicateForm) otherList.predicates.elementAt(i);
             if (!pred.equals(otherPred)) {
                 return false;
             }
@@ -252,13 +268,12 @@ public class JSListLogicalAtoms extends Vector<Object> {
 
     public int hashCode() {
         if(varlist){
-            JSTerm term = (JSTerm) this.elementAt(0);
+            JSTerm term = this.term;
             return term.hashCode();
         }
 
         int hash = 1;
-        for(Object o : this) {
-            JSPredicateForm pred = (JSPredicateForm) o;
+        for(JSPredicateForm pred : this.predicates) {
             int predHash = pred.hashCode();
             hash = JSJshopVars.combineHashCodes(hash, predHash);
         }

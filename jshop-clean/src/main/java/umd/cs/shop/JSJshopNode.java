@@ -4,28 +4,28 @@ import java.util.*;
 
 public final class JSJshopNode {
     JSTaskAtom atom;
-    Vector<Object> children;   // should have been JSTasks
+    Vector<JSPredicateForm> children;   // should have been JSTasks
 
     JSJshopNode() {
         super();
     }
 
-    JSJshopNode(JSTaskAtom a, Vector<Object> c) {
+    JSJshopNode(JSTaskAtom a, JSTasks c) {
         super();
         atom = a;
-        children = c;
+        children = c.predicates;
     }
 
-    JSJshopNode(JSJshopNode rootNode, Vector listNodes) {
+    /*JSJshopNode(JSJshopNode rootNode, Vector listNodes) {
         /* rootNode has the form
                (task <listTasks>) where task is the root task.
             listNodes has the form 
                ((task <listTasks>) .... (task <list Tasks>))
            
-        */
+        / previous comment block ended here
         super();
         atom = rootNode.atom();
-        Vector<Object> childs = rootNode.children();
+        Vector<JSPredicateForm> childs = rootNode.children();
 
         if (childs.isEmpty()) {
             children = childs;
@@ -50,7 +50,7 @@ public final class JSJshopNode {
             }
         }
 
-    }
+    }*/
 
     public void print() {
         JSTaskAtom a = this.atom();
@@ -75,7 +75,7 @@ public final class JSJshopNode {
         JSTaskAtom a = this.atom();
         JSTasks child;
         if (this.children.size() > 0) {
-            child = (JSTasks) this.children();
+            child = new JSTasks(this.children());
             JSUtil.print(a.toStr() + " [ ");
             child.print();
             JSUtil.println(" ]");
@@ -91,7 +91,7 @@ public final class JSJshopNode {
         return atom;
     }
 
-    public Vector<Object> children() {
+    public Vector<JSPredicateForm> children() {
         return children;
     }
 

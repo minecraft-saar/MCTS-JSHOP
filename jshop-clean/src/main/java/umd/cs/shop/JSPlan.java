@@ -33,8 +33,8 @@ public class JSPlan extends JSTasks {
     }
 
     public void addElements(JSPlan pl) {
-        for (short i = 0; i < pl.size(); i++) {
-            this.addElement(pl.elementAt(i));
+        for (short i = 0; i < pl.predicates.size(); i++) {
+            this.predicates.addElement(pl.predicates.elementAt(i));
             // Added in May 2
             costs.addElement(pl.costs.elementAt(i));
         }
@@ -42,8 +42,8 @@ public class JSPlan extends JSTasks {
     }
 
     public void addElementsRev(JSPlan pl) {
-        for (int i = pl.size()-1; i >= 0; i--) {
-            this.addElement(pl.elementAt(i));
+        for (int i = pl.predicates.size()-1; i >= 0; i--) {
+            this.predicates.addElement(pl.predicates.elementAt(i));
             // Added in May 2
             costs.addElement(pl.costs.elementAt(i));
         }
@@ -53,24 +53,24 @@ public class JSPlan extends JSTasks {
     public void printPlan() {
         JSTaskAtom t;
         JSUtil.print(" ( ");
-        for (short i = 0; i < size(); i++) {
-            t = (JSTaskAtom) elementAt(i);
+        for (short i = 0; i < this.predicates.size(); i++) {
+            t = (JSTaskAtom) this.predicates.elementAt(i);
             t.print();
             // Added in May 2
-            JSUtil.print(" " + (String) costs.elementAt(i) + " ");
+            JSUtil.print(" " + (String) this.costs.elementAt(i) + " ");
         }
         JSUtil.println(" ) ");
     }
 
     public void addWithCost(JSTaskAtom t, double cost) {
 
-        addElement(t);
-        costs.addElement(String.valueOf(cost));
+        this.predicates.addElement(t);
+        this.costs.addElement(String.valueOf(cost));
         planCost += cost;
     }
 
     public void insertWithCost(int place, JSTaskAtom t, double cost) {
-        insertElementAt(t, place);
+        this.predicates.insertElementAt(t, place);
         costs.insertElementAt(String.valueOf(cost), place);
         planCost += cost;
     }

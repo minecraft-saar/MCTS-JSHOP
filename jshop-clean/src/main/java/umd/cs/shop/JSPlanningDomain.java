@@ -99,23 +99,6 @@ public class JSPlanningDomain {
 
     }
 
-    public JSPairPlanTSListNodes solve(JSPlanningProblem prob, Vector<Object> listNodes, JSJshopVars vars) {
-        JSPairPlanTState pair = new JSPairPlanTState();
-
-        if (JSJshopVars.flagLevel > 8) {
-            JSUtil.print("====== SOLVING A NEW PROBLEM====");
-            this.print();
-            JSUtil.print("PROBLEM");
-            prob.print();
-        }
-
-        JSTasks tasks = prob.tasks();
-        pair = tasks.seekPlan(new JSTState(prob.state(), new JSListLogicalAtoms(),
-                        new JSListLogicalAtoms()), new JSPlan(), listNodes, vars);
-
-        return new JSPairPlanTSListNodes(pair, listNodes);
-    }
-
     public void solveMCTS(JSPlanningProblem prob, int runs, long timeout, boolean printTree, JSJshopVars vars) {
         JSTState ts = new JSTState(prob.state(), new JSListLogicalAtoms(), new JSListLogicalAtoms());
         JSTasks tasks = prob.tasks();

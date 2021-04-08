@@ -48,7 +48,7 @@ public class JSPlanningProblem {
 
     public void makeTask(JSTaskAtom pred) {
         tasks = new JSTasks();
-        tasks.addElement(pred);
+        tasks.predicates.addElement(pred);
     }
 
 

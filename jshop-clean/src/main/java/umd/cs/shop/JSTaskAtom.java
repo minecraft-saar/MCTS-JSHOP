@@ -125,15 +125,13 @@ public class JSTaskAtom extends JSPredicateForm {
         pl.assignFailure();
         return new JSPairPlanTState(pl, new JSTState());
     }
-
+/*
     public JSReduction reduce(JSState s, JSReduction red, JSJshopVars vars) {
         //JSUtil.flag("reduce(PlanningDomain dom,State s,Reduction red)");
-
         JSListMethods mets = vars.domain.methods();
-
         return mets.findReduction(this, s, red, vars.domain.axioms());
 
-    }
+    }*/
 
     public JSTaskAtom applySubstitutionTA(JSSubstitution alpha) {
         JSTaskAtom nta = new JSTaskAtom();
@@ -204,7 +202,6 @@ public class JSTaskAtom extends JSPredicateForm {
 
     }
 
-
     public boolean isGround() {
         JSTerm ti;
 
@@ -239,20 +236,6 @@ public class JSTaskAtom extends JSPredicateForm {
 
         return nTA;
 
-    }
-
-    JSJshopNode findInList(Vector list) {
-        JSJshopNode node;
-
-
-        for (int i = 0; i < list.size(); i++) {
-            node = (JSJshopNode) list.elementAt(i);
-            if (this.equals(node.atom())) {
-                return node;
-            }
-        }
-
-        return new JSJshopNode(this, new Vector<>());
     }
 
     public boolean isPrimitive() {

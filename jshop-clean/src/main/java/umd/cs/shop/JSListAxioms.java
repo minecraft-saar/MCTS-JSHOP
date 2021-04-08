@@ -39,7 +39,7 @@ public class JSListAxioms  {
         JSAxiom axiom;
         String str;
         answers = new JSListSubstitution();
-        if (conds.size() == 0) {
+        if (conds.predicates.size() == 0) {
             answers.substitutionVector.addElement(new JSSubstitution());
             if (JSJshopVars.flagLevel > 5)
                 JSUtil.println("Returning successfully from find-satisfiers : No more goals to satisfy");
@@ -48,7 +48,7 @@ public class JSListAxioms  {
         }
 
 
-        e1 = (JSPredicateForm) conds.elementAt(0);
+        e1 = conds.predicates.elementAt(0);
         Rest = conds.Cdr();
         str = (String) e1.elementAt(0);
         if (JSJshopVars.flagLevel > 6) {
@@ -63,7 +63,7 @@ public class JSListAxioms  {
         if (str.equalsIgnoreCase("not")) {
             e1 = (JSPredicateForm) e1.elementAt(1);
             one = new JSListLogicalAtoms();
-            one.addElement(e1);
+            one.predicates.addElement(e1);
             subanswers1 = TheoremProver(one, S, alpha, false);
 
             if (!subanswers1.fail()) {

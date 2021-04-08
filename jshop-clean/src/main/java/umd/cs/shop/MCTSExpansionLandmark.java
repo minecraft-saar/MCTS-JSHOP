@@ -18,7 +18,7 @@ public class MCTSExpansionLandmark implements MCTSExpand{
         public Vector<MCTSNode> expand(MCTSNode node){
             JSPairPlanTState pair;
             JSPlan ans;
-            JSTaskAtom t = (JSTaskAtom) node.taskNetwork().firstElement();
+            JSTaskAtom t = (JSTaskAtom) node.taskNetwork().predicates.firstElement();
             JSTasks rest = node.taskNetwork().cdr();
             //JSUtil.println("current Task Atom: ");
             //t.print();
@@ -53,7 +53,7 @@ public class MCTSExpansionLandmark implements MCTSExpand{
                     JSTasks newTasks;
                     JSMethod selMet = red.selectedMethod();
                     if (red.isDummy()) {
-                        assert (!node.taskNetwork().isEmpty());
+                        assert (!node.taskNetwork().predicates.isEmpty());
                         node.plan.assignFailure();
                         node.setDeadEnd(vars);
                         JSUtil.println("DeadEnd after no applicable task with cost: " + node.getCost());
@@ -75,7 +75,7 @@ public class MCTSExpansionLandmark implements MCTSExpand{
             }
             if(recursive && children.size() == 1){
                 MCTSNode child = children.get(0);
-                if(child.taskNetwork().isEmpty()){
+                if(child.taskNetwork().predicates.isEmpty()){
                     return children;
                 }
                 children.remove(child);
@@ -90,7 +90,7 @@ public class MCTSExpansionLandmark implements MCTSExpand{
         boolean testDeadEnd(MCTSNode node) {
             JSPairPlanTState pair;
             JSPlan ans;
-            JSTaskAtom t = (JSTaskAtom) node.taskNetwork().firstElement();
+            JSTaskAtom t = (JSTaskAtom) node.taskNetwork().predicates.firstElement();
             JSTasks rest = node.taskNetwork().cdr();
 
             Vector<MCTSNode> children = new Vector<>();
@@ -112,7 +112,7 @@ public class MCTSExpansionLandmark implements MCTSExpand{
             JSTasks newTasks;
             JSMethod selMet = red.selectedMethod();
             if (red.isDummy()) {
-                assert (!node.taskNetwork().isEmpty());
+                assert (!node.taskNetwork().predicates.isEmpty());
                 node.plan.assignFailure();
                 node.setDeadEnd(vars);
                 return true;

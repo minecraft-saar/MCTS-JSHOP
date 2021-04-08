@@ -74,13 +74,13 @@ public class MCTSSimulationFast implements MCTSSimulation {
     }
 
     public JSPlan deterministic_simulation(JSTState currentState, JSTasks currentTasks, int depth, double plan_cost) {
-        if (currentTasks.isEmpty()) {
+        if (currentTasks.predicates.isEmpty()) {
             JSPlan ret = new JSPlan();
             ret.setDepth(depth);
             return ret;
         }
 
-        JSTaskAtom task = (JSTaskAtom) currentTasks.firstElement();
+        JSTaskAtom task = (JSTaskAtom) currentTasks.predicates.firstElement();
         JSTasks rest = currentTasks.cdr();
 
         if (task.isPrimitive()) {
@@ -157,7 +157,7 @@ public class MCTSSimulationFast implements MCTSSimulation {
 
 
     public JSPlan random_simulation(JSTState currentState, JSTasks currentTasks, int depth, double plan_cost) {
-        if (currentTasks.isEmpty()) {
+        if (currentTasks.predicates.isEmpty()) {
             JSPlan success = new JSPlan();
             success.setDepth(depth);
             return success;
@@ -169,7 +169,7 @@ public class MCTSSimulationFast implements MCTSSimulation {
         }
 
 
-        JSTaskAtom task = (JSTaskAtom) currentTasks.firstElement();
+        JSTaskAtom task = (JSTaskAtom) currentTasks.predicates.firstElement();
         JSTasks rest = currentTasks.cdr();
 
         if (task.isPrimitive()) {

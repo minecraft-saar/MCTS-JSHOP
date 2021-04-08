@@ -54,7 +54,7 @@ public class JSListIfThenElse {
             el.print();
         }
     }
-
+/*
     JSTasks evalPrec(JSState s, JSSubstitution alpha, JSListAxioms axioms) {
         JSPairIfThen pair;
         JSTasks then;
@@ -75,7 +75,7 @@ public class JSListIfThenElse {
         //JSUtil.flag("Failure");
         return then;
 
-    }
+    }*/
 
     Vector<JSTasks> evalPrecAll(JSState s, JSSubstitution alpha, JSListAxioms axioms) {
 
@@ -91,7 +91,7 @@ public class JSListIfThenElse {
                     JSUtil.print("Found an applicable method : ");
                     JSUtil.println(pair.Name());
                 }
-                JSTasks then = (JSTasks) pair.thenPart().clone();
+                JSTasks then =  pair.thenPart().cloneTasks();
                 for (int k = 0; k < beta.substitutionVector.size(); k++)
                     allReductions.addElement(then.applySubstitutionTasks((JSSubstitution) beta.substitutionVector.elementAt(k)));
                 return allReductions;

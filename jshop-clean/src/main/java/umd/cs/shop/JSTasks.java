@@ -9,10 +9,15 @@ public class JSTasks extends JSListLogicalAtoms {
 
     /*==== instance variables ====*/
 
-    private boolean fail; //default false
+    //private boolean fail; //default false
 
     JSTasks() {
         super();
+    }
+
+    JSTasks(Vector<JSPredicateForm> tasks){
+        super();
+        predicates.addAll(tasks);
     }
 
     JSTasks(StreamTokenizer tokenizer) {
@@ -44,7 +49,7 @@ public class JSTasks extends JSListLogicalAtoms {
             tokenizer.pushBack();
             ta = new JSTaskAtom(tokenizer);
             if (ta.size() != 0) {
-                this.addElement(ta);
+                this.predicates.addElement(ta);
             } else {
                 JSUtil.println("Line: " + tokenizer.lineno() + " parsing list of tasks: unexpected atom");
                 throw new JSParserError(); //return;
@@ -54,61 +59,6 @@ public class JSTasks extends JSListLogicalAtoms {
         }
 
         //  JSUtil.flagParser("ListTasks parse succesful");
-    }
-
-
-    public JSPairPlanTState seekPlan(JSTState ts, JSPlan pl, Vector<Object> listNodes, JSJshopVars vars) {
-
-        JSPlan ans;
-        JSPairPlanTState pair;
-        //JSPlan sol;
-
-        if (this.isEmpty()) {
-            return new JSPairPlanTState(pl, ts);
-        }
-
-        JSTaskAtom t = (JSTaskAtom) this.firstElement();
-        JSTasks rest = this.cdr();
-
-        if (t.isPrimitive()) {
-            pair = t.seekSimplePlan(ts, vars);
-            ans = pair.plan();
-            if (ans.isFailure()) {
-                return pair; // failure
-            } else {
-                pl.addElements(ans);
-                listNodes.addElement(new JSJshopNode(t, new Vector<>()));
-                return rest.seekPlan(pair.tState(), pl, listNodes, vars);
-            }
-        } else {
-            JSJshopNode node;
-            JSReduction red = new JSReduction();
-            red = t.reduce( ts.state(), red, vars); //counter to iterate
-            // on all reductions
-
-            JSTasks newTasks;
-            JSMethod selMet = red.selectedMethod();
-            while (!red.isDummy()) {
-                newTasks = red.reduction();
-                node = new JSJshopNode(t, newTasks.cloneTasks());
-
-                //  JSUtil.flag("<- tasks");
-                newTasks.addElements(rest);
-                pair = newTasks.seekPlan(ts, pl, listNodes, vars);
-                if (!pair.plan().isFailure()) {
-                    //  JSUtil.flag("reduced");
-                    listNodes.addElement(node);
-                    return pair;
-                }
-                // JSUtil.flag("iterating");
-                red = t.reduce(ts.state(), red, vars);
-                selMet = red.selectedMethod();
-            }
-        }
-        ans = new JSPlan();
-        ans.assignFailure();
-        return new JSPairPlanTState(ans, new JSTState());
-
     }
 
     /*   Multi plan generator */
@@ -128,7 +78,7 @@ public class JSTasks extends JSListLogicalAtoms {
             return plans;
         }
 
-        if (this.isEmpty()) {
+        if (this.predicates.isEmpty()) {
             if (JSJshopVars.flagLevel > 1)
                 JSUtil.println("Returning successfully from find-plan : No more tasks to plan");
 
@@ -143,7 +93,7 @@ public class JSTasks extends JSListLogicalAtoms {
             return plans;
         }
 
-        JSTaskAtom t = (JSTaskAtom) this.firstElement();
+        JSTaskAtom t = (JSTaskAtom) this.predicates.firstElement();
         if (JSJshopVars.flagLevel > 2) {
             JSUtil.println(" ");
             JSUtil.print("Searching a plan for");
@@ -167,8 +117,8 @@ public class JSTasks extends JSListLogicalAtoms {
             if (results.isEmpty())
                 return plans;
 
-            ta = (JSTaskAtom) ans.elementAt(0);
-            node = new JSJshopNode(t, new Vector<>());
+            ta = (JSTaskAtom) ans.predicates.elementAt(0);
+            node = new JSJshopNode(t, new JSTasks());
 
             for (int i = 0; i < results.size(); i++) {
                 ptl = results.elementAt(i);
@@ -225,7 +175,7 @@ public class JSTasks extends JSListLogicalAtoms {
     /*****************************************************************/
 
 
-    public boolean fail() {
+    /*public boolean fail() {
         return fail;
     }
 
@@ -235,7 +185,7 @@ public class JSTasks extends JSListLogicalAtoms {
 
     public void makeSucceed() {
         fail = false;
-    }
+    }*/
 
     public JSTasks applySubstitutionTasks(JSSubstitution alpha) {
         JSTasks nt = new JSTasks();
@@ -243,12 +193,12 @@ public class JSTasks extends JSListLogicalAtoms {
         JSTaskAtom nti;
 
 
-        for (short i = 0; i < this.size(); i++) {
-            ti = (JSTaskAtom) this.elementAt(i);
+        for (short i = 0; i < this.predicates.size(); i++) {
+            ti = (JSTaskAtom) this.predicates.elementAt(i);
             //ti.print();
             nti = ti.applySubstitutionTA(alpha);
             //nti.print();
-            nt.addElement(nti);
+            nt.predicates.addElement(nti);
             //nt.print();
             //JSUtil.flag("<-- applyJSTasks");
         }
@@ -262,8 +212,8 @@ public class JSTasks extends JSListLogicalAtoms {
     public boolean contains(JSTaskAtom t) {
         JSTaskAtom el;
 
-        for (int i = this.size() - 1; i > -1; i--) {
-            el = (JSTaskAtom) this.elementAt(i);
+        for (int i = this.predicates.size() - 1; i > -1; i--) {
+            el = (JSTaskAtom) this.predicates.elementAt(i);
             
             /*JSUtil.print("JSTaskAtom:");
             el.print();
@@ -284,9 +234,9 @@ public class JSTasks extends JSListLogicalAtoms {
         JSTasks newTs = new JSTasks();
         JSTaskAtom t;
 
-        for (short i = 0; i < this.size(); i++) {
-            t = (JSTaskAtom) this.elementAt(i);
-            newTs.addElement(t.cloneTA());
+        for (short i = 0; i < this.predicates.size(); i++) {
+            t = (JSTaskAtom) this.predicates.elementAt(i);
+            newTs.predicates.addElement(t.cloneTA());
         }
         return newTs;
 
@@ -296,9 +246,9 @@ public class JSTasks extends JSListLogicalAtoms {
         JSTasks newTs = new JSTasks();
         JSTaskAtom t;
 
-        for (short i = 1; i < this.size(); i++) {
-            t = (JSTaskAtom) this.elementAt(i);
-            newTs.addElement(t);
+        for (short i = 1; i < this.predicates.size(); i++) {
+            t = (JSTaskAtom) this.predicates.elementAt(i);
+            newTs.predicates.addElement(t);
         }
         return newTs;
 
@@ -308,9 +258,9 @@ public class JSTasks extends JSListLogicalAtoms {
         JSTasks newTs = new JSTasks();
         JSTaskAtom t;
 
-        for (short i = 0; i < this.size(); i++) {
-            t = (JSTaskAtom) this.elementAt(i);
-            newTs.addElement(t.standarizerTA(vars));
+        for (short i = 0; i < this.predicates.size(); i++) {
+            t = (JSTaskAtom) this.predicates.elementAt(i);
+            newTs.predicates.addElement(t.standarizerTA(vars));
         }
         return newTs;
 
