@@ -88,11 +88,13 @@ public class JSJshopVars {
         Double foundCost = plan.planCost();
         long currentTime = System.currentTimeMillis();
         //bestPlans.addElement(plan);
-        //JSUtil.println("Found plan of cost " + foundCost + " in run " + mctsRuns + " after " + (currentTime - startTime) + " ms at depth " + depth);
+        //JSUtil.println("Found a plan of cost " + foundCost + " in run " + mctsRuns + " after " + (currentTime - startTime) + " ms at depth " + depth);
+        //plan.printPlan();
         if (!planFound) {
             planFound = true;
             if(print)
                 JSUtil.println("Found first plan of cost " + foundCost + " in run " + mctsRuns + " after " + (currentTime - startTime) + " ms at depth " + depth);
+                plan.printPlan();
             bestCost = foundCost;
             this.bestPlans.addElement(plan);
         } else if (foundCost.compareTo(bestCost) < 0) {
@@ -100,6 +102,7 @@ public class JSJshopVars {
             bestCost = foundCost;
             if(print)
                 JSUtil.println("Found better plan of cost " + foundCost + " in run " + mctsRuns + " after " + (currentTime - startTime) + " ms at depth " + depth);
+                plan.printPlan();
         }
     }
 

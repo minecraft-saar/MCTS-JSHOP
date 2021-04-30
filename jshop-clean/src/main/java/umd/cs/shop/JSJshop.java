@@ -104,6 +104,9 @@ public final class JSJshop implements Runnable {
     @Option(names = {"-lf", "--landmarkFile"}, defaultValue = "", description = "Name of Landmark File")
     String landmarkFile;
 
+    @Option(names = {"-wf", "--weightsFile"}, defaultValue = "", description = "Json File for NLG weights")
+    String weightsFile;
+
     @Override
     public void run() {
         /*JSPlan plan = nlgSearch(mctsruns, timeout);
@@ -129,7 +132,7 @@ public final class JSJshop implements Runnable {
         if(level == CostFunction.InstructionLevel.NONE)
             variables.costFunction = CostFunction.getCostFunction(costFunctionName, variables.domain.getName());
         else
-            variables.costFunction = CostFunction.getCostFunction(costFunctionName, variables.domain.getName(), level);
+            variables.costFunction = CostFunction.getCostFunction(costFunctionName, variables.domain.getName(), level, weightsFile);
 
         if(landmarks){
             JSUtil.println("Starting landmark parsing");
@@ -320,7 +323,8 @@ public final class JSJshop implements Runnable {
         this.fastSimulation = false;
         this.bbPruningFast = true;
         this.recursiveSimulationBudget = 0;
-        vars.costFunction = CostFunction.getCostFunction(CostFunction.CostFunctionType.STATEDEPENDENT, "house", level);
+        this.weightsFile = "";
+        vars.costFunction = CostFunction.getCostFunction(CostFunction.CostFunctionType.STATEDEPENDENT, "house", level, weightsFile);
 
         mctsSearch(vars);
         return vars.bestPlans.lastElement();

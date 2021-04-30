@@ -51,9 +51,9 @@ public interface CostFunction {
         return null;
     }
 
-    public static CostFunction getCostFunction(CostFunctionType costFunctionName, String domainName, InstructionLevel level) {
+    public static CostFunction getCostFunction(CostFunctionType costFunctionName, String domainName, InstructionLevel level, String weightFile) {
         if(costFunctionName == CostFunctionType.NLG){
-            return new NLGCost(level);
+            return new NLGCost(level, weightFile);
         }
         switch (level) {
             case BLOCK:

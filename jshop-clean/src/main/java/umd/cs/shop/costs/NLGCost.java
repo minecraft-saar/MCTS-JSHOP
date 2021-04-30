@@ -3,21 +3,40 @@ package umd.cs.shop.costs;
 import de.saar.basic.Pair;
 import de.saar.coli.minecraft.relationextractor.*;
 import de.saar.coli.minecraft.MinecraftRealizer;
+import de.saar.minecraft.analysis.WeightEstimator;
 import umd.cs.shop.*;
 
-import java.util.ArrayList;
-import java.util.HashSet;
-import java.util.List;
-import java.util.Set;
+import java.io.IOException;
+import java.nio.file.Files;
+import java.nio.file.Paths;
+import java.util.*;
 
 public class NLGCost implements CostFunction {
 
     MinecraftRealizer nlgSystem;
     CostFunction.InstructionLevel instructionLevel;
+    protected WeightEstimator.WeightResult weights;
+    boolean weightsPresent;
+    Double lowestCost;
 
-    public NLGCost(CostFunction.InstructionLevel ins) {
+    public NLGCost(CostFunction.InstructionLevel ins, String weightFile) {
         instructionLevel = ins;
         nlgSystem = MinecraftRealizer.createRealizer();
+        lowestCost = 10.0;
+        if(weightFile.equals("")){
+            weightsPresent = false;
+        } else {
+            weightsPresent = true;
+            try {
+                weights = WeightEstimator.WeightResult.fromJson(
+                        Files.readString(Paths.get(weightFile)));
+                nlgSystem.setExpectedDurations(weights.weights, false);
+            } catch (IOException e) {
+                throw new RuntimeException("could not read weights file: " + weightFile);
+            }
+        }
+
+
     }
 
     @Override
@@ -26,14 +45,58 @@ public class NLGCost implements CostFunction {
             return 0.0;
         }
         MinecraftObject currentObject = createCurrentMinecraftObject(op, groundedOperator);
-        if(currentObject instanceof IntroductionMessage ){
-            return 0.0;
-        }
-        Pair<Set<MinecraftObject>,Set<MinecraftObject>> pair = createWorldFromState(state);
+        Set<String> knownObjects = new HashSet<>();
+        Pair<Set<MinecraftObject>,Set<MinecraftObject>> pair = createWorldFromState(state, knownObjects);
         Set<MinecraftObject> world = pair.getRight();
         Set<MinecraftObject> it = pair.getLeft();
-        Double returnValue = nlgSystem.estimateCostForPlanningSystem(world, currentObject, it);
-
+        if(currentObject instanceof IntroductionMessage ){
+            IntroductionMessage intro = (IntroductionMessage) currentObject;
+            //JSUtil.println(intro.toString());
+            //JSUtil.println(world.toString());
+            if(knownObjects.contains(intro.name)){
+                return 10000.0;
+            } else {
+                return 1.0;
+            }
+        }
+        //JSUtil.println(groundedOperator.toString());
+        //JSUtil.println(currentObject.toString() + " it: " + it.toString());
+        String currentObjectType = currentObject.getClass().getSimpleName().toLowerCase();
+        boolean objectFirstOccurence = ! knownObjects.contains(currentObjectType);
+        if (objectFirstOccurence && weights != null) {
+            // temporarily set the weight to the first occurence one
+            // ... if we have an estimate for the first occurence
+            if (weights.firstOccurenceWeights.containsKey("i" + currentObjectType)) {
+                nlgSystem.setExpectedDurations(
+                        Map.of("i" + currentObjectType, weights.firstOccurenceWeights.get("i" + currentObjectType)),
+                        false);
+            }
+        }
+        double returnValue = nlgSystem.estimateCostForPlanningSystem(world, currentObject, it);
+        //JSUtil.println(returnValue + " ");
+        //JSUtil.println(world.toString());
+        if (returnValue < 0.0){
+            //if(returnValue < lowestCost){
+                lowestCost = returnValue;
+                JSUtil.println(lowestCost.toString());
+                returnValue = 0.1;
+            //}
+            //returnValue = 0.0;
+        }
+        //returnValue = returnValue + 21864;
+        //if(returnValue < 0.0){
+        //    JSUtil.println("returnValue is smaller 0: " + returnValue);
+        //    System.exit(2);
+        //}
+        if (objectFirstOccurence) {
+            knownObjects.add(currentObjectType);
+            // reset weights
+            if (weights != null && weights.weights.containsKey("i" + currentObjectType)) {
+                nlgSystem.setExpectedDurations(
+                        Map.of("i" + currentObjectType, weights.weights.get("i" + currentObjectType)),
+                        false);
+            }
+        }
         return returnValue;
     }
 
@@ -42,11 +105,12 @@ public class NLGCost implements CostFunction {
         return false;
     }
 
-    private Pair<Set<MinecraftObject>,Set<MinecraftObject>> createWorldFromState(JSTState state) {
+    private Pair<Set<MinecraftObject>,Set<MinecraftObject>> createWorldFromState(JSTState state, Set<String> knownObjects) {
         Set<MinecraftObject> world = new HashSet<>();
         HashSet<MinecraftObject> it = new HashSet<MinecraftObject>();
         for (JSPredicateForm term : state.state().atoms()) {
             String name = (String) term.elementAt(0);
+            MinecraftObject mco;
             JSTerm data;
             String type;
             JSTerm tmp;
@@ -69,7 +133,9 @@ public class NLGCost implements CostFunction {
                     z = (int) Double.parseDouble(tmp.toStr().toString());
                     //System.out.println("Block: " + type + " " + x + " " + y + " "+ z);
                     if(type.equals("stone")){
-                        world.add(new Block(x, y, z));
+                        mco = new Block(x, y, z);
+                        world.add(mco);
+                        knownObjects.add(mco.getClass().getSimpleName().toLowerCase());
                     } else {
                         world.add(new UniqueBlock(type, x, y, z));
                     }
@@ -88,16 +154,24 @@ public class NLGCost implements CostFunction {
                     }
                     break;
                 case "wall-at":
-                    world.add(createWall(term));
+                     mco = createWall(term);
+                    world.add(mco);
+                    knownObjects.add(mco.getClass().getSimpleName().toLowerCase());
                     break;
                 case "row-at":
-                    world.add(createRow(term));
+                    mco = createRow(term);
+                    world.add(mco);
+                    knownObjects.add(mco.getClass().getSimpleName().toLowerCase());
                     break;
                 case "railing-at":
-                    world.add(createRailing(term));
+                    mco = createRailing(term);
+                    world.add(mco);
+                    knownObjects.add(mco.getClass().getSimpleName().toLowerCase());
                     break;
                 case "floor-at":
-                    world.add(createFloor(term));
+                    mco = createFloor(term);
+                    world.add(mco);
+                    knownObjects.add(mco.getClass().getSimpleName().toLowerCase());
                     break;
             }
         }
