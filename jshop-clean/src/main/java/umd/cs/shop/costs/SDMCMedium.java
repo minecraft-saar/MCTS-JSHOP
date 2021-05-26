@@ -63,6 +63,8 @@ public class SDMCMedium implements CostFunction {
                 case "!place-block-hidden":
                 case "!build-wall-starting":
                 case "!build-wall-finished":
+                case "!build-row-starting":
+                case "!build-row-finished":
                 case "!build-railing-finished":
                 case "!build-railing-starting":
                 case "!build-floor-finished":
