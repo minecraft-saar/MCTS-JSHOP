@@ -32,6 +32,10 @@ public class SDMCBlock implements CostFunction {
                 return 0.0;
             case "!build-wall-finished":
                 return 0.0;
+            case "!build-row-starting":
+                return 0.0;
+            case "!build-row-finished":
+                return 0.0;
             case "!build-railing-finished":
                 return 0.0;
             case "!build-railing-starting":
