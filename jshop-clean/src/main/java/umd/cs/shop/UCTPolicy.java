@@ -84,7 +84,8 @@ public class UCTPolicy implements MCTSPolicy {
         exploration = java.lang.Math.sqrt(exploration);
         double reward;
         if(vars.planFound){
-            reward = vars.bestCost/child.getCost();
+            reward = 1/child.getCost(); //change for NLG system
+            //reward = vars.bestCost/child.getCost();
         } else {
             reward = 0.5;
         }

@@ -54,7 +54,8 @@ public class NLGCost implements CostFunction {
             //JSUtil.println(intro.toString());
             //JSUtil.println(world.toString());
             if(knownObjects.contains(intro.name)){
-                return 10000.0;
+                //make dead end
+                return 30000.0;
             } else {
                 return 1.0;
             }
@@ -76,11 +77,11 @@ public class NLGCost implements CostFunction {
         //JSUtil.println(returnValue + " ");
         //JSUtil.println(world.toString());
         if (returnValue < 0.0){
-            //if(returnValue < lowestCost){
+            if(returnValue < lowestCost){
                 lowestCost = returnValue;
                 JSUtil.println(lowestCost.toString());
-                returnValue = 0.1;
-            //}
+                //returnValue = 0.1;
+            }
             //returnValue = 0.0;
         }
         //returnValue = returnValue + 21864;
