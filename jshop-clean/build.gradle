@@ -2,7 +2,7 @@ plugins {
 	id 'java'
 	id 'application'
     // shadow builds jar with all dependencies
-    id 'com.github.johnrengelman.shadow' version '5.0.0'
+    id 'com.github.johnrengelman.shadow' version '5.2.0'
 
     // enables automatic version numbers from git tags
     // and provides additional gradle tasks to create releases (optional)
@@ -26,7 +26,11 @@ scmVersion {
 }
 version = scmVersion.version
 
-sourceCompatibility = 1.11
+java {
+    toolchain {
+        languageVersion = JavaLanguageVersion.of(16)
+    }
+}
 
 repositories {
     mavenLocal()
