@@ -31,8 +31,8 @@ sourceCompatibility = 1.11
 repositories {
     mavenLocal()
     mavenCentral()
-    maven {url 'http://www.ling.uni-potsdam.de/tcl/maven2/external'}
-    maven {url 'http://www.ling.uni-potsdam.de/tcl/maven2/releases'}
+    maven { url "http://akci.coli.uni-saarland.de/artifactory/external"
+           allowInsecureProtocol = true }
     maven { url 'https://jitpack.io' }
     maven {
         name = "GitHubPackages"
@@ -45,9 +45,9 @@ repositories {
 }
 
 dependencies {
-	compile 'info.picocli:picocli:3.9.3'
-	compile group: 'com.github.minecraft-saar', name: 'minecraft-nlg', version: 'ab9c7805b07b86cfed3ceced477178d2015140a6'
-    compile group: 'com.github.minecraft-saar', name: 'weight-estimator', version: '15d4b89418b670b5cf47c89dacda9fc96c771e78'
+	implementation 'info.picocli:picocli:3.9.3'
+	implementation group: 'com.github.minecraft-saar', name: 'minecraft-nlg', version: 'ab9c7805b07b86cfed3ceced477178d2015140a6'
+    implementation group: 'com.github.minecraft-saar', name: 'weight-estimator', version: '15d4b89418b670b5cf47c89dacda9fc96c771e78'
 	//compile 'de.saar.minecraft:shared-resources:1.1.1'
 }
 
