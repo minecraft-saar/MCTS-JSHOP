@@ -40,7 +40,15 @@ public class SDCostMinecraft implements CostFunction {
                     return 2;
                 }
             case "!place-block-hidden":
-                return 0;
+            case "!build-wall-finished":
+            case "!build-wall-starting":
+            case "!build-row-finished":
+            case "!build-row-starting":
+            case "!build-railing-finished":
+            case "!build-railing-starting":
+            case "!build-floor-finished":
+            case "!build-floor-starting":
+                return 0.0;
             case "!build-row":
                 return 4;
             case "!build-column":
@@ -49,7 +57,7 @@ public class SDCostMinecraft implements CostFunction {
                 return 10;
             case "!build-wall":
                 return 20;
-            case "!build-plane":
+            case "!build-floor":
                 return 20;
             case "!remove":
                 return 5;

@@ -107,13 +107,17 @@ public final class JSJshop implements Runnable {
     @Option(names = {"-wf", "--weightsFile"}, defaultValue = "", description = "Json File for NLG weights")
     String weightsFile;
 
+    @Option(names = {"-p", "--planFile"}, defaultValue = "NoFile.plan", description = "Output File containing Plan")
+    String planFile;
+
     @Override
     public void run() {
         /*JSPlan plan = nlgSearch(mctsruns, timeout);
         if(plan != null){
             return;
         }*/
-        JSJshopVars variables = new JSJshopVars(bbPruning, useApproximatedCostFunction, random, true, landmarks);
+        JSJshopVars variables = new JSJshopVars(bbPruning, useApproximatedCostFunction, random, true, landmarks, planFile);
+        JSUtil.println(variables.planFile);
         variables.startTime = System.currentTimeMillis();
         variables.initRandGen(this.randomSeed);
         JSUtil.println("Reading file " + nameDomainFile);
@@ -233,7 +237,12 @@ public final class JSJshop implements Runnable {
                 //JSUtil.println("Solution in Tree: " + JSJshopVars.bestPlans.lastElement().isInTree());
                 JSUtil.println("Reward for Given Plan: " + vars.bestPlans.lastElement().planCost());
                 JSUtil.println("********* PLAN *******");
-                vars.bestPlans.lastElement().printPlan();
+                if(vars.planFile.equals("NoFile.plan")){
+                    vars.bestPlans.lastElement().printPlan();
+                } else {
+                    vars.bestPlans.lastElement().printPlanToFile(vars.planFile);
+                }
+
                 //for (JSPlan plan : vars.bestPlans) {
                 //    plan.printPlan();
                 //}
@@ -309,7 +318,7 @@ public final class JSJshop implements Runnable {
         if (!parseSuccess) {
             JSUtil.println("Problem File not parsed correctly");
         }
-        JSJshopVars vars = new JSJshopVars(false, true, false, false, false);
+        JSJshopVars vars = new JSJshopVars(false, true, false, false, false, "");
         vars.initRandGen(42);
         this.domain.axioms.setVars(vars);
         vars.domain = this.domain;
@@ -327,6 +336,9 @@ public final class JSJshop implements Runnable {
         vars.costFunction = CostFunction.getCostFunction(CostFunction.CostFunctionType.STATEDEPENDENT, "house", level, weightsFile);
 
         mctsSearch(vars);
+        if(!vars.planFound){
+            return new JSPlan();
+        }
         return vars.bestPlans.lastElement();
     }
 
