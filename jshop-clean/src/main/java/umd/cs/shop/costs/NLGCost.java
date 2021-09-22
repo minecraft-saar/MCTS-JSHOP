@@ -57,7 +57,7 @@ public class NLGCost implements CostFunction {
                 //make dead end
                 return 30000.0;
             } else {
-                return 1.0;
+                return 0.000001;
             }
         }
         //JSUtil.println(groundedOperator.toString());
@@ -167,11 +167,13 @@ public class NLGCost implements CostFunction {
                 case "railing-at":
                     mco = createRailing(term);
                     world.add(mco);
+                    it.add(mco);
                     knownObjects.add(mco.getClass().getSimpleName().toLowerCase());
                     break;
                 case "floor-at":
                     mco = createFloor(term);
                     world.add(mco);
+                    it.add(mco);
                     knownObjects.add(mco.getClass().getSimpleName().toLowerCase());
                     break;
             }
