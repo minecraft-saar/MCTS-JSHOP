@@ -41,6 +41,7 @@ public class NLGCost implements CostFunction {
 
     @Override
     public Double getCost(JSTState state, JSOperator op, JSTaskAtom groundedOperator, boolean approx) {
+
         if(groundedOperator.get(0).equals("!place-block-hidden")){
             return 0.0;
         }
@@ -51,8 +52,6 @@ public class NLGCost implements CostFunction {
         Set<MinecraftObject> it = pair.getLeft();
         if(currentObject instanceof IntroductionMessage ){
             IntroductionMessage intro = (IntroductionMessage) currentObject;
-            //JSUtil.println(intro.toString());
-            //JSUtil.println(world.toString());
             if(knownObjects.contains(intro.name)){
                 //make dead end
                 return 30000.0;
@@ -60,8 +59,6 @@ public class NLGCost implements CostFunction {
                 return 0.000001;
             }
         }
-        //JSUtil.println(groundedOperator.toString());
-        //JSUtil.println(currentObject.toString() + " it: " + it.toString());
         String currentObjectType = currentObject.getClass().getSimpleName().toLowerCase();
         boolean objectFirstOccurence = ! knownObjects.contains(currentObjectType);
         if (objectFirstOccurence && weights != null) {
@@ -74,21 +71,12 @@ public class NLGCost implements CostFunction {
             }
         }
         double returnValue = nlgSystem.estimateCostForPlanningSystem(world, currentObject, it);
-        //JSUtil.println(returnValue + " ");
-        //JSUtil.println(world.toString());
         if (returnValue < 0.0){
             if(returnValue < lowestCost){
                 lowestCost = returnValue;
                 JSUtil.println(lowestCost.toString());
-                //returnValue = 0.1;
             }
-            //returnValue = 0.0;
         }
-        //returnValue = returnValue + 21864;
-        //if(returnValue < 0.0){
-        //    JSUtil.println("returnValue is smaller 0: " + returnValue);
-        //    System.exit(2);
-        //}
         if (objectFirstOccurence) {
             knownObjects.add(currentObjectType);
             // reset weights
