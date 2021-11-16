@@ -13,6 +13,12 @@ plugins {
 group 'de.saar.minecraft'
 description 'jshop'
 
+configurations.all {
+  resolutionStrategy {
+    force 'xml-apis:xml-apis:1.4.01'
+  }
+}
+
 // This defines releases as revisions
 // that have a tag of the form "release-X.Y.Z"
 scmVersion {
@@ -35,9 +41,10 @@ java {
 repositories {
     mavenLocal()
     mavenCentral()
-    maven { url "http://akci.coli.uni-saarland.de/artifactory/external"
-           allowInsecureProtocol = true }
+    //maven { url "http://akci.coli.uni-saarland.de/artifactory/external"
+    //       allowInsecureProtocol = true }
     maven { url 'https://jitpack.io' }
+    maven {url 'https://raw.github.com/coli-saar/alto/repository/'}
     maven {
         name = "GitHubPackages"
         url = uri("https://maven.pkg.github.com/minecraft-saar/jshop")
@@ -50,7 +57,7 @@ repositories {
 
 dependencies {
 	implementation 'info.picocli:picocli:3.9.3'
-	implementation group: 'com.github.minecraft-saar', name: 'minecraft-nlg', version: 'fda8aea68fa5cb9835624a7a1f9efef5f50760db'
+	implementation group: 'com.github.minecraft-saar', name: 'minecraft-nlg', version: '114d7acd9cbb2cfe112dff02421c3890eec43547'
     implementation group: 'com.github.minecraft-saar', name: 'weight-estimator', version: '51941b62e8fbdee7dccf772716ee97f4520f4675'
 	//compile 'de.saar.minecraft:shared-resources:1.1.1'
 }
