@@ -164,6 +164,12 @@ public class NLGCost implements CostFunction {
                     it.add(mco);
                     knownObjects.add(mco.getClass().getSimpleName().toLowerCase());
                     break;
+                case "stairs-at":
+                    mco = createStairs(term);
+                    world.add(mco);
+                    it.add(mco);
+                    knownObjects.add(mco.getClass().getSimpleName().toLowerCase());
+                    break;
             }
         }
         Pair<Set<MinecraftObject>, Set<MinecraftObject>> ret = new Pair<Set<MinecraftObject>, Set<MinecraftObject>>(it, world);
@@ -202,6 +208,50 @@ public class NLGCost implements CostFunction {
         }
         return new Floor("floor", x1, z1, x2, z2, y1);
 
+    }
+//((stairs-at ?x ?y ?z ?width ?depth ?height ?dir))
+    public MinecraftObject createStairs(JSPredicateForm term) {
+        int x1, x2, x3, y1, y3, z1, z2, z3, length, width, height, dir;
+        JSTerm tmp = (JSTerm) term.elementAt(1);
+        x1 = (int) Double.parseDouble(tmp.toStr().toString().replace("[", "").replace("]", ""));
+        tmp = (JSTerm) term.elementAt(2);
+        y1 = (int) Double.parseDouble(tmp.toStr().toString().replace("[", "").replace("]", ""));
+        tmp = (JSTerm) term.elementAt(3);
+        z1 = (int) Double.parseDouble(tmp.toStr().toString().replace("[", "").replace("]", ""));
+        tmp = (JSTerm) term.elementAt(4);
+        width = (int) Double.parseDouble(tmp.toStr().toString().replace("[", "").replace("]", ""));
+        tmp = (JSTerm) term.elementAt(5);
+        length = (int) Double.parseDouble(tmp.toStr().toString().replace("[", "").replace("]", ""));
+        tmp = (JSTerm) term.elementAt(6);
+        height = (int) Double.parseDouble(tmp.toStr().toString().replace("[", "").replace("]", ""));
+        tmp = (JSTerm) term.elementAt(7);
+        dir = (int) Double.parseDouble(tmp.toStr().toString().replace("[", "").replace("]", ""));
+        //east=1=>x+, west=2=>x-, north=3=>z-, south=4=>z+
+        if (dir == 1) {
+            x2 = x1 + width - 1;
+            z2 = z1;
+            x3 = x1;
+            z3 = z1 + length - 1;
+        } else if (dir == 2) {
+            x2 = x1;
+            x1 = x1 - width + 1;
+            z2 = z1;
+            x3 = x1;
+            z3 = z1 - length + 1;
+        } else if (dir == 3) {
+            z2 = z1;
+            z1 = z1 - width + 1;
+            x2 = x1;
+            z3 = z1;
+            x3 = x1 + length -1;
+        } else {
+            z2 = z1 + width - 1;
+            x2 = x1;
+            z3 = z1;
+            x3 = x1 - length + 1;
+        }
+        y3 = y1 + height -1;
+        return new Stairs( "stairs", x1, y1, z1, x2, z2, x3, y3, z3);
     }
 
     public MinecraftObject createRailing(JSPredicateForm term) {

@@ -57,7 +57,7 @@ repositories {
 
 dependencies {
 	implementation 'info.picocli:picocli:3.9.3'
-	implementation group: 'com.github.minecraft-saar', name: 'minecraft-nlg', version: '114d7acd9cbb2cfe112dff02421c3890eec43547'
+	implementation group: 'com.github.minecraft-saar', name: 'minecraft-nlg', version: '984f20d45de1c4adfb83dd517f4ed362a352595c'
     implementation group: 'com.github.minecraft-saar', name: 'weight-estimator', version: '51941b62e8fbdee7dccf772716ee97f4520f4675'
 	//compile 'de.saar.minecraft:shared-resources:1.1.1'
 }
