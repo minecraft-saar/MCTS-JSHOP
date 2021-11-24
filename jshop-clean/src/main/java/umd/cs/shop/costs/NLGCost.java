@@ -405,6 +405,17 @@ public class NLGCost implements CostFunction {
             case "!build-floor":
                 result = createFloor(groundedOperator);
                 break;
+            case "!build-stairs-starting":
+                if (instructionLevel != CostFunction.InstructionLevel.BLOCK)
+                    result = new IntroductionMessage(createStairs(groundedOperator), true, "floor");
+                break;
+            case "!build-stairs-finished":
+                if (instructionLevel != CostFunction.InstructionLevel.BLOCK)
+                    result = new IntroductionMessage(createStairs(groundedOperator), false, "floor");
+                break;
+            case "!build-stairs":
+                result = createStairs(groundedOperator);
+                break;
             case "!place-block-hidden":
                 System.out.println("Tried to get Minecraft Object for place-block-hidden something went wrong ");
                 result = null;
