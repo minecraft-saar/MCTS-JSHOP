@@ -133,14 +133,14 @@ public final class JSJshop implements Runnable {
         JSUtil.println("Problem file parsed successfully");
         final long parseTime = System.currentTimeMillis();
         JSUtil.println("Parsing Time: " + (parseTime - variables.startTime));
-        if(level == CostFunction.InstructionLevel.NONE)
+        if (level == CostFunction.InstructionLevel.NONE)
             variables.costFunction = CostFunction.getCostFunction(costFunctionName, variables.domain.getName());
         else
             variables.costFunction = CostFunction.getCostFunction(costFunctionName, variables.domain.getName(), level, weightsFile);
 
-        if(landmarks){
+        if (landmarks) {
             JSUtil.println("Starting landmark parsing");
-            if(!parserFileLandmarks(landmarkFile))
+            if (!parserFileLandmarks(landmarkFile))
                 System.exit(0);
             JSUtil.println("Initial Fact Landmarks: ");
             JSUtil.println(initialFactLandmarks.toString());
@@ -196,12 +196,12 @@ public final class JSJshop implements Runnable {
 
     //MCTS
     public void mctsSearch(JSJshopVars vars) {
-        if(explorationFactor == 1.41421){
+        if (explorationFactor == 1.41421) {
             explorationFactor = java.lang.Math.sqrt(2);
         }
         vars.policy = MCTSPolicy.getPolicy(vars, updateMinimum, explorationFactor);
         vars.expansionPolicy = MCTSExpand.getPolicy(expansionPolicy, recursive, vars);
-        vars.simulationPolicy = MCTSSimulation.getPolicy(!fastSimulation, recursiveSimulationBudget, bbPruning, bbPruningFast,vars);
+        vars.simulationPolicy = MCTSSimulation.getPolicy(!fastSimulation, recursiveSimulationBudget, bbPruning, bbPruningFast, vars);
 
         if (duplicate) {
             vars.registry = new Registry();
@@ -209,19 +209,19 @@ public final class JSJshop implements Runnable {
 
         for (int k = 0; k < probSet.size(); k++) {
             prob = (JSPlanningProblem) probSet.elementAt(k);
-            if(vars.print) {
+            if (vars.print) {
                 JSUtil.println("Solving Problem :" + prob.Name() + " with mcts");
                 JSUtil.println("time till timeout: " + timeout);
             }
-            if(landmarks) {
+            if (landmarks) {
                 prob.state().factLandmarks = initialFactLandmarks;
-                for(JSPredicateForm pred : prob.state().atoms){
+                for (JSPredicateForm pred : prob.state().atoms) {
                     prob.state().factLandmarks.removeIf(landmark -> landmark.compare(pred, true));
                 }
                 prob.state().taskLandmarks = initialTaskLandmarks;
             }
             vars.domain.solveMCTS(prob, mctsruns, timeout, printTree, vars);
-            if(!vars.print){
+            if (!vars.print) {
                 return;
             }
             final long searchTime = System.currentTimeMillis();
@@ -237,7 +237,7 @@ public final class JSJshop implements Runnable {
                 //JSUtil.println("Solution in Tree: " + JSJshopVars.bestPlans.lastElement().isInTree());
                 JSUtil.println("Reward for Given Plan: " + vars.bestPlans.lastElement().planCost());
                 JSUtil.println("********* PLAN *******");
-                if(vars.planFile.equals("NoFile.plan")){
+                if (vars.planFile.equals("NoFile.plan")) {
                     vars.bestPlans.lastElement().printPlan();
                 } else {
                     vars.bestPlans.lastElement().printPlanToFile(vars.planFile);
@@ -262,7 +262,7 @@ public final class JSJshop implements Runnable {
 
             prob = (JSPlanningProblem) probSet.elementAt(k);
             JSUtil.println("Solving Problem :" + prob.Name());
-            allPlans = vars.domain.solveAll(prob, vars.allPlans,vars);
+            allPlans = vars.domain.solveAll(prob, vars.allPlans, vars);
             final long totalTime = System.currentTimeMillis();
             JSUtil.println("Total Time: " + (totalTime - vars.startTime));
             if (allPlans.isEmpty()) {
@@ -301,332 +301,290 @@ public final class JSJshop implements Runnable {
         }
     }
 
+    public void transformWorldForArchitect(InputStream world, String problem, InputStream
+        domain){
+            //InputStream domain = JSJshop.class.getResourceAsStream("domain.shp");
+            //InputStream world = JSJshop.class.getResourceAsStream("/de/saar/minecraft/worlds/artengis.csv");
 
-    //Calls mcts search but returns the plan insteasd of printing it for use in the NLG System
-    public JSPlan nlgSearch(int mctsruns, long timeout, InputStream world, String problem, InputStream domain, CostFunction.InstructionLevel level) {
-        //InputStream domain = JSJshop.class.getResourceAsStream("domain.shp");
-        //InputStream world = JSJshop.class.getResourceAsStream("/de/saar/minecraft/worlds/artengis.csv");
-
-        boolean parseSuccess = parserFile(domain);
-        if (!parseSuccess) {
-            JSUtil.println("Domain File not parsed correctly");
+            boolean parseSuccess = parserFile(domain);
+            if (!parseSuccess) {
+                JSUtil.println("Domain File not parsed correctly");
+            }
+            //creating Problem file from world info
+            InputStream transformedProblem = transformWorld(world, problem);
+            //parseFile initializes probSet, a list of all problems, prob.elementAt(0).state() is initial state
+            parseSuccess = parserFile(transformedProblem);
+            if (!parseSuccess) {
+                JSUtil.println("Problem File not parsed correctly");
+            }
         }
-        //creating Problem file from world info
-        InputStream transformedProblem = transformWorld(world, problem);
-        //parseFile initializes probSet, a list of all problems, prob.elementAt(0).state() is initial state
-        parseSuccess = parserFile(transformedProblem);
-        if (!parseSuccess) {
-            JSUtil.println("Problem File not parsed correctly");
+
+
+        //Calls mcts search but returns the plan insteasd of printing it for use in the NLG System
+        public JSPlan nlgSearch ( int mctsruns, long timeout, InputStream world, String problem, InputStream
+        domain, CostFunction.InstructionLevel level){
+            //InputStream domain = JSJshop.class.getResourceAsStream("domain.shp");
+            //InputStream world = JSJshop.class.getResourceAsStream("/de/saar/minecraft/worlds/artengis.csv");
+
+            boolean parseSuccess = parserFile(domain);
+            if (!parseSuccess) {
+                JSUtil.println("Domain File not parsed correctly");
+            }
+            //creating Problem file from world info
+            InputStream transformedProblem = transformWorld(world, problem);
+            //parseFile initializes probSet, a list of all problems, prob.elementAt(0).state() is initial state
+            parseSuccess = parserFile(transformedProblem);
+            if (!parseSuccess) {
+                JSUtil.println("Problem File not parsed correctly");
+            }
+            JSJshopVars vars = new JSJshopVars(false, true, false, false, false, "");
+            vars.initRandGen(42);
+            this.domain.axioms.setVars(vars);
+            vars.domain = this.domain;
+            vars.startTime = System.currentTimeMillis();
+            this.mctsruns = mctsruns;
+            this.timeout = timeout;
+            this.updateMinimum = true;
+            this.explorationFactor = java.lang.Math.sqrt(2);
+            this.expansionPolicy = "simple";
+            this.recursive = true;
+            this.fastSimulation = false;
+            this.bbPruningFast = true;
+            this.recursiveSimulationBudget = 0;
+            this.weightsFile = "";
+            vars.costFunction = CostFunction.getCostFunction(CostFunction.CostFunctionType.STATEDEPENDENT, "house", level, weightsFile);
+
+            mctsSearch(vars);
+            if (!vars.planFound) {
+                return new JSPlan();
+            }
+            return vars.bestPlans.lastElement();
         }
-        JSJshopVars vars = new JSJshopVars(false, true, false, false, false, "");
-        vars.initRandGen(42);
-        this.domain.axioms.setVars(vars);
-        vars.domain = this.domain;
-        vars.startTime = System.currentTimeMillis();
-        this.mctsruns = mctsruns;
-        this.timeout = timeout;
-        this.updateMinimum = true;
-        this.explorationFactor = java.lang.Math.sqrt(2);
-        this.expansionPolicy="simple";
-        this.recursive = true;
-        this.fastSimulation = false;
-        this.bbPruningFast = true;
-        this.recursiveSimulationBudget = 0;
-        this.weightsFile = "";
-        vars.costFunction = CostFunction.getCostFunction(CostFunction.CostFunctionType.STATEDEPENDENT, "house", level, weightsFile);
 
-        mctsSearch(vars);
-        if(!vars.planFound){
-            return new JSPlan();
-        }
-        return vars.bestPlans.lastElement();
-    }
+        public InputStream transformWorld (InputStream world, String problem){
 
-    public InputStream transformWorld(InputStream world, String problem) {
-
-        BufferedReader reader = new BufferedReader(new InputStreamReader(world));
-        String line = "";
-        String result = "(defproblem problem-house build-house ( (last-placed 150 150 150) ";
-        try {
-            while ((line = reader.readLine()) != null) {
-                String[] data = line.split(",");
-                int x = Integer.parseInt(data[0]);
-                int y = Integer.parseInt(data[1]);
-                int z = Integer.parseInt(data[2]);
-                if (x < 0 || y < 0 || z < 0) {
-                    continue;
+            BufferedReader reader = new BufferedReader(new InputStreamReader(world));
+            String line = "";
+            String result = "(defproblem problem-house build-house ( (last-placed 150 150 150) ";
+            try {
+                while ((line = reader.readLine()) != null) {
+                    String[] data = line.split(",");
+                    int x = Integer.parseInt(data[0]);
+                    int y = Integer.parseInt(data[1]);
+                    int z = Integer.parseInt(data[2]);
+                    if (x < 0 || y < 0 || z < 0) {
+                        continue;
+                    }
+                    String blockAt = "(block-at ";
+                    //append block type
+                    blockAt = blockAt.concat(data[3]).concat(" ");
+                    //append x,y,z coordinates
+                    blockAt = blockAt.concat(data[0]).concat(" ").concat(data[1]).concat(" ").concat(data[2]).concat(") ");
+                    result = result.concat(blockAt);
                 }
-                String blockAt = "(block-at ";
-                //append block type
-                blockAt = blockAt.concat(data[3]).concat(" ");
-                //append x,y,z coordinates
-                blockAt = blockAt.concat(data[0]).concat(" ").concat(data[1]).concat(" ").concat(data[2]).concat(") ");
-                result = result.concat(blockAt);
+
+            } catch (IOException e) {
+                e.printStackTrace();
             }
 
-        } catch (IOException e) {
-            e.printStackTrace();
+            result = result.concat(") ((").concat(problem).concat(")) )");
+            return new ByteArrayInputStream(result.getBytes());
         }
 
-        result = result.concat(") ((").concat(problem).concat(")) )");
-        return new ByteArrayInputStream(result.getBytes());
-    }
+        public void testParser () {
+            try {
 
-    public void testParser() {
-        try {
+                FileReader fr = new FileReader("farp.shp");
+                StreamTokenizer tokenizer = new StreamTokenizer(fr);
+                JSUtil.initParseTable(tokenizer);
+                while (tokenizer.nextToken() != StreamTokenizer.TT_EOF) {
+                    if (tokenizer.ttype == StreamTokenizer.TT_NUMBER) {
+                        System.err.print(tokenizer.nval + " ");
+                    }
+                    if (tokenizer.ttype == JSJshopVars.leftPar) {
+                        System.err.print("( ");
+                    }
+                    if (tokenizer.ttype == JSJshopVars.rightPar) {
+                        System.err.print(") ");
+                    }
+                    if (tokenizer.ttype == JSJshopVars.colon) {
+                        System.err.print(": ");
+                    }
+                    if (tokenizer.ttype == JSJshopVars.semicolon) {
+                        System.err.print("; ");
+                    }
+                    if (tokenizer.ttype == JSJshopVars.apostrophe) {
+                        System.err.print("' ");
+                    }
+                    if (tokenizer.ttype == JSJshopVars.exclamation) {
+                        System.err.print("! ");
+                    }
+                    if (tokenizer.ttype == JSJshopVars.interrogation) {
+                        System.err.print("? ");
+                    }
+                    if (tokenizer.ttype == JSJshopVars.minus) {
+                        System.err.print("- ");
+                    }
+                    if (tokenizer.ttype == JSJshopVars.lessT) {
+                        System.err.print("< ");
+                    }
+                    if (tokenizer.ttype == JSJshopVars.equalT) {
+                        System.err.print("= ");
+                    }
+                    if (tokenizer.ttype == JSJshopVars.greaterT) {
+                        System.err.print("> ");
+                    }
+                    if (tokenizer.ttype == JSJshopVars.plus) {
+                        System.err.print("+ ");
+                    }
 
-            FileReader fr = new FileReader("farp.shp");
-            StreamTokenizer tokenizer = new StreamTokenizer(fr);
-            JSUtil.initParseTable(tokenizer);
-            while (tokenizer.nextToken() != StreamTokenizer.TT_EOF) {
-                if (tokenizer.ttype == StreamTokenizer.TT_NUMBER) {
-                    System.err.print(tokenizer.nval + " ");
-                }
-                if (tokenizer.ttype == JSJshopVars.leftPar) {
-                    System.err.print("( ");
-                }
-                if (tokenizer.ttype == JSJshopVars.rightPar) {
-                    System.err.print(") ");
-                }
-                if (tokenizer.ttype == JSJshopVars.colon) {
-                    System.err.print(": ");
-                }
-                if (tokenizer.ttype == JSJshopVars.semicolon) {
-                    System.err.print("; ");
-                }
-                if (tokenizer.ttype == JSJshopVars.apostrophe) {
-                    System.err.print("' ");
-                }
-                if (tokenizer.ttype == JSJshopVars.exclamation) {
-                    System.err.print("! ");
-                }
-                if (tokenizer.ttype == JSJshopVars.interrogation) {
-                    System.err.print("? ");
-                }
-                if (tokenizer.ttype == JSJshopVars.minus) {
-                    System.err.print("- ");
-                }
-                if (tokenizer.ttype == JSJshopVars.lessT) {
-                    System.err.print("< ");
-                }
-                if (tokenizer.ttype == JSJshopVars.equalT) {
-                    System.err.print("= ");
-                }
-                if (tokenizer.ttype == JSJshopVars.greaterT) {
-                    System.err.print("> ");
-                }
-                if (tokenizer.ttype == JSJshopVars.plus) {
-                    System.err.print("+ ");
-                }
+                    if (tokenizer.ttype == JSJshopVars.backquote) {
+                        System.err.print("` ");
+                    }
 
-                if (tokenizer.ttype == JSJshopVars.backquote) {
-                    System.err.print("` ");
-                }
+                    if (tokenizer.ttype == JSJshopVars.slash) {
+                        System.err.print("/ ");
+                    }
+                    if (tokenizer.ttype == JSJshopVars.coma) {
+                        System.err.print(", ");
+                    }
+                    if (tokenizer.ttype == JSJshopVars.astherisk) {
+                        System.err.print("* ");
+                    }
+                    if (tokenizer.ttype == JSJshopVars.rightBrac) {
+                        System.err.print("] ");
+                    }
+                    if (tokenizer.ttype == JSJshopVars.leftBrac) {
+                        System.err.print("[ ");
+                    }
+                    if (tokenizer.ttype == JSJshopVars.verticalL) {
+                        System.err.print("| ");
+                    }
+                    if (tokenizer.ttype == StreamTokenizer.TT_WORD) {
+                        System.err.print(tokenizer.sval + " ");
+                    }
 
-                if (tokenizer.ttype == JSJshopVars.slash) {
-                    System.err.print("/ ");
                 }
-                if (tokenizer.ttype == JSJshopVars.coma) {
-                    System.err.print(", ");
-                }
-                if (tokenizer.ttype == JSJshopVars.astherisk) {
-                    System.err.print("* ");
-                }
-                if (tokenizer.ttype == JSJshopVars.rightBrac) {
-                    System.err.print("] ");
-                }
-                if (tokenizer.ttype == JSJshopVars.leftBrac) {
-                    System.err.print("[ ");
-                }
-                if (tokenizer.ttype == JSJshopVars.verticalL) {
-                    System.err.print("| ");
-                }
-                if (tokenizer.ttype == StreamTokenizer.TT_WORD) {
-                    System.err.print(tokenizer.sval + " ");
-                }
+                fr.close();
+                //JSUtil.flag("End of parsing");
 
+            } catch (Exception e) {
+                JSUtil.println("Error reading control parameters: " + e);
+                System.exit(1);
             }
-            fr.close();
-            //JSUtil.flag("End of parsing");
 
-        } catch (Exception e) {
-            JSUtil.println("Error reading control parameters: " + e);
-            System.exit(1);
         }
 
-    }
+        public boolean parserFile (InputStream input){
+            String libraryDirectory = ".";
 
-    public boolean parserFile(InputStream input) {
-        String libraryDirectory = ".";
-
-        try {
-            Reader fr = new InputStreamReader(input);
-            StreamTokenizer tokenizer = new StreamTokenizer(fr);
-            tokenizer.lowerCaseMode(true);
-            JSUtil.initParseTable(tokenizer);
-            while (tokenizer.nextToken() != StreamTokenizer.TT_EOF)
-                processToken(tokenizer);
-            fr.close();
-        } catch (IOException e) {
-            System.out.println("Error in readFile() : " + e);
-            return false;
-        } catch (JSParserError parserError) {
-            System.out.println("Error in parsing file");
-            return false;
-        }
-        return true;
-    }
-
-    public boolean parserFile(String libraryFile) {
-        String libraryDirectory = ".";
-
-        try {
-            FileReader fr = new FileReader(libraryFile);
-            StreamTokenizer tokenizer = new StreamTokenizer(fr);
-            tokenizer.lowerCaseMode(true);
-            JSUtil.initParseTable(tokenizer);
-            if (fr == null) {
-                JSUtil.println("Can not open file : " + libraryFile);
+            try {
+                Reader fr = new InputStreamReader(input);
+                StreamTokenizer tokenizer = new StreamTokenizer(fr);
+                tokenizer.lowerCaseMode(true);
+                JSUtil.initParseTable(tokenizer);
+                while (tokenizer.nextToken() != StreamTokenizer.TT_EOF)
+                    processToken(tokenizer);
+                fr.close();
+            } catch (IOException e) {
+                System.out.println("Error in readFile() : " + e);
+                return false;
+            } catch (JSParserError parserError) {
+                System.out.println("Error in parsing file");
                 return false;
             }
-            while (tokenizer.nextToken() != StreamTokenizer.TT_EOF)
-                processToken(tokenizer);
-            fr.close();
-        } catch (IOException e) {
-            System.out.println("Error in readFile() : " + e);
-            return false;
-        } catch (JSParserError parserError) {
-            System.out.println("Error in parsing file");
-            return false;
-        }
-        return true;
-    }
-
-    public BufferedReader getBufferedReader(String dir, String file) {
-        return getBufferedReader(dir, file);
-    }
-
-    public BufferedReader getBufferedReader(String dir, String file,
-                                            JApplet applet) {
-        if (file == null) return null;
-        BufferedReader br = null;
-        FileInputStream libraryFileInputStream = null;
-        InputStream conn = null;
-        String line;
-        try {
-            if (applet != null) {
-                URL url = getAppletURL(file, applet);
-                if (url == null) {
-                    System.err.println("Util.getBufferedReader() error: cannot get URL");
-                    return null;
-                } else {
-                    conn = url.openStream();
-                    if (conn == null) {
-                        System.err.println("Util.getBufferedReader() error: cannot open URL");
-                        return null;
-                    }
-                }
-            } // is applet
-            else  // is application
-            {
-                libraryFileInputStream =
-                        new FileInputStream(dir + File.separator + file);
-            }
-        } catch (IOException e) {
-            System.err.println("Error 1 in Util.getBufferedReader : " + e);
-            return null;
+            return true;
         }
 
-        if (applet != null) {
-            br =
-                    new BufferedReader(new InputStreamReader(conn));
-        } else  // application
-        {
+        public boolean parserFile (String libraryFile){
+            String libraryDirectory = ".";
+
             try {
+                FileReader fr = new FileReader(libraryFile);
+                StreamTokenizer tokenizer = new StreamTokenizer(fr);
+                tokenizer.lowerCaseMode(true);
+                JSUtil.initParseTable(tokenizer);
+                if (fr == null) {
+                    JSUtil.println("Can not open file : " + libraryFile);
+                    return false;
+                }
+                while (tokenizer.nextToken() != StreamTokenizer.TT_EOF)
+                    processToken(tokenizer);
+                fr.close();
+            } catch (IOException e) {
+                System.out.println("Error in readFile() : " + e);
+                return false;
+            } catch (JSParserError parserError) {
+                System.out.println("Error in parsing file");
+                return false;
+            }
+            return true;
+        }
+
+        public BufferedReader getBufferedReader (String dir, String file){
+            return getBufferedReader(dir, file);
+        }
+
+        public BufferedReader getBufferedReader (String dir, String file,
+                JApplet applet){
+            if (file == null) return null;
+            BufferedReader br = null;
+            FileInputStream libraryFileInputStream = null;
+            InputStream conn = null;
+            String line;
+            try {
+                if (applet != null) {
+                    URL url = getAppletURL(file, applet);
+                    if (url == null) {
+                        System.err.println("Util.getBufferedReader() error: cannot get URL");
+                        return null;
+                    } else {
+                        conn = url.openStream();
+                        if (conn == null) {
+                            System.err.println("Util.getBufferedReader() error: cannot open URL");
+                            return null;
+                        }
+                    }
+                } // is applet
+                else  // is application
+                {
+                    libraryFileInputStream =
+                            new FileInputStream(dir + File.separator + file);
+                }
+            } catch (IOException e) {
+                System.err.println("Error 1 in Util.getBufferedReader : " + e);
+                return null;
+            }
+
+            if (applet != null) {
                 br =
-                        new BufferedReader(new InputStreamReader(libraryFileInputStream,
-                                System.getProperty("file.encoding")));
-            } catch (UnsupportedEncodingException e) {
-                System.err.println("Error 2 in Util.getBufferedReader : " + e);
+                        new BufferedReader(new InputStreamReader(conn));
+            } else  // application
+            {
+                try {
+                    br =
+                            new BufferedReader(new InputStreamReader(libraryFileInputStream,
+                                    System.getProperty("file.encoding")));
+                } catch (UnsupportedEncodingException e) {
+                    System.err.println("Error 2 in Util.getBufferedReader : " + e);
+                    return null;
+                }
+            }
+            return br;
+        } // getBufferedReader
+
+        public URL getAppletURL (String file, JApplet applet){
+            try {
+                return (new URL(applet.getCodeBase() + file));
+            } catch (MalformedURLException e) {
                 return null;
             }
         }
-        return br;
-    } // getBufferedReader
 
-    public URL getAppletURL(String file, JApplet applet) {
-        try {
-            return (new URL(applet.getCodeBase() + file));
-        } catch (MalformedURLException e) {
-            return null;
-        }
-    }
-
-    public void processToken(StreamTokenizer tokenizer) {
-        if (tokenizer.ttype == JSJshopVars.leftPar) {
-            if (!JSUtil.expectTokenType(StreamTokenizer.TT_WORD, tokenizer,
-                    "Expected 'defdomain or defproblem' "))
-                throw new JSParserError(); //return;
-
-            tokenizer.pushBack();
-
-            String w = JSUtil.readWord(tokenizer, "JSJshop>>processToken");
-            if (w.equals("%%%"))
-                throw new JSParserError(); //return;
-
-            if (w.equalsIgnoreCase("defdomain")) {
-                domain = new JSPlanningDomain(tokenizer);
-                return;
-            } else {
-                if (w.equalsIgnoreCase("defproblem")) {
-                    prob = new JSPlanningProblem(tokenizer);
-                    probSet.addElement(prob);
-                    return;
-                }
-            }
-
-            System.err.println("Line : " + tokenizer.lineno() + " Expecting defdomain or defproblem");
-            throw new JSParserError(); //return;
-        } else {
-            System.err.println("Line : " + tokenizer.lineno() + " Expected '('");
-            throw new JSParserError(); //return;
-        }
-    }
-
-
-    public boolean parserFileLandmarks(String libraryFile) {
-        String libraryDirectory = ".";
-
-        try {
-            FileReader fr = new FileReader(libraryFile);
-            StreamTokenizer tokenizer = new StreamTokenizer(fr);
-            tokenizer.lowerCaseMode(true);
-            //JSUtil.initParseTable(tokenizer);
-            if (fr == null) {
-                JSUtil.println("Can not open file : " + libraryFile);
-                return false;
-            }
-            if (tokenizer.nextToken() != StreamTokenizer.TT_EOF)
-                processTokenLandmarks(tokenizer);
-            fr.close();
-        } catch (IOException e) {
-            System.out.println("Error in readFile() : " + e);
-            return false;
-        } catch (JSParserError parserError) {
-            System.out.println("Error in parsing file");
-            return false;
-        }
-        return true;
-    }
-
-
-    public void processTokenLandmarks(StreamTokenizer tokenizer) {
-        initialFactLandmarks = new HashSet<JSFactLandmark>() ;
-        initialTaskLandmarks = new HashSet<>();
-        while (tokenizer.ttype != StreamTokenizer.TT_EOF) {
-            if (tokenizer.ttype == JSJshopVars.leftBrac) {
+        public void processToken (StreamTokenizer tokenizer){
+            if (tokenizer.ttype == JSJshopVars.leftPar) {
                 if (!JSUtil.expectTokenType(StreamTokenizer.TT_WORD, tokenizer,
-                        "Expected landmark description "))
+                        "Expected 'defdomain or defproblem' "))
                     throw new JSParserError(); //return;
 
                 tokenizer.pushBack();
@@ -635,53 +593,114 @@ public final class JSJshop implements Runnable {
                 if (w.equals("%%%"))
                     throw new JSParserError(); //return;
 
-                if (w.equalsIgnoreCase("factlm")) {
-                    JSUtil.readToken(tokenizer, "rightBrac");
-                    JSFactLandmark tmp= new JSFactLandmark(tokenizer);
-                    initialFactLandmarks.add(tmp);
-                } else if (w.equalsIgnoreCase("tasklm")) {
-                    JSUtil.readToken(tokenizer, "rightBrac");
-                    JSTaskLandmark tmp = new JSTaskLandmark(tokenizer, false);
-                    initialTaskLandmarks.add(tmp);
-                } else if (w.equalsIgnoreCase("actionlm")) {
-                    JSUtil.readToken(tokenizer, "rightBrac");
-                    JSTaskLandmark tmp = new JSTaskLandmark(tokenizer, true);
-                    initialTaskLandmarks.add(tmp);
-                } else if (w.equalsIgnoreCase("methodlm")){
-                    while (tokenizer.ttype != StreamTokenizer.TT_EOL && tokenizer.ttype != StreamTokenizer.TT_EOF && tokenizer.ttype != JSJshopVars.leftBrac)
-                        JSUtil.readToken(tokenizer, "reading methodLMs");
+                if (w.equalsIgnoreCase("defdomain")) {
+                    domain = new JSPlanningDomain(tokenizer);
+                    return;
+                } else {
+                    if (w.equalsIgnoreCase("defproblem")) {
+                        prob = new JSPlanningProblem(tokenizer);
+                        probSet.addElement(prob);
+                        return;
+                    }
+                }
+
+                System.err.println("Line : " + tokenizer.lineno() + " Expecting defdomain or defproblem");
+                throw new JSParserError(); //return;
+            } else {
+                System.err.println("Line : " + tokenizer.lineno() + " Expected '('");
+                throw new JSParserError(); //return;
+            }
+        }
+
+
+        public boolean parserFileLandmarks (String libraryFile){
+            String libraryDirectory = ".";
+
+            try {
+                FileReader fr = new FileReader(libraryFile);
+                StreamTokenizer tokenizer = new StreamTokenizer(fr);
+                tokenizer.lowerCaseMode(true);
+                //JSUtil.initParseTable(tokenizer);
+                if (fr == null) {
+                    JSUtil.println("Can not open file : " + libraryFile);
+                    return false;
+                }
+                if (tokenizer.nextToken() != StreamTokenizer.TT_EOF)
+                    processTokenLandmarks(tokenizer);
+                fr.close();
+            } catch (IOException e) {
+                System.out.println("Error in readFile() : " + e);
+                return false;
+            } catch (JSParserError parserError) {
+                System.out.println("Error in parsing file");
+                return false;
+            }
+            return true;
+        }
+
+
+        public void processTokenLandmarks (StreamTokenizer tokenizer){
+            initialFactLandmarks = new HashSet<JSFactLandmark>();
+            initialTaskLandmarks = new HashSet<>();
+            while (tokenizer.ttype != StreamTokenizer.TT_EOF) {
+                if (tokenizer.ttype == JSJshopVars.leftBrac) {
+                    if (!JSUtil.expectTokenType(StreamTokenizer.TT_WORD, tokenizer,
+                            "Expected landmark description "))
+                        throw new JSParserError(); //return;
+
                     tokenizer.pushBack();
+
+                    String w = JSUtil.readWord(tokenizer, "JSJshop>>processToken");
+                    if (w.equals("%%%"))
+                        throw new JSParserError(); //return;
+
+                    if (w.equalsIgnoreCase("factlm")) {
+                        JSUtil.readToken(tokenizer, "rightBrac");
+                        JSFactLandmark tmp = new JSFactLandmark(tokenizer);
+                        initialFactLandmarks.add(tmp);
+                    } else if (w.equalsIgnoreCase("tasklm")) {
+                        JSUtil.readToken(tokenizer, "rightBrac");
+                        JSTaskLandmark tmp = new JSTaskLandmark(tokenizer, false);
+                        initialTaskLandmarks.add(tmp);
+                    } else if (w.equalsIgnoreCase("actionlm")) {
+                        JSUtil.readToken(tokenizer, "rightBrac");
+                        JSTaskLandmark tmp = new JSTaskLandmark(tokenizer, true);
+                        initialTaskLandmarks.add(tmp);
+                    } else if (w.equalsIgnoreCase("methodlm")) {
+                        while (tokenizer.ttype != StreamTokenizer.TT_EOL && tokenizer.ttype != StreamTokenizer.TT_EOF && tokenizer.ttype != JSJshopVars.leftBrac)
+                            JSUtil.readToken(tokenizer, "reading methodLMs");
+                        tokenizer.pushBack();
+                    } else {
+                        System.err.println("Line : " + tokenizer.lineno() + " Expected '('");
+                        throw new JSParserError(); //return;
+                    }
+
                 } else {
                     System.err.println("Line : " + tokenizer.lineno() + " Expected '('");
                     throw new JSParserError(); //return;
                 }
 
-            } else {
-                System.err.println("Line : " + tokenizer.lineno() + " Expected '('");
-                throw new JSParserError(); //return;
+                JSUtil.readToken(tokenizer, "nextToken");
+                //tokenizer.pushBack();
+
             }
-
-            JSUtil.readToken(tokenizer, "nextToken");
-            //tokenizer.pushBack();
-
         }
+
+
+        public JSPlanningProblem prob () {
+            return prob;
+        }
+
+        public JSPlan sol () {
+            return sol;
+        }
+
+        public JSJshopNode tree () {
+            return tree;
+        }
+
+
     }
-
-
-    public JSPlanningProblem prob() {
-        return prob;
-    }
-
-    public JSPlan sol() {
-        return sol;
-    }
-
-    public JSJshopNode tree() {
-        return tree;
-    }
-
-
-}
 
             
 
