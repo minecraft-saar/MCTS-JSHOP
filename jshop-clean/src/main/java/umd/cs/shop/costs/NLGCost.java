@@ -251,7 +251,7 @@ public class NLGCost implements CostFunction {
             x3 = x1 - length + 1;
         }
         y3 = y1 + height -1;
-        return new Stairs( "stairs", x1, y1, z1, x2, z2, x3, y3, z3);
+        return new Stairs( "staircase", x1, y1, z1, x2, z2, x3, y3, z3);
     }
 
     public MinecraftObject createRailing(JSPredicateForm term) {
@@ -407,11 +407,11 @@ public class NLGCost implements CostFunction {
                 break;
             case "!build-stairs-starting":
                 if (instructionLevel != CostFunction.InstructionLevel.BLOCK)
-                    result = new IntroductionMessage(createStairs(groundedOperator), true, "floor");
+                    result = new IntroductionMessage(createStairs(groundedOperator), true, "staircase");
                 break;
             case "!build-stairs-finished":
                 if (instructionLevel != CostFunction.InstructionLevel.BLOCK)
-                    result = new IntroductionMessage(createStairs(groundedOperator), false, "floor");
+                    result = new IntroductionMessage(createStairs(groundedOperator), false, "staircase");
                 break;
             case "!build-stairs":
                 result = createStairs(groundedOperator);
