@@ -57,8 +57,8 @@ repositories {
 
 dependencies {
 	implementation 'info.picocli:picocli:3.9.3'
-	implementation group: 'com.github.minecraft-saar', name: 'minecraft-nlg', version: '4d15ddf3665e1705dbc3740fb4567b57bc8f4f09'
-    implementation group: 'com.github.minecraft-saar', name: 'weight-estimator', version: '564773f456569e54e8c195e5045dd8f56b4ee87e'
+	implementation group: 'com.github.minecraft-saar', name: 'minecraft-nlg', version: 'e6a58b7115f2ee070849ea978717edfa454f0d35'
+    implementation group: 'com.github.minecraft-saar', name: 'weight-estimator', version: 'b2813b71152d2ad126f3fcdf404b4046e5b42176'
 }
 
 mainClassName = 'umd.cs.shop.JSJshop'
