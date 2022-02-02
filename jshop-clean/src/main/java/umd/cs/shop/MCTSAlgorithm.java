@@ -33,7 +33,7 @@ public class MCTSAlgorithm {
             }
             MCTSNode child = this.vars.policy.bestChild(tst);
             if (tst.isDeadEnd()) {
-                //JSUtil.println("In MCTSAlgorithm DeadEnd with cost: " + tst.getCost(vars));
+                //JSUtil.println("In MCTSAlgorithm DeadEnd with taskNetwork: " + tst.taskNetwork());
                 return tst.getCost();
             }
 
@@ -62,6 +62,7 @@ public class MCTSAlgorithm {
         tst.setInTree();
 
         if(tst.isDeadEnd()){
+            //JSUtil.println("In MCTSAlgorithm DeadEnd with taskNetwork: " + tst.taskNetwork());
             //JSUtil.println("In MCTSAlgorithm DeadEnd with cost: " + tst.getCost(vars));
             return tst.getCost();
         }

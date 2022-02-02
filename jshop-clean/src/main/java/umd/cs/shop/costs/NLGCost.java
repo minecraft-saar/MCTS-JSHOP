@@ -10,6 +10,7 @@ import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Paths;
 import java.util.*;
+import java.util.stream.Collectors;
 
 public class NLGCost implements CostFunction {
 
@@ -23,7 +24,7 @@ public class NLGCost implements CostFunction {
         instructionLevel = ins;
         nlgSystem = MinecraftRealizer.createRealizer();
         lowestCost = 10.0;
-        if(weightFile.equals("")){
+        if (weightFile.equals("")) {
             weightsPresent = false;
         } else {
             weightsPresent = true;
@@ -42,25 +43,28 @@ public class NLGCost implements CostFunction {
     @Override
     public Double getCost(JSTState state, JSOperator op, JSTaskAtom groundedOperator, boolean approx) {
 
-        if(groundedOperator.get(0).equals("!place-block-hidden")){
+        if (groundedOperator.get(0).equals("!place-block-hidden") ||
+                groundedOperator.get(0).equals("!remove-it-row") ||
+                groundedOperator.get(0).equals("!remove-it-railing") ||
+                groundedOperator.get(0).equals("!remove-it-stairs") ||
+                groundedOperator.get(0).equals("!remove-it-wall")) {
             return 0.0;
         }
-        MinecraftObject currentObject = createCurrentMinecraftObject(op, groundedOperator);
+        MinecraftObject currentObject = createCurrentMinecraftObject(groundedOperator);
         Set<String> knownObjects = new HashSet<>();
-        Pair<Set<MinecraftObject>,Set<MinecraftObject>> pair = createWorldFromState(state, knownObjects);
+        Pair<Set<MinecraftObject>, Set<MinecraftObject>> pair = createWorldFromState(state, knownObjects);
         Set<MinecraftObject> world = pair.getRight();
         Set<MinecraftObject> it = pair.getLeft();
-        if(currentObject instanceof IntroductionMessage ){
-            IntroductionMessage intro = (IntroductionMessage) currentObject;
-            if(knownObjects.contains(intro.name)){
-                //make dead end
-                return 30000.0;
+        if (currentObject instanceof IntroductionMessage intro) {
+            if (knownObjects.contains(intro.name)) {
+                //make unattractive
+                return 80000.0;
             } else {
                 return 0.000001;
             }
         }
         String currentObjectType = currentObject.getClass().getSimpleName().toLowerCase();
-        boolean objectFirstOccurence = ! knownObjects.contains(currentObjectType);
+        boolean objectFirstOccurence = !knownObjects.contains(currentObjectType);
         if (objectFirstOccurence && weights != null) {
             // temporarily set the weight to the first occurence one
             // ... if we have an estimate for the first occurence
@@ -71,8 +75,8 @@ public class NLGCost implements CostFunction {
             }
         }
         double returnValue = nlgSystem.estimateCostForPlanningSystem(world, currentObject, it);
-        if (returnValue < 0.0){
-            if(returnValue < lowestCost){
+        if (returnValue < 0.0) {
+            if (returnValue < lowestCost) {
                 lowestCost = returnValue;
                 JSUtil.println(lowestCost.toString());
             }
@@ -94,20 +98,27 @@ public class NLGCost implements CostFunction {
         return false;
     }
 
-    private Pair<Set<MinecraftObject>,Set<MinecraftObject>> createWorldFromState(JSTState state, Set<String> knownObjects) {
+    private Pair<Set<MinecraftObject>, Set<MinecraftObject>> createWorldFromState(JSTState state, Set<String> knownObjects) {
         Set<MinecraftObject> world = new HashSet<>();
-        HashSet<MinecraftObject> it = new HashSet<MinecraftObject>();
+        Set<MinecraftObject> it = new HashSet<>();
+        JSTerm tmp;
+        Pair<Boolean,Triple> itStairs = checkForIt(state, "it-staircase");
+        Pair<Boolean,Triple> itRailing = checkForIt(state, "it-railing");
+        Pair<Boolean,Triple> itWall = checkForIt(state, "it-wall");
+        Pair<Boolean,Triple> itRow = checkForIt(state, "it-row");
+        boolean foundItStairs = !itStairs.left;
+        boolean foundItRailing = !itRailing.left;
+        boolean foundItWall = !itWall.left;
+        boolean foundItRow = !itRow.left;
         for (JSPredicateForm term : state.state().atoms()) {
             String name = (String) term.elementAt(0);
             MinecraftObject mco;
-            JSTerm data;
             String type;
-            JSTerm tmp;
             int x, y, z;
             switch (name) {
-                case "block-at":
-                    data = (JSTerm) term.elementAt(1);
-                    type = (String) data.elementAt(0);
+                case "block-at" -> {
+                    tmp = (JSTerm) term.elementAt(1);
+                    type = (String) tmp.elementAt(0);
                     if (type.equals("water")) {
                         // water behaves differently from normal blocks,
                         // e.g. you can still put blocks into water blocks
@@ -121,16 +132,15 @@ public class NLGCost implements CostFunction {
                     tmp = (JSTerm) term.elementAt(4);
                     z = (int) Double.parseDouble(tmp.toStr().toString());
                     //System.out.println("Block: " + type + " " + x + " " + y + " "+ z);
-                    if(type.equals("stone")){
+                    if (type.equals("stone")) {
                         mco = new Block(x, y, z);
                         world.add(mco);
                         knownObjects.add(mco.getClass().getSimpleName().toLowerCase());
                     } else {
                         world.add(new UniqueBlock(type, x, y, z));
                     }
-                    break;
-                case "last-placed":
-                    data = (JSTerm) term.elementAt(1);
+                }
+                case "last-placed" -> {
                     tmp = (JSTerm) term.elementAt(1);
                     x = (int) Double.parseDouble(tmp.toStr().toString());
                     tmp = (JSTerm) term.elementAt(2);
@@ -138,42 +148,74 @@ public class NLGCost implements CostFunction {
                     tmp = (JSTerm) term.elementAt(3);
                     z = (int) Double.parseDouble(tmp.toStr().toString());
                     //System.out.println("Block: " + type + " " + x + " " + y + " "+ z);
-                    if(!(x == 100 && y == 100 && z == 100)){
-                        it.add(new Block( x, y, z));
+                    if (!(x == 100 && y == 100 && z == 100)) {
+                        it.add(new Block(x, y, z));
                     }
-                    break;
-                case "wall-at":
-                     mco = createWall(term);
+                }
+                case "it-row", "it-railing", "it-wall", "it-staircase" -> {
+                }
+                case "wall-at" -> {
+                    mco = createWall(term);
                     world.add(mco);
                     knownObjects.add(mco.getClass().getSimpleName().toLowerCase());
-                    break;
-                case "row-at":
+                    if(itWall.left){
+                        Triple wallCoord = parseCoordinates(term);
+                        if (wallCoord.equals(itWall.right)){
+                            it.add(mco);
+                            foundItWall = true;
+                        }
+                    }
+                }
+                case "row-at" -> {
                     mco = createRow(term);
                     world.add(mco);
                     knownObjects.add(mco.getClass().getSimpleName().toLowerCase());
-                    break;
-                case "railing-at":
+                    if(itRow.left){
+                        Triple rowCoord = parseCoordinates(term);
+                        if (rowCoord.equals(itRow.right)){
+                            it.add(mco);
+                            foundItRow = true;
+                        }
+                    }
+                }
+                case "railing-at" -> {
                     mco = createRailing(term);
                     world.add(mco);
-                    it.add(mco);
                     knownObjects.add(mco.getClass().getSimpleName().toLowerCase());
-                    break;
-                case "floor-at":
+                    if(itRailing.left){
+                        Triple railingCoord = parseCoordinates(term);
+                        if (railingCoord.equals(itRailing.right)){
+                            it.add(mco);
+                            foundItRailing = true;
+                        }
+                    }
+                }
+                case "floor-at" -> {
                     mco = createFloor(term);
                     world.add(mco);
-                    it.add(mco);
+                    it.add(mco); //Floor is a special case right now, because we can only have one the it never changes
                     knownObjects.add(mco.getClass().getSimpleName().toLowerCase());
-                    break;
-                case "stairs-at":
+                }
+                case "stairs-at" -> {
                     mco = createStairs(term);
                     world.add(mco);
-                    it.add(mco);
                     knownObjects.add(mco.getClass().getSimpleName().toLowerCase());
-                    break;
+                    if(itStairs.left){
+                        Triple stairsCoord = parseCoordinates(term);
+                        if (stairsCoord.equals(itStairs.right)){
+                            it.add(mco);
+                            foundItStairs = true;
+                        }
+                    }
+                }
             }
         }
-        Pair<Set<MinecraftObject>, Set<MinecraftObject>> ret = new Pair<Set<MinecraftObject>, Set<MinecraftObject>>(it, world);
-        return ret;
+        //Pair<Set<MinecraftObject>, Set<MinecraftObject>> ret = new Pair<>(it, world);
+        if(!foundItWall || !foundItRailing || !foundItRow || !foundItStairs){
+            JSUtil.println("could not find an it-object");
+            System.exit(-1);
+        }
+        return new Pair<>(it, world);
     }
 
     public MinecraftObject createFloor(JSPredicateForm term) {
@@ -209,7 +251,8 @@ public class NLGCost implements CostFunction {
         return new Floor("floor", x1, z1, x2, z2, y1);
 
     }
-//((stairs-at ?x ?y ?z ?width ?depth ?height ?dir))
+
+    //((stairs-at ?x ?y ?z ?width ?depth ?height ?dir))
     public MinecraftObject createStairs(JSPredicateForm term) {
         int x1, x2, x3, y1, y3, z1, z2, z3, length, width, height, dir;
         JSTerm tmp = (JSTerm) term.elementAt(1);
@@ -243,15 +286,15 @@ public class NLGCost implements CostFunction {
             z1 = z1 - width + 1;
             x2 = x1;
             z3 = z1;
-            x3 = x1 + length -1;
+            x3 = x1 + length - 1;
         } else {
             z2 = z1 + width - 1;
             x2 = x1;
             z3 = z1;
             x3 = x1 - length + 1;
         }
-        y3 = y1 + height -1;
-        return new Stairs( "staircase", x1, y1, z1, x2, z2, x3, y3, z3);
+        y3 = y1 + height - 1;
+        return new Stairs("staircase", x1, y1, z1, x2, z2, x3, y3, z3);
     }
 
     public MinecraftObject createRailing(JSPredicateForm term) {
@@ -350,84 +393,117 @@ public class NLGCost implements CostFunction {
         return new Wall("wall", x1, y1, z1, x2, y2, z2);
     }
 
-    private MinecraftObject createCurrentMinecraftObject(JSOperator op, JSTaskAtom groundedOperator) {
-        MinecraftObject result = null;
+    private MinecraftObject createCurrentMinecraftObject(JSTaskAtom groundedOperator) {
+        //MinecraftObject result = null;
         int x1, y1, z1; // , x2, y2, z2, length, width, height, dir;
         String operator_name = groundedOperator.get(0).toString();
-        switch (operator_name) {
+
+        return switch (operator_name) {
             case "!place-block":
                 x1 = (int) Double.parseDouble(groundedOperator.get(2).toString().replace("[", "").replace("]", ""));
                 y1 = (int) Double.parseDouble(groundedOperator.get(3).toString().replace("[", "").replace("]", ""));
                 z1 = (int) Double.parseDouble(groundedOperator.get(4).toString().replace("[", "").replace("]", ""));
-                result = new Block(x1, y1, z1);
-                break;
+                yield new Block(x1, y1, z1);
             case "!build-row":
-                result = createRow(groundedOperator);
-                break;
+                yield createRow(groundedOperator);
             case "!build-row-starting":
-                if (instructionLevel != CostFunction.InstructionLevel.BLOCK)
-                    result = new IntroductionMessage(createRow(groundedOperator), true, "row");
-                break;
+                if (instructionLevel != InstructionLevel.BLOCK)
+                    yield new IntroductionMessage(createRow(groundedOperator), true, "row");
             case "!build-row-finished":
-                if (instructionLevel != CostFunction.InstructionLevel.BLOCK)
-                    result = new IntroductionMessage(createRow(groundedOperator), false, "row");
-                break;
+                if (instructionLevel != InstructionLevel.BLOCK)
+                    yield new IntroductionMessage(createRow(groundedOperator), false, "row");
             case "!build-wall-starting":
-                if (instructionLevel != CostFunction.InstructionLevel.BLOCK)
-                    result = new IntroductionMessage(createWall(groundedOperator), true, "wall");
-                break;
+                if (instructionLevel != InstructionLevel.BLOCK)
+                    yield new IntroductionMessage(createWall(groundedOperator), true, "wall");
             case "!build-wall-finished":
-                if (instructionLevel != CostFunction.InstructionLevel.BLOCK)
-                    result = new IntroductionMessage(createWall(groundedOperator), false, "wall");
-                break;
+                if (instructionLevel != InstructionLevel.BLOCK)
+                    yield new IntroductionMessage(createWall(groundedOperator), false, "wall");
             case "!build-wall":
-                result = createWall(groundedOperator);
-                break;
+                yield createWall(groundedOperator);
             case "!build-railing-starting":
-                if (instructionLevel != CostFunction.InstructionLevel.BLOCK)
-                    result = new IntroductionMessage(createRailing(groundedOperator), true, "railing");
-                break;
+                if (instructionLevel != InstructionLevel.BLOCK)
+                    yield new IntroductionMessage(createRailing(groundedOperator), true, "railing");
             case "!build-railing-finished":
-                if (instructionLevel != CostFunction.InstructionLevel.BLOCK)
-                    result = new IntroductionMessage(createRailing(groundedOperator), false, "railing");
-                break;
+                if (instructionLevel != InstructionLevel.BLOCK)
+                    yield new IntroductionMessage(createRailing(groundedOperator), false, "railing");
             case "!build-railing":
-                result = createRailing(groundedOperator);
-                break;
+                yield createRailing(groundedOperator);
             case "!build-floor-starting":
-                if (instructionLevel != CostFunction.InstructionLevel.BLOCK)
-                    result = new IntroductionMessage(createFloor(groundedOperator), true, "floor");
-                break;
+                if (instructionLevel != InstructionLevel.BLOCK)
+                    yield new IntroductionMessage(createFloor(groundedOperator), true, "floor");
             case "!build-floor-finished":
-                if (instructionLevel != CostFunction.InstructionLevel.BLOCK)
-                    result = new IntroductionMessage(createFloor(groundedOperator), false, "floor");
-                break;
+                if (instructionLevel != InstructionLevel.BLOCK)
+                    yield new IntroductionMessage(createFloor(groundedOperator), false, "floor");
             case "!build-floor":
-                result = createFloor(groundedOperator);
-                break;
+                yield createFloor(groundedOperator);
             case "!build-stairs-starting":
-                if (instructionLevel != CostFunction.InstructionLevel.BLOCK)
-                    result = new IntroductionMessage(createStairs(groundedOperator), true, "staircase");
-                break;
+                if (instructionLevel != InstructionLevel.BLOCK)
+                    yield new IntroductionMessage(createStairs(groundedOperator), true, "staircase");
             case "!build-stairs-finished":
-                if (instructionLevel != CostFunction.InstructionLevel.BLOCK)
-                    result = new IntroductionMessage(createStairs(groundedOperator), false, "staircase");
-                break;
+                if (instructionLevel != InstructionLevel.BLOCK)
+                    yield new IntroductionMessage(createStairs(groundedOperator), false, "staircase");
             case "!build-stairs":
-                result = createStairs(groundedOperator);
-                break;
+                yield createStairs(groundedOperator);
             case "!place-block-hidden":
                 System.out.println("Tried to get Minecraft Object for place-block-hidden something went wrong ");
-                result = null;
-                break;
+                System.exit(-1);
+                yield null;
             default:
                 //log(task, "NewAction");
                 System.out.println("New Action " + groundedOperator);
-                result = null;
-                break;
-        }
-
-        return result;
+                System.exit(-1);
+                yield null;
+        };
     }
 
+    Triple parseCoordinates(JSPredicateForm term){
+        JSTerm tmp;
+        tmp = (JSTerm) term.elementAt(1);
+        int x = (int) Double.parseDouble(tmp.toStr().toString());
+        tmp = (JSTerm) term.elementAt(2);
+        int y = (int) Double.parseDouble(tmp.toStr().toString());
+        tmp = (JSTerm) term.elementAt(3);
+        int z = (int) Double.parseDouble(tmp.toStr().toString());
+         return new Triple(x, y, z);
+    }
+
+    Pair<Boolean,Triple> checkForIt(JSTState state, String itName){
+        List<JSPredicateForm> itList = state.state().atoms().stream().filter(term -> (term.elementAt(0)).equals(itName)).toList();
+        if(itList.isEmpty()){
+            return new Pair<>(false, new Triple(100, 100, 100));
+        } else {
+            Triple coord =  parseCoordinates(itList.get(0));
+            if(coord.x == 100){
+                return new Pair<>(false, coord);
+            } else {
+                return new Pair<>(true, coord);
+            }
+        }
+    }
+
+
 }
+
+ class Triple{
+    int x;
+    int y;
+    int z;
+    Triple(int x, int y, int z){
+        this.x = x;
+        this.y = y;
+        this.z = z;
+    }
+
+     @Override
+     public boolean equals(Object o) {
+         if (this == o) return true;
+         if (o == null || getClass() != o.getClass()) return false;
+         Triple triple = (Triple) o;
+         return triple.x == x && triple.y == y && triple.z == z;
+     }
+
+     @Override
+     public int hashCode() {
+         return Objects.hash(x, y, z);
+     }
+ }
