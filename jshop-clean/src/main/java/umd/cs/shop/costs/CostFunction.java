@@ -15,7 +15,8 @@ public interface CostFunction {
         UNIT,
         BASIC,
         STATEDEPENDENT,
-        NLG
+        NLG,
+        NN
     }
 
     enum InstructionLevel{
@@ -54,6 +55,9 @@ public interface CostFunction {
     public static CostFunction getCostFunction(CostFunctionType costFunctionName, String domainName, InstructionLevel level, String weightFile) {
         if(costFunctionName == CostFunctionType.NLG){
             return new NLGCost(level, weightFile);
+        }
+        else if (costFunctionName == CostFunctionType.NN) {
+            return new EstimationCost(level, weightFile);
         }
         switch (level) {
             case BLOCK:

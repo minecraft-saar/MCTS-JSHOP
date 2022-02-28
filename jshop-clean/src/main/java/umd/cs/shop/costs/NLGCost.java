@@ -94,7 +94,7 @@ public class NLGCost implements CostFunction {
         return false;
     }
 
-    private Pair<Set<MinecraftObject>,Set<MinecraftObject>> createWorldFromState(JSTState state, Set<String> knownObjects) {
+    public Pair<Set<MinecraftObject>,Set<MinecraftObject>> createWorldFromState(JSTState state, Set<String> knownObjects) {
         Set<MinecraftObject> world = new HashSet<>();
         HashSet<MinecraftObject> it = new HashSet<MinecraftObject>();
         for (JSPredicateForm term : state.state().atoms()) {
@@ -143,7 +143,7 @@ public class NLGCost implements CostFunction {
                     }
                     break;
                 case "wall-at":
-                     mco = createWall(term);
+                    mco = createWall(term);
                     world.add(mco);
                     knownObjects.add(mco.getClass().getSimpleName().toLowerCase());
                     break;
@@ -209,7 +209,7 @@ public class NLGCost implements CostFunction {
         return new Floor("floor", x1, z1, x2, z2, y1);
 
     }
-//((stairs-at ?x ?y ?z ?width ?depth ?height ?dir))
+    //((stairs-at ?x ?y ?z ?width ?depth ?height ?dir))
     public MinecraftObject createStairs(JSPredicateForm term) {
         int x1, x2, x3, y1, y3, z1, z2, z3, length, width, height, dir;
         JSTerm tmp = (JSTerm) term.elementAt(1);
@@ -350,7 +350,7 @@ public class NLGCost implements CostFunction {
         return new Wall("wall", x1, y1, z1, x2, y2, z2);
     }
 
-    private MinecraftObject createCurrentMinecraftObject(JSOperator op, JSTaskAtom groundedOperator) {
+    public MinecraftObject createCurrentMinecraftObject(JSOperator op, JSTaskAtom groundedOperator) {
         MinecraftObject result = null;
         int x1, y1, z1; // , x2, y2, z2, length, width, height, dir;
         String operator_name = groundedOperator.get(0).toString();
