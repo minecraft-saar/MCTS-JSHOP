@@ -11,6 +11,8 @@ import java.io.*;
 import java.util.HashSet;
 import java.util.Map;
 import java.util.Set;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 
 public class EstimationCost extends NLGCost {
 
@@ -52,27 +54,48 @@ public class EstimationCost extends NLGCost {
                         false);
             }
         }
-        // TODO call my NN system here
+        // call NN python script here
 //        double returnValue = nlgSystem.estimateCostForPlanningSystem(world, currentObject, it);
         String model = nlgSystem.getModelforNN(world, currentObject, it);
-        ProcessBuilder pb = new ProcessBuilder("python", "../../cost-estimation/nn/main.py");
+        // add missing \" to string
+        System.out.println(model);
+        Pattern pattern = Pattern.compile("(\"[a-zA-Z_\\-\\d]+)(\")");  // ([a-zA-Z_\-\d]+)
+        Matcher matcher = pattern.matcher(model);
+        model = matcher.replaceAll("\\\\$1\\\\$2");
+        model = "[" + model + "]";
+        System.out.println(model);
+
+        // I guess ProcessBuilder init input can be read as the line you would put into the command line
+        ProcessBuilder pb = new ProcessBuilder("python", "../../cost-estimation/nn/main.py", "-c True", "-d " + model);
+        pb.directory(new File("../../cost-estimation/nn"));
         pb.redirectErrorStream(true);
         Process process = null;
         try {
             process = pb.start();
         } catch (IOException e) {
+            System.out.println("welp");
             e.printStackTrace();
         }
         BufferedReader in = new BufferedReader(new InputStreamReader(process.getInputStream()));
-        double returnValue = 0;
+        double returnValue = Double.POSITIVE_INFINITY;
         try {
-            returnValue = Double.valueOf(in.readLine()).doubleValue();
+//            PrintStream o = new PrintStream(new File("output.txt"));
+//            PrintStream console = System.out;
+//            System.setOut(o);
+            String ret;
+            while ((ret = in.readLine()) != null) {
+                ret = in.readLine();
+                System.out.println(ret);
+            }
+            returnValue = Double.parseDouble(ret);
         } catch (IOException e) {
+            System.out.println("welp");
             e.printStackTrace();
         }
         try {
             int exitCode = process.waitFor();
         } catch (InterruptedException e) {
+            System.out.println("welp");
             e.printStackTrace();
         }
 //        System.out.println(model);
