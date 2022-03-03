@@ -27,27 +27,23 @@ public class SDMCBlock implements CostFunction {
                 } else {
                     return 2.0;
                 }
-
+            case "!remove-it-stairs":
+            case "!remove-it-wall":
+            case "!remove-it-row":
+            case "!remove-it-railing":
             case "!build-wall-starting":
-                return 0.0;
             case "!build-wall-finished":
-                return 0.0;
             case "!build-row-starting":
-                return 0.0;
             case "!build-row-finished":
-                return 0.0;
             case "!build-railing-finished":
-                return 0.0;
             case "!build-railing-starting":
-                return 0.0;
             case "!build-stairs-finished":
-                return 0.0;
             case "!build-stairs-starting":
-                return 0.0;
             case "!build-floor-finished":
-                return 0.0;
             case "!build-floor-starting":
                 return 0.0;
+            case "!build-stairs":
+                return 100000.0;
             default:
                 return 10000.0;
         }

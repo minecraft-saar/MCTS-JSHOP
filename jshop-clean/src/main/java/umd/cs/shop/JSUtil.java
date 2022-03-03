@@ -192,8 +192,7 @@ public final class JSUtil {
 
     static String stringTokenizer(StreamTokenizer tokenizer) {
         if (tokenizer.ttype == StreamTokenizer.TT_NUMBER)
-            return new
-                    Integer((int) tokenizer.nval).toString();
+            return Integer.toString((int) tokenizer.nval);
         if (tokenizer.ttype == JSJshopVars.leftPar)
             return "(";
         if (tokenizer.ttype == JSJshopVars.rightPar)
