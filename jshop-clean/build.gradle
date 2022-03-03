@@ -59,6 +59,9 @@ dependencies {
 	implementation 'info.picocli:picocli:3.9.3'
 	implementation group: 'com.github.minecraft-saar', name: 'minecraft-nlg', version: 'babd2397beb172d285e43a52ec91868d4016e478'
     implementation group: 'com.github.minecraft-saar', name: 'weight-estimator', version: 'b2813b71152d2ad126f3fcdf404b4046e5b42176'
+    implementation group: 'ai.djl.pytorch', name: 'pytorch-engine', version: '0.15.0'
+    runtimeOnly group: 'ai.djl.pytorch', name: 'pytorch-native-auto', version: '1.9.1'
+    testImplementation group: 'org.slf4j', name: 'slf4j-simple', version: '1.7.36'
 }
 
 mainClassName = 'umd.cs.shop.JSJshop'

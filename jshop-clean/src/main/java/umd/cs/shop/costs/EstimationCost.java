@@ -14,12 +14,29 @@ import java.util.Set;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
+import ai.djl.*;
+import ai.djl.inference.*;
+import ai.djl.ndarray.*;
+import ai.djl.translate.*;
+import java.nio.file.*;
+
 public class EstimationCost extends NLGCost {
 
     //MinecraftRealizer nlgSystem;
+    Model nn;
 
     public EstimationCost(CostFunction.InstructionLevel ins, String weightFile) {
         super(ins, weightFile);
+        // nlgSystem = MinecraftRealizer.createRealizer();
+        Path nnDir = Paths.get("../../cost-estimation/nn/");
+        Model nn = Model.newInstance("trained_model.zip");
+        try {
+            nn.load(nnDir);
+        } catch (IOException e) {
+            e.printStackTrace();
+        } catch (MalformedModelException e) {
+            e.printStackTrace();
+        }
     }
 
     @Override
@@ -56,10 +73,10 @@ public class EstimationCost extends NLGCost {
         Matcher matcher = pattern.matcher(model);
         model = matcher.replaceAll("\\\\$1\\\\$2");
         model = "[" + model + "]";
-//        System.out.println(model);
+        System.out.println(model);
 
         // I guess ProcessBuilder init input can be understood as the line you would put into the command line
-        ProcessBuilder pb = new ProcessBuilder("python", "../../cost-estimation/nn/main.py", "-c True", "-d " + model);
+        ProcessBuilder pb = new ProcessBuilder("python", "../../cost-estimation/nn/main.py", "-c", "-d " + model);
         pb.directory(new File("../../cost-estimation/nn"));
         pb.redirectErrorStream(true);
         Process process = null;
@@ -69,7 +86,9 @@ public class EstimationCost extends NLGCost {
             BufferedReader in = new BufferedReader(new InputStreamReader(process.getInputStream()));
             String ret;
             while ((ret = in.readLine()) != null) {
-                returnValue = Double.parseDouble(ret);
+                System.out.println(ret);
+                System.out.println("!!!!!!!!!!!!!!!!!!!!!!");
+//                returnValue = Double.parseDouble(ret);
             }
             int exitCode = process.waitFor();
         } catch (IOException e) {
