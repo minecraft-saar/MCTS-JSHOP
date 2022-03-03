@@ -16,26 +16,28 @@ import java.util.regex.Pattern;
 
 public class EstimationCost extends NLGCost {
 
-    MinecraftRealizer nlgSystem;
+    //MinecraftRealizer nlgSystem;
 
     public EstimationCost(CostFunction.InstructionLevel ins, String weightFile) {
         super(ins, weightFile);
-        nlgSystem = MinecraftRealizer.createRealizer();
     }
 
     @Override
     public Double getCost(JSTState state, JSOperator op, JSTaskAtom groundedOperator, boolean approx) {
 
-        if(groundedOperator.get(0).equals("!place-block-hidden")){
+        if(groundedOperator.get(0).equals("!place-block-hidden")||
+                groundedOperator.get(0).equals("!remove-it-row") ||
+                groundedOperator.get(0).equals("!remove-it-railing") ||
+                groundedOperator.get(0).equals("!remove-it-stairs") ||
+                groundedOperator.get(0).equals("!remove-it-wall")) {
             return 0.0;
         }
         MinecraftObject currentObject = createCurrentMinecraftObject(op, groundedOperator);
         Set<String> knownObjects = new HashSet<>();
-        Pair<Set<MinecraftObject>,Set<MinecraftObject>> pair = createWorldFromState(state, knownObjects);
-        Set<MinecraftObject> world = pair.getRight();
-        Set<MinecraftObject> it = pair.getLeft();
-        if(currentObject instanceof IntroductionMessage){
-            IntroductionMessage intro = (IntroductionMessage) currentObject;
+        Pair<Set<MinecraftObject>,Set<MinecraftObject>> pair = createWorldFromState(state, knownObjects, currentObject);
+        //Set<MinecraftObject> world = pair.getRight();
+        //Set<MinecraftObject> it = pair.getLeft();
+        if(currentObject instanceof IntroductionMessage intro){
             if(knownObjects.contains(intro.name)){
                 //make dead end
                 return 30000.0;
@@ -43,20 +45,11 @@ public class EstimationCost extends NLGCost {
                 return 0.000001;
             }
         }
-        String currentObjectType = currentObject.getClass().getSimpleName().toLowerCase();
-        boolean objectFirstOccurence = ! knownObjects.contains(currentObjectType);
-        if (objectFirstOccurence && weights != null) {
-            // temporarily set the weight to the first occurence one
-            // ... if we have an estimate for the first occurence
-            if (weights.firstOccurenceWeights.containsKey("i" + currentObjectType)) {
-                nlgSystem.setExpectedDurations(
-                        Map.of("i" + currentObjectType, weights.firstOccurenceWeights.get("i" + currentObjectType)),
-                        false);
-            }
-        }
         // call NN python script here
-//        double returnValue = nlgSystem.estimateCostForPlanningSystem(world, currentObject, it);
-        String model = nlgSystem.getModelforNN(world, currentObject, it);
+        //calling nlgsysstem for model:
+        //String model = nlgSystem.getModelforNN(world, currentObject, it);
+        //new way
+        String model = this.model;
         // add missing \" to string
 //        System.out.println(model);
         Pattern pattern = Pattern.compile("(\"[a-zA-Z_\\-\\d]+)(\")");  // ([a-zA-Z_\-\d]+)
