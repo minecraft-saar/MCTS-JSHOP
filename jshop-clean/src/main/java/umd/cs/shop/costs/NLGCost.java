@@ -230,9 +230,15 @@ public class NLGCost implements CostFunction {
         }
         model = "{\"block\":";
         model = model + blocks + ",";
-        model = model + "\"row\":" + row + ",";
-        model = model + "\"floor\":" + floor + ",";
-        model = model + "\"railing\":" + railing + ",";
+        if(!row.isEmpty()){
+            model = model + "\"row\":" + row + ",";
+        }
+        if(!floor.isEmpty()){
+            model = model + "\"floor\":" + floor + ",";
+        }
+        if(!railing.isEmpty()){
+            model = model + "\"railing\":" + railing + ",";
+        }
         model = model + "\"target\":[[\"" + currentObject.toString() + "\"]]}";
         //Pair<Set<MinecraftObject>, Set<MinecraftObject>> ret = new Pair<>(it, world);
         if (!foundItWall || !foundItRailing || !foundItRow || !foundItStairs) {
