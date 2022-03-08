@@ -29,6 +29,7 @@ public class EstimationCost extends NLGCost {
     Model nn;
     Translator<Float, Float> translator;
     Predictor<Float, Float> predictor;
+    DataParser parser;
 
     public EstimationCost(CostFunction.InstructionLevel ins, String weightFile) {
         super(ins, weightFile);
@@ -42,6 +43,7 @@ public class EstimationCost extends NLGCost {
         } catch (MalformedModelException e) {
             e.printStackTrace();
         }
+        parser = new DataParser();
 
         translator = new Translator<Float, Float>(){  // TODO check if the types are correct
             @Override
@@ -68,44 +70,47 @@ public class EstimationCost extends NLGCost {
         predictor = nn.newPredictor(translator);
     }
 
-    private class DataParser { // TODO add documentation in code
+    /**
+     * Parser for the world state information.
+     */
+    private class DataParser {
         JSONObject data;
         int[] dim;
         int[] dimMin;
         JSONParser parser;
 
-        public DataParser(String jsonData) {  // TODO implement switches for target, structure etc
+        public DataParser() {  // TODO implement switches for target, structure etc
             parser = new JSONParser();
-            try {
+            dim = new int[]{5, 3, 3};  // TODO make dimensions more flexible through argument in init
+            dimMin = new int[]{6, 66, 6};
+        }
 
+        /**
+         * Sets a new world state in the parser so that it can be processed further.
+         * @param jsonData string containing the new world state in json format
+         */
+        public void setNewData(String jsonData) {
+            try {
                 Object jsonObj = parser.parse(jsonData);
                 data = (JSONObject) jsonObj;
             } catch (ParseException e) {
                 e.printStackTrace();
             }
-            dim = new int[]{5, 3, 3};  // TODO make dimensions more flexible through argument in init
-            dimMin = new int[]{6, 66, 6};
         }
 
+        /**
+         * Converts the json object of the world state into a (multi-channel) 3D matrix containing information on
+         * whether certain blocks or structures exist at certain coordinates or should be built; ignores colored blocks.
+         * The result is saved in the parser.
+         */
         public void convertIntoVector() {
             // read world state
-            ArrayList<int[]> coordinates = new ArrayList<>();
-            JSONArray blocks = (JSONArray) data.get("block");
-            for (int i = 0; i < blocks.size(); i++) {
-                JSONArray blockInBrackets = (JSONArray) blocks.get(i);
-                String block = (String) blockInBrackets.get(0);
-                String[] splitBlock = block.split("-");
-                if (splitBlock.length == 4) {
-                    int[] coords = new int[3];
-                    for (int j = 1; j < 4; j++) {
-                        coords[j-1] = Integer.parseInt(splitBlock[j]) - dimMin[j-1];
-                    }
-                    System.out.println(Arrays.toString(coords));
-                    coordinates.add(coords);
-                }
-            }
+            ArrayList<int[]> blockCoordinates = new ArrayList<>();
+            readFromKey("block", blockCoordinates);
 
             // read target
+            ArrayList<int[]> targetCoordinates = new ArrayList<>();
+            readFromKey("target", targetCoordinates);
 
             // read structures
 
@@ -116,6 +121,95 @@ public class EstimationCost extends NLGCost {
         }
 
         // TODO read from key method
+        private void readFromKey(String key, ArrayList<int[]> coordinates) {
+            JSONArray blocks = (JSONArray) data.get(key);
+            for (int i = 0; i < blocks.size(); i++) {
+                JSONArray blockInBrackets = (JSONArray) blocks.get(i);
+                String block = (String) blockInBrackets.get(0);
+                String[] splitBlock = block.split("-");
+//                System.out.println(splitBlock[0]);
+                int[] coords = new int[3];
+                int[] refCoords = new int[6]; // 1st block index 0-2, 2nd block index 3-5
+                switch (splitBlock[0]) {
+                    case "Railing":
+                        // support blocks
+                        int[] coords2 = new int[3];
+                        for (int j = 2; j < 5; j++) {
+                            coords[j-2] = Integer.parseInt(splitBlock[j]) - dimMin[j-2];
+                            coords2[j-2] = Integer.parseInt(splitBlock[j+4]) - dimMin[j-2];
+                        }
+                        coordinates.add(coords);
+                        coordinates.add(coords2);
+
+                        // row
+                        for (int j = coords[0]; j < coords[0] + 5; j++) { // use coord as reference block
+                            coordinates.add(new int[]{j, coords[1] + 1, coords[2]});
+                        }
+                        break;
+                    case "floor":
+                        // reference blocks
+                        for (int j = 1; j < 4; j++) {
+                            refCoords[j-1] = Integer.parseInt(splitBlock[j]) - dimMin[j-1];
+                            refCoords[j+3-1] = Integer.parseInt(splitBlock[j+3]) - dimMin[j-1];
+                        }
+
+                        // blocks in between
+                        for (int x = refCoords[0]; x < (refCoords[3] + 1); x++) {
+                            for (int z = refCoords[2]; z < (refCoords[5] + 1); z++) {
+                                coordinates.add(new int[]{x, refCoords[1], z});
+                            }
+                        }
+                        // remove first and last block since those are the reference blocks
+                        coordinates.remove(0);
+                        coordinates.remove(coordinates.size() - 1);
+                        break;
+                    case "row": // TODO probably untested; does not ignore colored blocks since python version doesn't either
+                        // reference blocks
+                        System.out.println("Row: ----------");
+                        System.out.println(splitBlock[0]);
+                        for (int j = 1; j < 4; j++) {
+                            refCoords[j-1] = Integer.parseInt(splitBlock[j]) - dimMin[j-1];
+                            refCoords[j+3-1] = Integer.parseInt(splitBlock[j+3]) - dimMin[j-1];
+                        }
+
+                        // blocks in between
+                        for (int x = refCoords[0]; x < (refCoords[3] + 1); x++) {
+                            coordinates.add(new int[]{x, refCoords[1], refCoords[2]});
+                            System.out.println(Arrays.toString(new int[]{x, refCoords[1], refCoords[2]}));
+                        }
+                        System.out.println("----------");
+                        break;
+                    case "Block":
+                        for (int j = 1; j < 4; j++) {
+                            coords[j-1] = Integer.parseInt(splitBlock[j]) - dimMin[j-1];
+                        }
+//                    System.out.println(Arrays.toString(coords));
+                        coordinates.add(coords);
+                        break;
+                    case "row-railing": // TODO maybe find another way to deal with this, like changing the data format
+                        // TODO also untested
+                        // notice:
+                        // "row":[["row-railing6-68-6-10-68-6"]]
+                        // "row":[["row6-66-6-10-66-6"],["row6-66-8-10-66-8"],["row6-68-6-10-68-6"]]
+                        System.out.println("Row-Railing: ----------");
+                        System.out.println(splitBlock[0]);
+
+                        for (int j = 2; j < 5; j++) {
+                            refCoords[j-2] = Integer.parseInt(splitBlock[j]) - dimMin[j-2];
+                            refCoords[j+3-2] = Integer.parseInt(splitBlock[j+3]) - dimMin[j-2];
+                        }
+
+                        // blocks in between
+                        for (int x = refCoords[0]; x < (refCoords[3] + 1); x++) {
+                            coordinates.add(new int[]{x, refCoords[1], refCoords[2]});
+                            System.out.println(Arrays.toString(new int[]{x, refCoords[1], refCoords[2]}));
+                        }
+                        System.out.println("----------");
+                        break;
+                }
+            }
+
+        }
 
         // TODO read special structures method
 
@@ -153,7 +247,7 @@ public class EstimationCost extends NLGCost {
         // add missing \" to string
 //        System.out.println(model);
 
-        DataParser parser = new DataParser(model);
+        parser.setNewData(model);
         parser.convertIntoVector();
 
         Pattern pattern = Pattern.compile("(\"[a-zA-Z_\\-\\d]+)(\")");
@@ -169,7 +263,7 @@ public class EstimationCost extends NLGCost {
         Process process = null;
         System.out.println("----------");
 //        try {
-//            predictor.predict(model);  // TODO create a json parser for the model in java
+//            predictor.predict(model);  // TODO how do I fix the scaling problem?
 //        } catch (TranslateException e) {
 //            e.printStackTrace();
 //        }
@@ -182,6 +276,7 @@ public class EstimationCost extends NLGCost {
             while ((ret = in.readLine()) != null) {
                 System.out.println(ret);
                 returnValue = Double.parseDouble(ret);
+                // TODO why do I get small numbers here? does the scaler not work?
             }
             int exitCode = process.waitFor();
         } catch (IOException e) {
