@@ -113,6 +113,8 @@ public class EstimationCost extends NLGCost {
             readFromKey("target", targetCoordinates);
 
             // read structures
+            ArrayList<ArrayList<int[]>> structuresCoordinates = new ArrayList<ArrayList<int[]>>();
+            readSpecialStructures(structuresCoordinates);
 
             // add fake costs
 
@@ -187,7 +189,7 @@ public class EstimationCost extends NLGCost {
                         coordinates.add(coords);
                         break;
                     case "row-railing": // TODO maybe find another way to deal with this, like changing the data format
-                        // TODO also untested
+                        // TODO also untested since case happens so rarely
                         // notice:
                         // "row":[["row-railing6-68-6-10-68-6"]]
                         // "row":[["row6-66-6-10-66-6"],["row6-66-8-10-66-8"],["row6-68-6-10-68-6"]]
@@ -212,6 +214,17 @@ public class EstimationCost extends NLGCost {
         }
 
         // TODO read special structures method
+        private void readSpecialStructures(ArrayList<ArrayList<int[]>> coordinates) {
+            if (data.containsKey("row")) {
+                readFromKey("row", coordinates.get(0));
+            }
+            if (data.containsKey("floor")) {
+                readFromKey("floor", coordinates.get(0));
+            }
+            if (data.containsKey("railing")) {
+                readFromKey("railing", coordinates.get(0));
+            }
+        }
 
         // TODO mark blocks method
     }
@@ -254,10 +267,10 @@ public class EstimationCost extends NLGCost {
         Matcher matcher = pattern.matcher(model);
         model = matcher.replaceAll("\\\\$1\\\\$2");
         model = "[" + model + "]";
-//        System.out.println(model);
+        System.out.println(model);
 
         // I guess ProcessBuilder init input can be understood as the line you would put into the command line
-        ProcessBuilder pb = new ProcessBuilder("python", "../../cost-estimation/nn/main.py", "-c", "-d " + model);
+        ProcessBuilder pb = new ProcessBuilder("python", "../../cost-estimation/nn/main.py", "-c", "-d " + model, "-l");
         pb.directory(new File("../../cost-estimation/nn"));
         pb.redirectErrorStream(true);
         Process process = null;
