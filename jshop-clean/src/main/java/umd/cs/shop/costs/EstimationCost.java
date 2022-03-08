@@ -113,7 +113,13 @@ public class EstimationCost extends NLGCost {
             readFromKey("target", targetCoordinates);
 
             // read structures
-            ArrayList<ArrayList<int[]>> structuresCoordinates = new ArrayList<ArrayList<int[]>>();
+            ArrayList<ArrayList<int[]>> structuresCoordinates = new ArrayList<>();
+            ArrayList<int[]> coordinatesRow = new ArrayList<>();
+            ArrayList<int[]> coordinatesFloor = new ArrayList<>();
+            ArrayList<int[]> coordinatesRailing = new ArrayList<>();
+            structuresCoordinates.add(coordinatesRow);
+            structuresCoordinates.add(coordinatesFloor);
+            structuresCoordinates.add(coordinatesRailing);
             readSpecialStructures(structuresCoordinates);
 
             // add fake costs
@@ -122,7 +128,11 @@ public class EstimationCost extends NLGCost {
 
         }
 
-        // TODO read from key method
+        /**
+         * Reads coordinates data from a json object given a json key.
+         * @param key json key such as "target"
+         * @param coordinates empty arraylist into which the coordinates should be put
+         */
         private void readFromKey(String key, ArrayList<int[]> coordinates) {
             JSONArray blocks = (JSONArray) data.get(key);
             for (int i = 0; i < blocks.size(); i++) {
@@ -213,16 +223,19 @@ public class EstimationCost extends NLGCost {
 
         }
 
-        // TODO read special structures method
+        /**
+         * Reads the coordinates of special structures such as rows.
+         * @param coordinates empty arraylist of arraylists into which the coordinates should be put
+         */
         private void readSpecialStructures(ArrayList<ArrayList<int[]>> coordinates) {
             if (data.containsKey("row")) {
                 readFromKey("row", coordinates.get(0));
             }
             if (data.containsKey("floor")) {
-                readFromKey("floor", coordinates.get(0));
+                readFromKey("floor", coordinates.get(1));
             }
             if (data.containsKey("railing")) {
-                readFromKey("railing", coordinates.get(0));
+                readFromKey("railing", coordinates.get(2));
             }
         }
 
