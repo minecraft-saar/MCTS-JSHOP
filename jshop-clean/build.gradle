@@ -63,6 +63,7 @@ dependencies {
     runtimeOnly group: 'ai.djl.pytorch', name: 'pytorch-native-auto', version: '1.9.1'
     testImplementation group: 'org.slf4j', name: 'slf4j-simple', version: '1.7.36'
     implementation group: 'org.apache.clerezza.ext', name: 'org.json.simple', version: '0.4'
+    implementation group: 'org.javatuples', name: 'javatuples', version: '1.2'
 }
 
 mainClassName = 'umd.cs.shop.JSJshop'
