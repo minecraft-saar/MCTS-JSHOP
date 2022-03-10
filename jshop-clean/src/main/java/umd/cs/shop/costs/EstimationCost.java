@@ -361,7 +361,10 @@ public class EstimationCost extends NLGCost {
 //        Process process = null;
         double returnValue = Double.POSITIVE_INFINITY;
         try {
-            returnValue = predictor.predict(flattenedInputDataNN);  // TODO how do I fix the scaling problem?
+            returnValue = predictor.predict(flattenedInputDataNN);
+            // inverse scaling
+            returnValue = (returnValue - 0D) / (1D - 0D);
+            returnValue = returnValue * (128071.40159593D - 2690.70126898D) + 2690.70126898D;
         } catch (TranslateException e) {
             e.printStackTrace();
         }
@@ -372,7 +375,6 @@ public class EstimationCost extends NLGCost {
 //            while ((ret = in.readLine()) != null) {
 //                System.out.println(ret);
 //                returnValue = Double.parseDouble(ret);
-//                // TODO why do I get small numbers here? does the scaler not work?
 //            }
 //            int exitCode = process.waitFor();
 //        } catch (IOException e) {
