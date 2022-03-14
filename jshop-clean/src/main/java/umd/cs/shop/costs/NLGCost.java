@@ -185,7 +185,7 @@ public class NLGCost implements CostFunction {
                     mco = createRow(term);
                     world.add(mco);
                     knownObjects.add(mco.getClass().getSimpleName().toLowerCase());
-                    row.add("[\"" + mco + "\"],");
+                    row.add("[\"" + mco + "\"]");
                     if (itRow.left) {
                         Triple rowCoord = parseCoordinates(term);
                         if (rowCoord.equals(itRow.right)) {
@@ -198,7 +198,7 @@ public class NLGCost implements CostFunction {
                     mco = createRailing(term);
                     world.add(mco);
                     knownObjects.add(mco.getClass().getSimpleName().toLowerCase());
-                    railing.add("[\"" + mco + "\"],");
+                    railing.add("[\"" + mco + "\"]");
                     if (itRailing.left) {
                         Triple railingCoord = parseCoordinates(term);
                         if (railingCoord.equals(itRailing.right)) {
@@ -212,7 +212,7 @@ public class NLGCost implements CostFunction {
                     world.add(mco);
                     it.add(mco); //Floor is a special case right now, because we can only have one the it never changes
                     knownObjects.add(mco.getClass().getSimpleName().toLowerCase());
-                    floor.add("[\"" + mco + "\"],");
+                    floor.add("[\"" + mco + "\"]");
                 }
                 case "stairs-at" -> {
                     mco = createStairs(term);
