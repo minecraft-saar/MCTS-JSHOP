@@ -27,16 +27,19 @@ import org.json.simple.parser.ParseException;
 
 public class EstimationCost extends NLGCost {
 
-    MinecraftRealizer nlgSystem; //
+//    MinecraftRealizer nlgSystem; //
     Model nn;
     Translator<Float[], Float> translator;
     Predictor<Float[], Float> predictor;
     DataParser parser;
+    Boolean use_target = true;
+    Boolean use_structures = true;
+    int num_channels;
 
     public EstimationCost(CostFunction.InstructionLevel ins, String weightFile) {
         super(ins, weightFile);
-        nlgSystem = MinecraftRealizer.createRealizer(); //
-        Path nnDir = Paths.get("../../cost-estimation/nn/");
+//        nlgSystem = MinecraftRealizer.createRealizer(); //
+        Path nnDir = Paths.get("../../cost-estimation/nn/"); // TODO make all pathing flexible
         nn = Model.newInstance("trained_model.zip");
         try {
             nn.load(nnDir);
@@ -45,14 +48,23 @@ public class EstimationCost extends NLGCost {
         } catch (MalformedModelException e) {
             e.printStackTrace();
         }
-        parser = new DataParser();
+
+        if (use_structures) {
+            num_channels = 5;
+        } else if (use_target) {
+            num_channels = 2;
+        } else {
+            num_channels = 1;
+        } // TODO consider allowing more flexibility with these options, e.g. use stuctures but no use target...
+
+        parser = new DataParser(use_target, use_structures, num_channels);
 
         translator = new Translator<Float[], Float>() {  // TODO check if translator works properly
             @Override
             public NDList processInput(TranslatorContext ctx, Float[] input) {
                 NDManager manager = ctx.getNDManager();
 //                NDArray array = manager.create(new float[] {input});
-                Shape shape = new Shape(5, 5, 3, 3);
+                Shape shape = new Shape(num_channels, 5, 3, 3);
                 float[] primitiveFloatArr = new float[input.length];
                 for (int i = 0; i < input.length; i++) {
                     primitiveFloatArr[i] = input[i].floatValue();
@@ -87,11 +99,17 @@ public class EstimationCost extends NLGCost {
         int[] dimMin;
         JSONParser parser;
         float[][][][] worldMatrix;
+        Boolean use_target;
+        Boolean use_structures;
+        int num_channels;
 
-        public DataParser() {  // TODO implement switches for target, structure etc
-            parser = new JSONParser();
-            dim = new int[]{5, 3, 3};  // TODO make dimensions more flexible through argument in init
-            dimMin = new int[]{6, 66, 6};
+        public DataParser(Boolean use_target, Boolean use_structures, int num_channels) {
+            this.parser = new JSONParser();
+            this.dim = new int[]{5, 3, 3};  // TODO make dimensions more flexible through argument in init
+            this.dimMin = new int[]{6, 66, 6};
+            this.use_target = use_target;
+            this.use_structures = use_structures;
+            this.num_channels = num_channels;
         }
 
         /**
@@ -129,7 +147,10 @@ public class EstimationCost extends NLGCost {
 
             // read target
             ArrayList<int[]> targetCoordinates = new ArrayList<>();
-            readFromKey("target", targetCoordinates);
+            if (use_target) {
+                readFromKey("target", targetCoordinates);
+            }
+
 
             // read structures
             ArrayList<ArrayList<int[]>> structuresCoordinates = new ArrayList<>();
@@ -139,7 +160,9 @@ public class EstimationCost extends NLGCost {
             structuresCoordinates.add(coordinatesRow);
             structuresCoordinates.add(coordinatesFloor);
             structuresCoordinates.add(coordinatesRailing);
-            readSpecialStructures(structuresCoordinates);
+            if (use_structures) {
+                readSpecialStructures(structuresCoordinates);
+            }
 
             // mark block positions in data list
             markBlockPositions(blockCoordinates, targetCoordinates, structuresCoordinates);
@@ -271,7 +294,7 @@ public class EstimationCost extends NLGCost {
          */
         private void markBlockPositions(ArrayList<int[]> worldStateCoords, ArrayList<int[]> targetCoords, ArrayList<ArrayList<int[]>> structureCoords) {
             // int arrays are filled with zeros by default
-            worldMatrix = new float[5][5][3][3]; // TODO check if dimensions are correct and if these are really all zeros
+            worldMatrix = new float[num_channels][5][3][3]; // TODO check if dimensions are correct and if these are really all zeros
 
             // mark currently present blocks
             for (int[] indices : worldStateCoords) {
@@ -279,26 +302,29 @@ public class EstimationCost extends NLGCost {
             }
 
             // mark target blocks
-            for (int[] indices : targetCoords) {
-                worldMatrix[1][indices[0]][indices[1]][indices[2]] = 1F;
+            if (use_target) {
+                for (int[] indices : targetCoords) {
+                    worldMatrix[1][indices[0]][indices[1]][indices[2]] = 1F;
+                }
             }
 
             // mark currently present special structures
-            int matrixIdx = 2;
-            for (ArrayList<int[]> structureType : structureCoords) {
-                if (!structureType.isEmpty()) {
-                    for (int[] coords : structureType) {
-                        worldMatrix[matrixIdx][coords[0]][coords[1]][coords[2]] = 1F;
+            if (use_structures) {
+                int matrixIdx = 2;
+                for (ArrayList<int[]> structureType : structureCoords) {
+                    if (!structureType.isEmpty()) {
+                        for (int[] coords : structureType) {
+                            worldMatrix[matrixIdx][coords[0]][coords[1]][coords[2]] = 1F;
+                        }
                     }
+                    matrixIdx++;
                 }
-                matrixIdx++;
             }
         }
     }
 
     @Override
     public Double getCost(JSTState state, JSOperator op, JSTaskAtom groundedOperator, boolean approx) {
-
         if (groundedOperator.get(0).equals("!place-block-hidden") ||
                 groundedOperator.get(0).equals("!remove-it-row") ||
                 groundedOperator.get(0).equals("!remove-it-railing") ||
@@ -321,9 +347,9 @@ public class EstimationCost extends NLGCost {
         }
         // call NN python script here
         //calling nlgsysstem for model:
-        String model = nlgSystem.getModelforNN(world, currentObject, it); //
+//        String model = nlgSystem.getModelforNN(world, currentObject, it); //
         //new way
-//        String model = this.model;  //
+        String model = this.model;  //
 //        System.out.println(model);
 
         // process world state data by using a parser
@@ -331,7 +357,7 @@ public class EstimationCost extends NLGCost {
         parser.convertIntoVector();
         float[][][][] inputDataNN = parser.getMatrix();
 
-        // prepare world state representation for python argparse
+        // prepare world state representation for python argparse TODO remove this eventually
         Pattern pattern = Pattern.compile("(\"[a-zA-Z_\\-\\d]+)(\")");
         Matcher matcher = pattern.matcher(model);
         model = matcher.replaceAll("\\\\$1\\\\$2");
@@ -340,7 +366,7 @@ public class EstimationCost extends NLGCost {
 
         // flatten world state matrix in preparation for NDArray
         // TODO check if all of this works as intended together with translator
-        Float[] flattenedInputDataNN = new Float[5 * 5 * 3 * 3];
+        Float[] flattenedInputDataNN = new Float[num_channels * 5 * 3 * 3];
         int currIdx = 0;
         for (float[][][] l1 : inputDataNN) {
             for (float[][] l2 : l1) {
@@ -360,11 +386,12 @@ public class EstimationCost extends NLGCost {
 //        pb.redirectErrorStream(true);
 //        Process process = null;
         double returnValue = Double.POSITIVE_INFINITY;
-        try {
+        try { // TODO Quelle für diesen java code angeben!!!
             returnValue = predictor.predict(flattenedInputDataNN);
             // inverse scaling
             returnValue = (returnValue - 0D) / (1D - 0D);
             returnValue = returnValue * (128071.40159593D - 2690.70126898D) + 2690.70126898D;
+            // TODO does this break if the NN somehow where to generate a number bigger than the original range?
         } catch (TranslateException e) {
             e.printStackTrace();
         }
@@ -382,6 +409,7 @@ public class EstimationCost extends NLGCost {
 //        } catch (InterruptedException e) {
 //            e.printStackTrace();
 //        }
+
         return returnValue;
     }
 

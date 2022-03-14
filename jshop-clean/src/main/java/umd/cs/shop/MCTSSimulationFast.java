@@ -70,7 +70,11 @@ public class MCTSSimulationFast implements MCTSSimulation {
 
     public Double action_cost(JSOperator op, JSSubstitution alpha, JSTState currentState) {
         JSTaskAtom head = op.head();
-        return vars.costFunction.getCost(currentState, op, head.applySubstitutionTA(alpha), vars.useApproximatedCostFunction);
+        long startTime = System.currentTimeMillis();
+        Double res = vars.costFunction.getCost(currentState, op, head.applySubstitutionTA(alpha), vars.useApproximatedCostFunction);
+        long endTime = System.currentTimeMillis();
+        System.out.printf("Duration getCost: %d%n", (endTime - startTime));
+        return res;
     }
 
     public JSPlan deterministic_simulation(JSTState currentState, JSTasks currentTasks, int depth, double plan_cost) {
