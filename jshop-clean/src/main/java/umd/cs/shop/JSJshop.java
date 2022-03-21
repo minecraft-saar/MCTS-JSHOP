@@ -12,6 +12,7 @@ import picocli.CommandLine;
 import picocli.CommandLine.Option;
 import picocli.CommandLine.Parameters;
 import umd.cs.shop.costs.CostFunction;
+import umd.cs.shop.costs.EstimationCost;
 import umd.cs.shop.costs.NLGCost;
 
 
@@ -227,7 +228,7 @@ public final class JSJshop implements Runnable {
             }
             final long searchTime = System.currentTimeMillis();
             JSUtil.println("Total Time: " + (searchTime - vars.startTime));
-            if(vars.costFunction instanceof NLGCost costfunction){
+            if(vars.costFunction instanceof NLGCost costfunction && (!(vars.costFunction instanceof EstimationCost))){
                 if(costfunction.writeNNData){
 
                     try {
