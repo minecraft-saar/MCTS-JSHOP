@@ -6,6 +6,8 @@ import de.saar.coli.minecraft.MinecraftRealizer;
 import de.saar.minecraft.analysis.WeightEstimator;
 import umd.cs.shop.*;
 
+import java.io.File;
+import java.io.FileWriter;
 import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Paths;
@@ -18,14 +20,29 @@ public class NLGCost implements CostFunction {
     protected WeightEstimator.WeightResult weights;
     boolean weightsPresent;
     Double lowestCost;
+    public FileWriter NNData;
+    public boolean writeNNData = true;
     String model = "";
 
     public NLGCost(CostFunction.InstructionLevel ins, String weightFile) {
         instructionLevel = ins;
         nlgSystem = MinecraftRealizer.createRealizer();
         lowestCost = 10.0;
+        if(writeNNData){
+            try {
+                File yourFile = new File("/home/julia/Documents/jshop/jshop-clean/NN-data.json");
+                yourFile.createNewFile(); // if file already exists will do nothing
+                NNData = new FileWriter(yourFile);
+                NNData.write("{");
+            } catch (IOException e){
+                System.out.println("An error occurred while opening NN-data file");
+                e.printStackTrace();
+            }
+        }
         if (weightFile.equals("")) {
             weightsPresent = false;
+        } else if (weightFile.equals("random")) {
+            nlgSystem.randomizeExpectedDurations();
         } else {
             weightsPresent = true;
             try {
@@ -36,8 +53,16 @@ public class NLGCost implements CostFunction {
                 throw new RuntimeException("could not read weights file: " + weightFile);
             }
         }
+    }
 
-
+    public void closeFile(){
+        try {
+            NNData.flush();
+            NNData.close();
+        } catch (IOException e){
+            System.out.println("Problem while closing NNData File");
+            e.printStackTrace();
+        }
     }
 
     @Override
@@ -72,6 +97,20 @@ public class NLGCost implements CostFunction {
             }
         }
         double returnValue = nlgSystem.estimateCostForPlanningSystem(world, currentObject, it);
+
+        if(writeNNData){
+            model = model.substring(0, model.length() - 1);
+            model = model + ",\"cost\":[["+returnValue+"]]}";
+            try{
+                NNData.write(model);
+                NNData.write(",\n");
+            } catch (IOException e){
+                System.out.println("An error occurred while writing NN-data file");
+                e.printStackTrace();
+            }
+        }
+
+
         if (returnValue < 0.0) {
             if (returnValue < lowestCost) {
                 lowestCost = returnValue;

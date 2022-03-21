@@ -12,6 +12,7 @@ import picocli.CommandLine;
 import picocli.CommandLine.Option;
 import picocli.CommandLine.Parameters;
 import umd.cs.shop.costs.CostFunction;
+import umd.cs.shop.costs.NLGCost;
 
 
 /*HICAP import nrl.aic.hicap.*;*/
@@ -226,6 +227,19 @@ public final class JSJshop implements Runnable {
             }
             final long searchTime = System.currentTimeMillis();
             JSUtil.println("Total Time: " + (searchTime - vars.startTime));
+            if(vars.costFunction instanceof NLGCost costfunction){
+                if(costfunction.writeNNData){
+
+                    try {
+                        JSUtil.println("Closing NN Data");
+                        costfunction.NNData.write("}");
+                        costfunction.closeFile();
+                    } catch (IOException e){
+                        System.out.println("An error occurred while writing NN-data file");
+                        e.printStackTrace();
+                    }
+                }
+            }
             JSUtil.println("Number of Nodes generated: " + MCTSNode.NEXT_ID);
             if (duplicate) {
                 JSUtil.println("Number of Insertion into Registry " + vars.registry.numStates);
@@ -523,62 +537,6 @@ public final class JSJshop implements Runnable {
 
         public BufferedReader getBufferedReader (String dir, String file){
             return getBufferedReader(dir, file);
-        }
-
-        public BufferedReader getBufferedReader (String dir, String file,
-                JApplet applet){
-            if (file == null) return null;
-            BufferedReader br = null;
-            FileInputStream libraryFileInputStream = null;
-            InputStream conn = null;
-            String line;
-            try {
-                if (applet != null) {
-                    URL url = getAppletURL(file, applet);
-                    if (url == null) {
-                        System.err.println("Util.getBufferedReader() error: cannot get URL");
-                        return null;
-                    } else {
-                        conn = url.openStream();
-                        if (conn == null) {
-                            System.err.println("Util.getBufferedReader() error: cannot open URL");
-                            return null;
-                        }
-                    }
-                } // is applet
-                else  // is application
-                {
-                    libraryFileInputStream =
-                            new FileInputStream(dir + File.separator + file);
-                }
-            } catch (IOException e) {
-                System.err.println("Error 1 in Util.getBufferedReader : " + e);
-                return null;
-            }
-
-            if (applet != null) {
-                br =
-                        new BufferedReader(new InputStreamReader(conn));
-            } else  // application
-            {
-                try {
-                    br =
-                            new BufferedReader(new InputStreamReader(libraryFileInputStream,
-                                    System.getProperty("file.encoding")));
-                } catch (UnsupportedEncodingException e) {
-                    System.err.println("Error 2 in Util.getBufferedReader : " + e);
-                    return null;
-                }
-            }
-            return br;
-        } // getBufferedReader
-
-        public URL getAppletURL (String file, JApplet applet){
-            try {
-                return (new URL(applet.getCodeBase() + file));
-            } catch (MalformedURLException e) {
-                return null;
-            }
         }
 
         public void processToken (StreamTokenizer tokenizer){
