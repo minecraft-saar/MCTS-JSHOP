@@ -21,7 +21,7 @@ public class NLGCost implements CostFunction {
     boolean weightsPresent;
     Double lowestCost;
     public FileWriter NNData;
-    public boolean writeNNData = true;
+    public boolean writeNNData = false; // this was true before, just throws an error if I don't change it to false
     String model = "";
 
     public NLGCost(CostFunction.InstructionLevel ins, String weightFile) {
@@ -30,7 +30,7 @@ public class NLGCost implements CostFunction {
         lowestCost = 10.0;
         if(writeNNData){
             try {
-                File yourFile = new File("/home/julia/Documents/jshop/jshop-clean/NN-data.json");
+                File yourFile = new File("E:\\Bachelor_Arbeit\\jshop-cost-estimation\\jshop-clean\\NN-data.json");
                 yourFile.createNewFile(); // if file already exists will do nothing
                 NNData = new FileWriter(yourFile);
                 NNData.write("{");

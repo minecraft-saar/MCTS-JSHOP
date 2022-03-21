@@ -5,9 +5,9 @@ import de.saar.basic.Pair;
 import de.saar.coli.minecraft.MinecraftRealizer;
 import de.saar.coli.minecraft.relationextractor.IntroductionMessage;
 import de.saar.coli.minecraft.relationextractor.MinecraftObject;
+import de.saar.minecraft.analysis.WeightEstimator;
 import umd.cs.shop.*;
 
-import javax.swing.*;
 import java.io.*;
 import java.util.*;
 import java.util.regex.Matcher;
@@ -27,18 +27,28 @@ import org.json.simple.parser.ParseException;
 
 public class EstimationCost extends NLGCost {
 
-//    MinecraftRealizer nlgSystem; //
+    MinecraftRealizer nlgSystem; //
     Model nn;
     Translator<Float[], Float> translator;
     Predictor<Float[], Float> predictor;
     DataParser parser;
-    Boolean use_target = true;
-    Boolean use_structures = true;
-    int num_channels;
+    Boolean useTarget = true;
+    Boolean useStructures = true;
+    int numChannels;
+
+    public BufferedWriter writerCost;
+    Double diffCosts;
+    Double avgDiffCosts;
+    int countInstr;
 
     public EstimationCost(CostFunction.InstructionLevel ins, String weightFile) {
         super(ins, weightFile);
-//        nlgSystem = MinecraftRealizer.createRealizer(); //
+        nlgSystem = MinecraftRealizer.createRealizer(); //
+        try {
+            writerCost = new BufferedWriter(new FileWriter("cost_comparison.txt"));
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
         Path nnDir = Paths.get("../../cost-estimation/nn/"); // TODO make all pathing flexible
         nn = Model.newInstance("trained_model.zip");
         try {
@@ -49,22 +59,42 @@ public class EstimationCost extends NLGCost {
             e.printStackTrace();
         }
 
-        if (use_structures) {
-            num_channels = 5;
-        } else if (use_target) {
-            num_channels = 2;
+        // TODO remove this when done with comparisons; also consider running everything 10 times or so to reduce variance;
+        //  maybe check training losses again and fit number of epochs to the specific NN and situation
+        // TODO maybe run simple NN with the old data format of 0, 0.5, 1 as well
+        lowestCost = 10.0;
+        if (weightFile.equals("")) {
+            weightsPresent = false;
         } else {
-            num_channels = 1;
+            weightsPresent = true;
+            try {
+                weights = WeightEstimator.WeightResult.fromJson(
+                        Files.readString(Paths.get(weightFile)));
+                nlgSystem.setExpectedDurations(weights.weights, false);
+            } catch (IOException e) {
+                throw new RuntimeException("could not read weights file: " + weightFile);
+            }
+        }
+        diffCosts = 0D;
+        avgDiffCosts = 0D;
+        countInstr = 0;
+
+        if (useStructures) {
+            numChannels = 5;
+        } else if (useTarget) {
+            numChannels = 2;
+        } else {
+            numChannels = 1;
         } // TODO consider allowing more flexibility with these options, e.g. use stuctures but no use target...
 
-        parser = new DataParser(use_target, use_structures, num_channels);
+        parser = new DataParser(useTarget, useStructures, numChannels);
 
         translator = new Translator<Float[], Float>() {  // TODO check if translator works properly
             @Override
             public NDList processInput(TranslatorContext ctx, Float[] input) {
                 NDManager manager = ctx.getNDManager();
 //                NDArray array = manager.create(new float[] {input});
-                Shape shape = new Shape(num_channels, 5, 3, 3);
+                Shape shape = new Shape(numChannels, 5, 3, 3);
                 float[] primitiveFloatArr = new float[input.length];
                 for (int i = 0; i < input.length; i++) {
                     primitiveFloatArr[i] = input[i].floatValue();
@@ -345,12 +375,37 @@ public class EstimationCost extends NLGCost {
                 return 0.000001;
             }
         }
+
+        // NLG Model for comparision TODO comment out NLG stuff in init again when removing this
+        countInstr++;
+        String currentObjectType = currentObject.getClass().getSimpleName().toLowerCase();
+        boolean objectFirstOccurence = !knownObjects.contains(currentObjectType);
+        if (objectFirstOccurence && weights != null) {
+            // temporarily set the weight to the first occurence one
+            // ... if we have an estimate for the first occurence
+            if (weights.firstOccurenceWeights.containsKey("i" + currentObjectType)) {
+                nlgSystem.setExpectedDurations(
+                        Map.of("i" + currentObjectType, weights.firstOccurenceWeights.get("i" + currentObjectType)),
+                        false);
+            }
+        }
+        long startTime = System.currentTimeMillis();
+        double returnValueNLG = nlgSystem.estimateCostForPlanningSystem(world, currentObject, it);
+        long endTime = System.currentTimeMillis();
+        System.out.printf("Duration getCost NLG: %d%n", (endTime - startTime));
+//        System.out.printf("Cost NLG: %f%n", returnValueNLG);
+        try {
+            writerCost.write("Cost NLG: " + returnValueNLG + '\n');
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+
         // call NN python script here
         //calling nlgsysstem for model:
 //        String model = nlgSystem.getModelforNN(world, currentObject, it); //
         //new way
         String model = this.model;  //
-//        System.out.println(model);
+        System.out.println(model);
 
         // process world state data by using a parser
         parser.setNewData(model);
@@ -366,7 +421,7 @@ public class EstimationCost extends NLGCost {
 
         // flatten world state matrix in preparation for NDArray
         // TODO check if all of this works as intended together with translator
-        Float[] flattenedInputDataNN = new Float[num_channels * 5 * 3 * 3];
+        Float[] flattenedInputDataNN = new Float[numChannels * 5 * 3 * 3];
         int currIdx = 0;
         for (float[][][] l1 : inputDataNN) {
             for (float[][] l2 : l1) {
@@ -381,13 +436,17 @@ public class EstimationCost extends NLGCost {
 //        System.out.println(Arrays.toString(flattenedInputDataNN));
 
         // I guess ProcessBuilder init input can be understood as the line you would put into the command line
+        // TODO the stuff below has not been updated for the new parser args, probably unnecessary anyway
 //        ProcessBuilder pb = new ProcessBuilder("python", "../../cost-estimation/nn/main.py", "-c", "-d " + model, "-l");
 //        pb.directory(new File("../../cost-estimation/nn"));
 //        pb.redirectErrorStream(true);
 //        Process process = null;
         double returnValue = Double.POSITIVE_INFINITY;
-        try { // TODO Quelle für diesen java code angeben!!!
+        try { // TODO Quelle für diesen java code angeben!!! https://towardsdatascience.com/pytorch-model-in-deep-java-library-a9ca18d8ce51
+            startTime = System.currentTimeMillis();
             returnValue = predictor.predict(flattenedInputDataNN);
+            endTime = System.currentTimeMillis();
+            System.out.printf("Duration getCost: %d%n", (endTime - startTime));
             // inverse scaling
             returnValue = (returnValue - 0D) / (1D - 0D);
             returnValue = returnValue * (128071.40159593D - 2690.70126898D) + 2690.70126898D;
@@ -410,6 +469,16 @@ public class EstimationCost extends NLGCost {
 //            e.printStackTrace();
 //        }
 
+//        System.out.printf("Cost NN: %f%n", returnValue);
+        try {
+            writerCost.write("Cost NN: " + returnValue + '\n');
+            writerCost.write("------------" + '\n');
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+        diffCosts += Math.abs(returnValue - returnValueNLG);
+        avgDiffCosts = diffCosts / countInstr;
+        System.out.println("AVG COST DIFF: " + avgDiffCosts);
         return returnValue;
     }
 

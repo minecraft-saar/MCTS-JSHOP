@@ -38,3 +38,7 @@ hs_err_pid*
 
 # weights file
 weights-time.json
+
+# intellij output
+jshop-clean/output.txt
+jshop-clean/cost_comparison.txt
