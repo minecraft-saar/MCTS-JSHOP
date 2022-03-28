@@ -83,9 +83,10 @@ public class EstimationCost extends NLGCost {
             numChannels = 5;
         } else if (useTarget) {
             numChannels = 2;
+//            numChannels = 1;
         } else {
             numChannels = 1;
-        } // TODO consider allowing more flexibility with these options, e.g. use stuctures but no use target...
+        } // TODO consider allowing more flexibility with these options, e.g. use structures but no use target...
 
         parser = new DataParser(useTarget, useStructures, numChannels);
 
@@ -131,15 +132,15 @@ public class EstimationCost extends NLGCost {
         float[][][][] worldMatrix;
         Boolean use_target;
         Boolean use_structures;
-        int num_channels;
+        int numChannels;
 
-        public DataParser(Boolean use_target, Boolean use_structures, int num_channels) {
+        public DataParser(Boolean use_target, Boolean use_structures, int numChannels) {
             this.parser = new JSONParser();
             this.dim = new int[]{5, 3, 3};  // TODO make dimensions more flexible through argument in init
             this.dimMin = new int[]{6, 66, 6};
             this.use_target = use_target;
             this.use_structures = use_structures;
-            this.num_channels = num_channels;
+            this.numChannels = numChannels;
         }
 
         /**
@@ -324,7 +325,7 @@ public class EstimationCost extends NLGCost {
          */
         private void markBlockPositions(ArrayList<int[]> worldStateCoords, ArrayList<int[]> targetCoords, ArrayList<ArrayList<int[]>> structureCoords) {
             // int arrays are filled with zeros by default
-            worldMatrix = new float[num_channels][5][3][3]; // TODO check if dimensions are correct and if these are really all zeros
+            worldMatrix = new float[numChannels][5][3][3]; // TODO check if dimensions are correct and if these are really all zeros
 
             // mark currently present blocks
             for (int[] indices : worldStateCoords) {
@@ -335,6 +336,7 @@ public class EstimationCost extends NLGCost {
             if (use_target) {
                 for (int[] indices : targetCoords) {
                     worldMatrix[1][indices[0]][indices[1]][indices[2]] = 1F;
+//                    worldMatrix[0][indices[0]][indices[1]][indices[2]] = 0.5F;
                 }
             }
 
@@ -447,11 +449,14 @@ public class EstimationCost extends NLGCost {
             returnValue = predictor.predict(flattenedInputDataNN);
             endTime = System.currentTimeMillis();
             System.out.printf("Duration getCost: %d%n", (endTime - startTime));
-            // inverse scaling
+            // inverse scaling TODO make sure to mention somewhere that these values need to be set according to what python script says
+            double min = 2690.70126898D;
+            double max = 128071.40159593D;
             returnValue = (returnValue - 0D) / (1D - 0D);
-            returnValue = returnValue * (128071.40159593D - 2690.70126898D) + 2690.70126898D;
+            returnValue = returnValue * (max - min) + min;
             // TODO does this break if the NN somehow where to generate a number bigger than the original range?
         } catch (TranslateException e) {
+            System.out.println("An error occurred while estimating the costs using the NN.");
             e.printStackTrace();
         }
 //        try {

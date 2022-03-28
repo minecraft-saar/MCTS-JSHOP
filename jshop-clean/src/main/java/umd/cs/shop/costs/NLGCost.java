@@ -30,7 +30,7 @@ public class NLGCost implements CostFunction {
         lowestCost = 10.0;
         if(writeNNData){
             try {
-                File yourFile = new File("E:\\Bachelor_Arbeit\\jshop-cost-estimation\\jshop-clean\\NN-data.json");
+                File yourFile = new File("E:\\Bachelor_Arbeit\\jshop-cost-estimation\\jshop-clean\\NN-data-random.json");
                 yourFile.createNewFile(); // if file already exists will do nothing
                 NNData = new FileWriter(yourFile);
                 NNData.write("{");
@@ -43,6 +43,18 @@ public class NLGCost implements CostFunction {
             weightsPresent = false;
         } else if (weightFile.equals("random")) {
             nlgSystem.randomizeExpectedDurations();
+            try {
+                String weightsString = nlgSystem.getWeightsAsJson();
+                File randomWeightsFile = new File("E:\\Bachelor_Arbeit\\jshop-cost-estimation\\jshop-clean\\r-weights.json");
+                randomWeightsFile.createNewFile(); // if file already exists will do nothing
+                FileWriter weightWriter = new FileWriter(randomWeightsFile);
+                weightWriter.write(weightsString);
+                weightWriter.flush();
+                weightWriter.close();
+            } catch (IOException e) {
+                e.printStackTrace();
+                System.out.println("An error occurred while writing random weights into a file");
+            }
         } else {
             weightsPresent = true;
             try {
