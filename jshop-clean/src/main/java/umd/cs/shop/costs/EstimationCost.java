@@ -66,9 +66,7 @@ public class EstimationCost extends NLGCost {
             e.printStackTrace();
         }
 
-        // TODO remove this when done with comparisons; also consider running everything 10 times or so to reduce variance;
-        //  maybe check training losses again and fit number of epochs to the specific NN and situation
-        // TODO maybe run simple NN with the old data format of 0, 0.5, 1 as well
+        // TODO remove this when done with comparisons
         lowestCost = 10.0;
         if (weightFile.equals("")) {
             weightsPresent = false;
@@ -96,7 +94,7 @@ public class EstimationCost extends NLGCost {
 
         parser = new DataParser(useTarget, useStructures, numChannels);
 
-        translator = new Translator<Float[], Float>() {  // TODO check if translator works properly
+        translator = new Translator<Float[], Float>() {
             @Override
             public NDList processInput(TranslatorContext ctx, Float[] input) {
                 NDManager manager = ctx.getNDManager();
@@ -166,6 +164,7 @@ public class EstimationCost extends NLGCost {
         /**
          * Should only be used after using convertIntoVector; Returns the finished multi-channel 3D matrix portraying
          * the world state.
+         *
          * @return multi-channel 3D matrix
          */
         public float[][][][] getMatrix() {
@@ -324,10 +323,11 @@ public class EstimationCost extends NLGCost {
          * one. The second channel represents what the current instruction plans to build. The last three channels
          * represent whether certain structures, such as railings, have been built before, as this will lower the cost
          * when attempting to build them again.
+         *
          * @param worldStateCoords coordinate list for the currently existing blocks
-         * @param targetCoords coordinate list for the target blocks of the current instruction
-         * @param structureCoords coordinate list made of three sublists, each listing coordinates for their respective
-         *                        structure type
+         * @param targetCoords     coordinate list for the target blocks of the current instruction
+         * @param structureCoords  coordinate list made of three sublists, each listing coordinates for their respective
+         *                         structure type
          */
         private void markBlockPositions(ArrayList<int[]> worldStateCoords, ArrayList<int[]> targetCoords, ArrayList<ArrayList<int[]>> structureCoords) {
             // int arrays are filled with zeros by default
@@ -342,7 +342,7 @@ public class EstimationCost extends NLGCost {
             if (use_target) {
                 if (nnType == NNType.CNN) {
                     for (int[] indices : targetCoords) {
-                    worldMatrix[1][indices[0]][indices[1]][indices[2]] = 1F;
+                        worldMatrix[1][indices[0]][indices[1]][indices[2]] = 1F;
                     }
                 } else if (nnType == NNType.Simple) {
                     for (int[] indices : targetCoords) {

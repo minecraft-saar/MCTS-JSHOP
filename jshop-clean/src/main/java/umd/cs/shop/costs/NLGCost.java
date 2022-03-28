@@ -28,13 +28,13 @@ public class NLGCost implements CostFunction {
         instructionLevel = ins;
         nlgSystem = MinecraftRealizer.createRealizer();
         lowestCost = 10.0;
-        if(writeNNData){
+        if (writeNNData) {
             try {
                 File yourFile = new File("E:\\Bachelor_Arbeit\\jshop-cost-estimation\\jshop-clean\\NN-data-random.json");
                 yourFile.createNewFile(); // if file already exists will do nothing
                 NNData = new FileWriter(yourFile);
                 NNData.write("{");
-            } catch (IOException e){
+            } catch (IOException e) {
                 System.out.println("An error occurred while opening NN-data file");
                 e.printStackTrace();
             }
@@ -67,11 +67,11 @@ public class NLGCost implements CostFunction {
         }
     }
 
-    public void closeFile(){
+    public void closeFile() {
         try {
             NNData.flush();
             NNData.close();
-        } catch (IOException e){
+        } catch (IOException e) {
             System.out.println("Problem while closing NNData File");
             e.printStackTrace();
         }
@@ -110,13 +110,13 @@ public class NLGCost implements CostFunction {
         }
         double returnValue = nlgSystem.estimateCostForPlanningSystem(world, currentObject, it);
 
-        if(writeNNData){
+        if (writeNNData) {
             model = model.substring(0, model.length() - 1);
-            model = model + ",\"cost\":[["+returnValue+"]]}";
-            try{
+            model = model + ",\"cost\":[[" + returnValue + "]]}";
+            try {
                 NNData.write(model);
                 NNData.write(",\n");
-            } catch (IOException e){
+            } catch (IOException e) {
                 System.out.println("An error occurred while writing NN-data file");
                 e.printStackTrace();
             }
@@ -281,13 +281,13 @@ public class NLGCost implements CostFunction {
         }
         model = "{\"block\":";
         model = model + blocks + ",";
-        if(!row.isEmpty()){
+        if (!row.isEmpty()) {
             model = model + "\"row\":" + row + ",";
         }
-        if(!floor.isEmpty()){
+        if (!floor.isEmpty()) {
             model = model + "\"floor\":" + floor + ",";
         }
-        if(!railing.isEmpty()){
+        if (!railing.isEmpty()) {
             model = model + "\"railing\":" + railing + ",";
         }
         model = model + "\"target\":[[\"" + currentObject.toString() + "\"]]}";
@@ -554,7 +554,7 @@ public class NLGCost implements CostFunction {
         return result;
     }
 
-    Triple parseCoordinates(JSPredicateForm term){
+    Triple parseCoordinates(JSPredicateForm term) {
         JSTerm tmp;
         tmp = (JSTerm) term.elementAt(1);
         int x = (int) Double.parseDouble(tmp.toStr().toString());
@@ -580,27 +580,28 @@ public class NLGCost implements CostFunction {
     }
 }
 
-    class Triple{
-        int x;
-        int y;
-        int z;
-        Triple(int x, int y, int z){
-            this.x = x;
-            this.y = y;
-            this.z = z;
-        }
+class Triple {
+    int x;
+    int y;
+    int z;
 
-        @Override
-        public boolean equals(Object o) {
-            if (this == o) return true;
-            if (o == null || getClass() != o.getClass()) return false;
-            Triple triple = (Triple) o;
-            return triple.x == x && triple.y == y && triple.z == z;
-        }
-
-        @Override
-        public int hashCode() {
-            return Objects.hash(x, y, z);
-        }
+    Triple(int x, int y, int z) {
+        this.x = x;
+        this.y = y;
+        this.z = z;
     }
+
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) return true;
+        if (o == null || getClass() != o.getClass()) return false;
+        Triple triple = (Triple) o;
+        return triple.x == x && triple.y == y && triple.z == z;
+    }
+
+    @Override
+    public int hashCode() {
+        return Objects.hash(x, y, z);
+    }
+}
 
