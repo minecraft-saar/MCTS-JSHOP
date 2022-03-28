@@ -47,7 +47,7 @@ public class EstimationCost extends NLGCost {
         CNN
     }
 
-    public EstimationCost(CostFunction.InstructionLevel ins, String weightFile, NNType nnType) {
+    public EstimationCost(CostFunction.InstructionLevel ins, String weightFile, NNType nnType, String nnPath) {
         super(ins, weightFile);
         nlgSystem = MinecraftRealizer.createRealizer(); //
         this.nnType = nnType;
@@ -56,7 +56,7 @@ public class EstimationCost extends NLGCost {
         } catch (IOException e) {
             e.printStackTrace();
         }
-        Path nnDir = Paths.get("../../cost-estimation/nn/"); // TODO make all pathing flexible
+        Path nnDir = Paths.get(nnPath);
         nn = Model.newInstance("trained_model.zip");
         try {
             nn.load(nnDir);

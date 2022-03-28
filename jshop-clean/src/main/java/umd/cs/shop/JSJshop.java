@@ -115,6 +115,9 @@ public final class JSJshop implements Runnable {
     @Option(names = {"-nnt", "--nnType"}, defaultValue = "CNN", description = "Whether the trained NN is a simple one or a CNN")
     EstimationCost.NNType nnType;
 
+    @Option(names = {"-nnp", "--nnPath"}, defaultValue = "../../cost-estimation/nn/", description = "Path to the folder the trained NNs are in")
+    String nnPath;
+
     @Override
     public void run() {
         /*JSPlan plan = nlgSearch(mctsruns, timeout);
@@ -141,7 +144,7 @@ public final class JSJshop implements Runnable {
         if (level == CostFunction.InstructionLevel.NONE)
             variables.costFunction = CostFunction.getCostFunction(costFunctionName, variables.domain.getName());
         else
-            variables.costFunction = CostFunction.getCostFunction(costFunctionName, variables.domain.getName(), level, weightsFile, nnType);
+            variables.costFunction = CostFunction.getCostFunction(costFunctionName, variables.domain.getName(), level, weightsFile, nnType, nnPath);
 
         if (landmarks) {
             JSUtil.println("Starting landmark parsing");
@@ -370,7 +373,7 @@ public final class JSJshop implements Runnable {
             this.bbPruningFast = true;
             this.recursiveSimulationBudget = 0;
             this.weightsFile = "";
-            vars.costFunction = CostFunction.getCostFunction(CostFunction.CostFunctionType.STATEDEPENDENT, "house", level, weightsFile, nnType);
+            vars.costFunction = CostFunction.getCostFunction(CostFunction.CostFunctionType.STATEDEPENDENT, "house", level, weightsFile, nnType, nnPath);
 
             mctsSearch(vars);
             if (!vars.planFound) {
