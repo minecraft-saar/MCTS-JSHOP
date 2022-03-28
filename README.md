@@ -11,7 +11,7 @@ With the option "-d" the output can be made more verbose with 1 being the lowest
 
 2. Monte Carlo Tree Search 
 
-java -jar PathToJAR DOMAINFILE PROBLEMFILE -m MCTSRUNS -c COSTFUNCTION -e EXPANSIONPOLICY [-b] [--recursiveSimulation NUMBER] [-nnt NNTYPE]
+java -jar PathToJAR DOMAINFILE PROBLEMFILE -m MCTSRUNS -c COSTFUNCTION -e EXPANSIONPOLICY [-b] [--recursiveSimulation NUMBER] [-nnt NNTYPE] [-nnp NNPATH]
 
 * MCTSRUNS can be any positive integer. 
 
@@ -37,7 +37,7 @@ java -jar PathToJAR DOMAINFILE PROBLEMFILE -m MCTSRUNS -c COSTFUNCTION -e EXPANS
   + "Simple": The trained model that will be used is a simple NN.
   + "CNN": The trained model that will be used is a CNN.
   
-  This option is only relevant if using an NN to estimate costs.
+  This option is only relevant if using an NN to estimate costs. Depending on the structure of the files it may be necessary to also add NNPATH, the path to the folder the trained NN is in, with ``-nnp PATH``.
 
 Additional options for MCTS, their default is already set according to best performance:  
 * "-p" or "--planFile" Plan will be printed into File with this name, will overwrite anything already in File and create new File if none with that name is present
@@ -54,4 +54,4 @@ Currently best config to start planning using the integrated NLG system:
 java -jar $PATH_TO_JAR $PATH_TO_DOMAIN $PATH_TO_PROBLEM -m 1000000 -t 1 -exp 10 -c NLG --level MEDIUM -e deadEnd -wf $PATH_TO_WEIGHT_FILE
  
  Alternatively, the best config to start planning using a trained NN is:
- ``java -jar $PATH_TO_JAR $PATH_TO_DOMAIN $PATH_TO_PROBLEM -m 1000000 -t 10000 -exp 10 -c NN --level MEDIUM -e deadEnd -wf $PATH_TO_WEIGHT_FILE -nnt CNN``
+ ``java -jar $PATH_TO_JAR $PATH_TO_DOMAIN $PATH_TO_PROBLEM -m 1000000 -t 10000 -exp 10 -c NN --level MEDIUM -e deadEnd -wf $PATH_TO_WEIGHT_FILE -nnt CNN -nnp NNPATH``
