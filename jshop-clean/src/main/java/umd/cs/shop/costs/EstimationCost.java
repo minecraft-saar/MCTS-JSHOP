@@ -32,7 +32,7 @@ public class EstimationCost extends NLGCost {
     Translator<Float[], Float> translator;
     Predictor<Float[], Float> predictor;
     DataParser parser;
-    Boolean useTarget = true;
+    Boolean useTarget = false;
     Boolean useStructures = false;
     int numChannels;
     NNType nnType;
@@ -90,7 +90,7 @@ public class EstimationCost extends NLGCost {
             numChannels = 5;
         } else if (useTarget && (nnType == NNType.CNN)) {
             numChannels = 2;
-        } else if (nnType == NNType.Simple) {
+        } else if (nnType == NNType.Simple || (nnType == NNType.CNN)) {
             numChannels = 1;
         } // TODO consider allowing more flexibility with these options, e.g. use structures but no use target...
 
