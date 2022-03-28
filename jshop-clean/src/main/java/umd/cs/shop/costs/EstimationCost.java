@@ -33,17 +33,24 @@ public class EstimationCost extends NLGCost {
     Predictor<Float[], Float> predictor;
     DataParser parser;
     Boolean useTarget = true;
-    Boolean useStructures = true;
+    Boolean useStructures = false;
     int numChannels;
+    NNType nnType;
 
     public BufferedWriter writerCost;
     Double diffCosts;
     Double avgDiffCosts;
     int countInstr;
 
-    public EstimationCost(CostFunction.InstructionLevel ins, String weightFile) {
+    public enum NNType {
+        Simple,
+        CNN
+    }
+
+    public EstimationCost(CostFunction.InstructionLevel ins, String weightFile, NNType nnType) {
         super(ins, weightFile);
         nlgSystem = MinecraftRealizer.createRealizer(); //
+        this.nnType = nnType;
         try {
             writerCost = new BufferedWriter(new FileWriter("cost_comparison.txt"));
         } catch (IOException e) {
@@ -81,10 +88,9 @@ public class EstimationCost extends NLGCost {
 
         if (useStructures) {
             numChannels = 5;
-        } else if (useTarget) {
+        } else if (useTarget && (nnType == NNType.CNN)) {
             numChannels = 2;
-//            numChannels = 1;
-        } else {
+        } else if (nnType == NNType.Simple) {
             numChannels = 1;
         } // TODO consider allowing more flexibility with these options, e.g. use structures but no use target...
 
@@ -334,9 +340,14 @@ public class EstimationCost extends NLGCost {
 
             // mark target blocks
             if (use_target) {
-                for (int[] indices : targetCoords) {
+                if (nnType == NNType.CNN) {
+                    for (int[] indices : targetCoords) {
                     worldMatrix[1][indices[0]][indices[1]][indices[2]] = 1F;
-//                    worldMatrix[0][indices[0]][indices[1]][indices[2]] = 0.5F;
+                    }
+                } else if (nnType == NNType.Simple) {
+                    for (int[] indices : targetCoords) {
+                        worldMatrix[0][indices[0]][indices[1]][indices[2]] = 0.5F;
+                    }
                 }
             }
 
