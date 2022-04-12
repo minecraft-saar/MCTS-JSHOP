@@ -21,7 +21,7 @@ public class NLGCost implements CostFunction {
     boolean weightsPresent;
     Double lowestCost;
     public FileWriter NNData;
-    public boolean writeNNData = false; // this was true before, just throws an error if I don't change it to false
+    public boolean writeNNData = true; // this was true before, just throws an error if I don't change it to false
     String model = "";
 
     public NLGCost(CostFunction.InstructionLevel ins, String weightFile) {
@@ -43,18 +43,6 @@ public class NLGCost implements CostFunction {
             weightsPresent = false;
         } else if (weightFile.equals("random")) {
             nlgSystem.randomizeExpectedDurations();
-            try {
-                String weightsString = nlgSystem.getWeightsAsJson();
-                File randomWeightsFile = new File("E:\\Bachelor_Arbeit\\jshop-cost-estimation\\jshop-clean\\r-weights.json");
-                randomWeightsFile.createNewFile(); // if file already exists will do nothing
-                FileWriter weightWriter = new FileWriter(randomWeightsFile);
-                weightWriter.write(weightsString);
-                weightWriter.flush();
-                weightWriter.close();
-            } catch (IOException e) {
-                e.printStackTrace();
-                System.out.println("An error occurred while writing random weights into a file");
-            }
         } else {
             weightsPresent = true;
             try {
@@ -65,6 +53,7 @@ public class NLGCost implements CostFunction {
                 throw new RuntimeException("could not read weights file: " + weightFile);
             }
         }
+        JSUtil.println(nlgSystem.getWeightsAsJson());
     }
 
     public void closeFile() {
@@ -162,6 +151,8 @@ public class NLGCost implements CostFunction {
         LinkedList<String> row = new LinkedList<>();
         LinkedList<String> floor = new LinkedList<>();
         LinkedList<String> railing = new LinkedList<>();
+        LinkedList<String> wall = new LinkedList<>();
+        LinkedList<String> staircase = new LinkedList<>();
         if (!(currentObject instanceof IntroductionMessage)) {
             if (currentObject instanceof Block) {
                 blocks.add("[\"" + currentObject + "\"]");
@@ -289,6 +280,12 @@ public class NLGCost implements CostFunction {
         }
         if (!railing.isEmpty()) {
             model = model + "\"railing\":" + railing + ",";
+        }
+        if (!wall.isEmpty()) {
+            model = model + "\"wall\":" + wall + ",";
+        }
+        if (!staircase.isEmpty()) {
+            model = model + "\"staircase\":" + staircase + ",";
         }
         model = model + "\"target\":[[\"" + currentObject.toString() + "\"]]}";
         //Pair<Set<MinecraftObject>, Set<MinecraftObject>> ret = new Pair<>(it, world);
