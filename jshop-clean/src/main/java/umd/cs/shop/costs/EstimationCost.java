@@ -37,10 +37,10 @@ public class EstimationCost extends NLGCost {
     int numChannels;
     NNType nnType;
 
-    public BufferedWriter writerCost;
-    Double diffCosts;
-    Double avgDiffCosts;
-    int countInstr;
+    public BufferedWriter writerCost; //
+    Double diffCosts; //
+    Double avgDiffCosts; //
+    int countInstr; //
 
     public enum NNType {
         Simple,
@@ -51,6 +51,7 @@ public class EstimationCost extends NLGCost {
         super(ins, weightFile);
         nlgSystem = MinecraftRealizer.createRealizer(); //
         this.nnType = nnType;
+        // TODO remove this when done with comparisons
         try {
             writerCost = new BufferedWriter(new FileWriter("cost_comparison.txt"));
         } catch (IOException e) {
@@ -390,7 +391,7 @@ public class EstimationCost extends NLGCost {
         }
 
         // NLG Model for comparision TODO comment out NLG stuff in init again when removing this
-        countInstr++;
+        countInstr++; //
         String currentObjectType = currentObject.getClass().getSimpleName().toLowerCase();
         boolean objectFirstOccurence = !knownObjects.contains(currentObjectType);
         if (objectFirstOccurence && weights != null) {
@@ -406,7 +407,7 @@ public class EstimationCost extends NLGCost {
         double returnValueNLG = nlgSystem.estimateCostForPlanningSystem(world, currentObject, it);
         long endTime = System.currentTimeMillis();
         System.out.printf("Duration getCost NLG: %d%n", (endTime - startTime));
-//        System.out.printf("Cost NLG: %f%n", returnValueNLG);
+        System.out.printf("Cost NLG: %f%n", returnValueNLG);
         try {
             writerCost.write("Cost NLG: " + returnValueNLG + '\n');
         } catch (IOException e) {
@@ -415,7 +416,7 @@ public class EstimationCost extends NLGCost {
 
         // call NN python script here
         //calling nlgsysstem for model:
-//        String model = nlgSystem.getModelforNN(world, currentObject, it); //
+//        String model = nlgSystem.getModelforNN(world, currentObject, it);
         //new way
         String model = this.model;  //
         System.out.println(model);
@@ -456,10 +457,10 @@ public class EstimationCost extends NLGCost {
 //        Process process = null;
         double returnValue = Double.POSITIVE_INFINITY;
         try { // TODO Quelle für diesen java code angeben!!! https://towardsdatascience.com/pytorch-model-in-deep-java-library-a9ca18d8ce51
-            startTime = System.currentTimeMillis();
+//            startTime = System.currentTimeMillis(); //
             returnValue = predictor.predict(flattenedInputDataNN);
-            endTime = System.currentTimeMillis();
-            System.out.printf("Duration getCost: %d%n", (endTime - startTime));
+//            endTime = System.currentTimeMillis(); //
+//            System.out.printf("Duration getCost: %d%n", (endTime - startTime)); //
             // inverse scaling TODO make sure to mention somewhere that these values need to be set according to what python script says
             double min = 2690.70126898D;
             double max = 128071.40159593D;
@@ -486,6 +487,7 @@ public class EstimationCost extends NLGCost {
 //        }
 
 //        System.out.printf("Cost NN: %f%n", returnValue);
+        // TODO remove this when done with comparisons
         try {
             writerCost.write("Cost NN: " + returnValue + '\n');
             writerCost.write("------------" + '\n');
