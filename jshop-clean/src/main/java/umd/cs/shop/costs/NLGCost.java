@@ -12,7 +12,6 @@ import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Paths;
 import java.util.*;
-import java.util.stream.Collectors;
 
 public class NLGCost implements CostFunction {
 
@@ -69,38 +68,22 @@ public class NLGCost implements CostFunction {
 
     @Override
     public Double getCost(JSTState state, JSOperator op, JSTaskAtom groundedOperator, boolean approx) {
-
-//<<<<<<< HEAD
-//        if (groundedOperator.get(0).equals("!place-block-hidden")) {
-//=======
         if (groundedOperator.get(0).equals("!place-block-hidden") ||
                 groundedOperator.get(0).equals("!remove-it-row") ||
                 groundedOperator.get(0).equals("!remove-it-railing") ||
                 groundedOperator.get(0).equals("!remove-it-stairs") ||
                 groundedOperator.get(0).equals("!remove-it-wall")) {
-//>>>>>>> origin/master
             return 0.0;
         }
         MinecraftObject currentObject = createCurrentMinecraftObject(groundedOperator);
         Set<String> knownObjects = new HashSet<>();
-//<<<<<<< HEAD
         Pair<Set<MinecraftObject>, Set<MinecraftObject>> pair = createWorldFromState(state, knownObjects, currentObject);
         Set<MinecraftObject> world = pair.getRight();
         Set<MinecraftObject> it = pair.getLeft();
-//        if (currentObject instanceof IntroductionMessage) {
-//            IntroductionMessage intro = (IntroductionMessage) currentObject;
-//            if (knownObjects.contains(intro.name)) {
-//                //make dead end
-//                return 30000.0;
-//=======
-//        Pair<Set<MinecraftObject>, Set<MinecraftObject>> pair = createWorldFromState(state, knownObjects);
-//        Set<MinecraftObject> world = pair.getRight();
-//        Set<MinecraftObject> it = pair.getLeft();
         if (currentObject instanceof IntroductionMessage intro) {
             if (knownObjects.contains(intro.name)) {
 //                //make unattractive
                 return 80000.0;
-//>>>>>>> origin/master
             } else {
                 return 0.000001;
             }
@@ -117,7 +100,6 @@ public class NLGCost implements CostFunction {
             }
         }
         double returnValue = nlgSystem.estimateCostForPlanningSystem(world, currentObject, it);
-//<<<<<<< HEAD
 
         if (writeNNData) {
             model = model.substring(0, model.length() - 1);
@@ -131,9 +113,6 @@ public class NLGCost implements CostFunction {
             }
         }
 
-
-//=======
-//>>>>>>> origin/master
         if (returnValue < 0.0) {
             if (returnValue < lowestCost) {
                 lowestCost = returnValue;
@@ -157,7 +136,6 @@ public class NLGCost implements CostFunction {
         return false;
     }
 
-//<<<<<<< HEAD
     public Pair<Set<MinecraftObject>, Set<MinecraftObject>> createWorldFromState(JSTState state, Set<String> knownObjects, MinecraftObject currentObject) {
         Set<MinecraftObject> world = new HashSet<>();
         Set<MinecraftObject> it = new HashSet<>();
@@ -166,21 +144,10 @@ public class NLGCost implements CostFunction {
         Pair<Boolean, Triple> itRailing = checkForIt(state, "it-railing");
         Pair<Boolean, Triple> itWall = checkForIt(state, "it-wall");
         Pair<Boolean, Triple> itRow = checkForIt(state, "it-row");
-//=======
-//    private Pair<Set<MinecraftObject>, Set<MinecraftObject>> createWorldFromState(JSTState state, Set<String> knownObjects) {
-//        Set<MinecraftObject> world = new HashSet<>();
-//        Set<MinecraftObject> it = new HashSet<>();
-//        JSTerm tmp;
-//        Pair<Boolean,Triple> itStairs = checkForIt(state, "it-staircase");
-//        Pair<Boolean,Triple> itRailing = checkForIt(state, "it-railing");
-//        Pair<Boolean,Triple> itWall = checkForIt(state, "it-wall");
-//        Pair<Boolean,Triple> itRow = checkForIt(state, "it-row");
-//>>>>>>> origin/master
         boolean foundItStairs = !itStairs.left;
         boolean foundItRailing = !itRailing.left;
         boolean foundItWall = !itWall.left;
         boolean foundItRow = !itRow.left;
-//<<<<<<< HEAD
         LinkedList<String> blocks = new LinkedList<>();
         LinkedList<String> row = new LinkedList<>();
         LinkedList<String> floor = new LinkedList<>();
@@ -198,9 +165,6 @@ public class NLGCost implements CostFunction {
                 row.add("[\"" + currentObject + "\"]");
             }
         }
-
-//=======
-//>>>>>>> origin/master
         for (JSPredicateForm term : state.state().atoms()) {
             String name = (String) term.elementAt(0);
             MinecraftObject mco;
@@ -231,10 +195,7 @@ public class NLGCost implements CostFunction {
                         mco = new UniqueBlock(type, x, y, z);
                         world.add(mco);
                     }
-//<<<<<<< HEAD
                     blocks.add("[\"" + mco + "\"]");
-//=======
-//>>>>>>> origin/master
                 }
                 case "last-placed" -> {
                     tmp = (JSTerm) term.elementAt(1);
@@ -254,15 +215,9 @@ public class NLGCost implements CostFunction {
                     mco = createWall(term);
                     world.add(mco);
                     knownObjects.add(mco.getClass().getSimpleName().toLowerCase());
-//<<<<<<< HEAD
                     if (itWall.left) {
                         Triple wallCoord = parseCoordinates(term);
                         if (wallCoord.equals(itWall.right)) {
-//=======
-//                    if(itWall.left){
-//                        Triple wallCoord = parseCoordinates(term);
-//                        if (wallCoord.equals(itWall.right)){
-//>>>>>>> origin/master
                             it.add(mco);
                             foundItWall = true;
                         }
@@ -272,16 +227,10 @@ public class NLGCost implements CostFunction {
                     mco = createRow(term);
                     world.add(mco);
                     knownObjects.add(mco.getClass().getSimpleName().toLowerCase());
-//<<<<<<< HEAD
                     row.add("[\"" + mco + "\"]");
                     if (itRow.left) {
                         Triple rowCoord = parseCoordinates(term);
                         if (rowCoord.equals(itRow.right)) {
-//=======
-//                    if(itRow.left){
-//                        Triple rowCoord = parseCoordinates(term);
-//                        if (rowCoord.equals(itRow.right)){
-//>>>>>>> origin/master
                             it.add(mco);
                             foundItRow = true;
                         }
@@ -291,16 +240,10 @@ public class NLGCost implements CostFunction {
                     mco = createRailing(term);
                     world.add(mco);
                     knownObjects.add(mco.getClass().getSimpleName().toLowerCase());
-//<<<<<<< HEAD
                     railing.add("[\"" + mco + "\"]");
                     if (itRailing.left) {
                         Triple railingCoord = parseCoordinates(term);
                         if (railingCoord.equals(itRailing.right)) {
-//=======
-//                    if(itRailing.left){
-//                        Triple railingCoord = parseCoordinates(term);
-//                        if (railingCoord.equals(itRailing.right)){
-//>>>>>>> origin/master
                             it.add(mco);
                             foundItRailing = true;
                         }
@@ -311,24 +254,15 @@ public class NLGCost implements CostFunction {
                     world.add(mco);
                     it.add(mco); //Floor is a special case right now, because we can only have one the it never changes
                     knownObjects.add(mco.getClass().getSimpleName().toLowerCase());
-//<<<<<<< HEAD
                     floor.add("[\"" + mco + "\"]");
-//=======
-//>>>>>>> origin/master
                 }
                 case "stairs-at" -> {
                     mco = createStairs(term);
                     world.add(mco);
                     knownObjects.add(mco.getClass().getSimpleName().toLowerCase());
-//<<<<<<< HEAD
                     if (itStairs.left) {
                         Triple stairsCoord = parseCoordinates(term);
                         if (stairsCoord.equals(itStairs.right)) {
-//=======
-//                    if(itStairs.left){
-//                        Triple stairsCoord = parseCoordinates(term);
-//                        if (stairsCoord.equals(itStairs.right)){
-//>>>>>>> origin/master
                             it.add(mco);
                             foundItStairs = true;
                         }
@@ -355,12 +289,7 @@ public class NLGCost implements CostFunction {
             model = model + "\"staircase\":" + staircase + ",";
         }
         model = model + "\"target\":[[\"" + currentObject.toString() + "\"]]}";
-        //Pair<Set<MinecraftObject>, Set<MinecraftObject>> ret = new Pair<>(it, world);
         if (!foundItWall || !foundItRailing || !foundItRow || !foundItStairs) {
-//=======
-        //Pair<Set<MinecraftObject>, Set<MinecraftObject>> ret = new Pair<>(it, world);
-//        if(!foundItWall || !foundItRailing || !foundItRow || !foundItStairs){
-//>>>>>>> origin/master
             JSUtil.println("could not find an it-object");
             System.exit(-1);
         }
@@ -542,13 +471,8 @@ public class NLGCost implements CostFunction {
         return new Wall("wall", x1, y1, z1, x2, y2, z2);
     }
 
-//<<<<<<< HEAD
-//    public MinecraftObject createCurrentMinecraftObject(JSOperator op, JSTaskAtom groundedOperator) {
-//        MinecraftObject result = null;
-//=======
-    public MinecraftObject createCurrentMinecraftObject(JSTaskAtom groundedOperator) { // private
-        //MinecraftObject result = null;
-//>>>>>>> origin/master
+
+    public MinecraftObject createCurrentMinecraftObject(JSTaskAtom groundedOperator) {
         int x1, y1, z1; // , x2, y2, z2, length, width, height, dir;
         String operator_name = groundedOperator.get(0).toString();
 
@@ -610,11 +534,7 @@ public class NLGCost implements CostFunction {
         };
     }
 
-//<<<<<<< HEAD
     Triple parseCoordinates(JSPredicateForm term) {
-//=======
-//    Triple parseCoordinates(JSPredicateForm term){
-//>>>>>>> origin/master
         JSTerm tmp;
         tmp = (JSTerm) term.elementAt(1);
         int x = (int) Double.parseDouble(tmp.toStr().toString());
@@ -622,7 +542,6 @@ public class NLGCost implements CostFunction {
         int y = (int) Double.parseDouble(tmp.toStr().toString());
         tmp = (JSTerm) term.elementAt(3);
         int z = (int) Double.parseDouble(tmp.toStr().toString());
-//<<<<<<< HEAD
         return new Triple(x, y, z);
     }
 
@@ -633,18 +552,6 @@ public class NLGCost implements CostFunction {
         } else {
             Triple coord = parseCoordinates(itList.get(0));
             if (coord.x == 100) {
-//=======
-//         return new Triple(x, y, z);
-//    }
-//
-//    Pair<Boolean,Triple> checkForIt(JSTState state, String itName){
-//        List<JSPredicateForm> itList = state.state().atoms().stream().filter(term -> (term.elementAt(0)).equals(itName)).toList();
-//        if(itList.isEmpty()){
-//            return new Pair<>(false, new Triple(100, 100, 100));
-//        } else {
-//            Triple coord =  parseCoordinates(itList.get(0));
-//            if(coord.x == 100){
-//>>>>>>> origin/master
                 return new Pair<>(false, coord);
             } else {
                 return new Pair<>(true, coord);
