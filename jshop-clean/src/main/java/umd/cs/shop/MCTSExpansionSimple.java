@@ -52,6 +52,7 @@ public class MCTSExpansionSimple implements MCTSExpand{
                 if (red.isDummy()) {
                     assert (!node.taskNetwork().predicates.isEmpty());
                     node.plan.assignFailure();
+                    //JSUtil.println("In MCTSAlgorithm DeadEnd with task: " + t);
                     node.setDeadEnd(vars);
                     return children;
                 }
@@ -87,15 +88,14 @@ public class MCTSExpansionSimple implements MCTSExpand{
         JSPlan ans;
         JSTaskAtom t = (JSTaskAtom) node.taskNetwork().predicates.firstElement();
         JSTasks rest = node.taskNetwork().cdr();
-
         Vector<MCTSNode> children = new Vector<>();
         if (t.isPrimitive()) {
             //task is primitive, so find applicable operators
             pair = t.seekSimplePlanCostFunction(node.tState(),vars);
             ans = pair.plan();
             if (ans.isFailure()) {
+                JSUtil.println("Deadend with task: " + t);
                 node.plan.assignFailure();
-                //JSUtil.println("New dead end at depth: " + depth);
                 node.setDeadEnd(vars);
                 return true;
             }

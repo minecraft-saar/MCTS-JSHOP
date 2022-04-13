@@ -376,7 +376,7 @@ public class EstimationCost extends NLGCost {
                 groundedOperator.get(0).equals("!remove-it-wall")) {
             return 0.0;
         }
-        MinecraftObject currentObject = createCurrentMinecraftObject(op, groundedOperator);
+        MinecraftObject currentObject = createCurrentMinecraftObject(groundedOperator);  // op, groundedOperator
         Set<String> knownObjects = new HashSet<>();
         Pair<Set<MinecraftObject>, Set<MinecraftObject>> pair = createWorldFromState(state, knownObjects, currentObject);
         Set<MinecraftObject> world = pair.getRight(); //

@@ -26,9 +26,6 @@ import umd.cs.shop.costs.NLGCost;
 // last problem for the last domain.
 
 public final class JSJshop implements Runnable {
-    /*HICAP*//*==== class variables ====*/
-    // /*HICAP*/public static boolean corbaToHicap = false;
-    // /*HICAP*/public static JApplet applet;-b
 
     @Parameters(index = "0", description = "The domain file")
     String nameDomainFile;
@@ -281,7 +278,7 @@ public final class JSJshop implements Runnable {
 
         for (int k = 0; k < probSet.size(); k++) {
 
-            prob = (JSPlanningProblem) probSet.elementAt(k);
+            prob = probSet.elementAt(k);
             JSUtil.println("Solving Problem :" + prob.Name());
             allPlans = vars.domain.solveAll(prob, vars.allPlans, vars);
             final long totalTime = System.currentTimeMillis();
@@ -294,7 +291,7 @@ public final class JSJshop implements Runnable {
                 JSUtil.println("0 plans found");
             } else {
                 // Return the first solution to HICAP
-                solution = (JSPairPlanTSListNodes) allPlans.elementAt(0);
+                solution = allPlans.elementAt(0);
                 sol = solution.planS().plan();
                 //solution.print();
                 JSUtil.println(allPlans.size() + " plans found.");
@@ -304,7 +301,7 @@ public final class JSJshop implements Runnable {
                     JSUtil.println("********* PLANS *******");
                     for (int i = 0; i < allPlans.size(); i++) {
                         //JSUtil.println("Plan # " + (i + 1));
-                        pair = (JSPairPlanTSListNodes) allPlans.elementAt(i);
+                        pair = allPlans.elementAt(i);
                         double planCost = pair.planS().plan().planCost();
                         JSUtil.println("Plan cost: " + planCost);
                         if (bestPlanValue.compareTo(planCost) > 0) {
@@ -517,21 +514,19 @@ public final class JSJshop implements Runnable {
             return true;
         }
 
-        public boolean parserFile (String libraryFile){
+        public boolean parserFile (String fileName){
             String libraryDirectory = ".";
-
             try {
-                FileReader fr = new FileReader(libraryFile);
+                FileReader fr = new FileReader(fileName);
                 StreamTokenizer tokenizer = new StreamTokenizer(fr);
                 tokenizer.lowerCaseMode(true);
                 JSUtil.initParseTable(tokenizer);
-                if (fr == null) {
-                    JSUtil.println("Can not open file : " + libraryFile);
-                    return false;
-                }
                 while (tokenizer.nextToken() != StreamTokenizer.TT_EOF)
                     processToken(tokenizer);
                 fr.close();
+            }catch (FileNotFoundException exp){
+                JSUtil.println("Can not open file : " + fileName);
+                return false;
             } catch (IOException e) {
                 System.out.println("Error in readFile() : " + e);
                 return false;
@@ -660,9 +655,7 @@ public final class JSJshop implements Runnable {
             return sol;
         }
 
-        public JSJshopNode tree () {
-            return tree;
-        }
+        // public JSJshopNode tree () { return tree;}
 
 
     }

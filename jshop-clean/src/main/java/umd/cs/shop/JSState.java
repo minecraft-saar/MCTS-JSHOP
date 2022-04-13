@@ -1,6 +1,8 @@
 package umd.cs.shop;
 
 
+import umd.cs.shop.costs.NLGCost;
+
 import java.io.*;
 import java.util.HashSet;
 import java.util.Set;
@@ -11,6 +13,7 @@ public class JSState {
     Set<JSPredicateForm> atoms;
     public boolean wallBuilt = false;
     public boolean railingBuilt = false;
+    public boolean stairsBuilt = false;
     // This is a Vector over JSPredicateForm (call terms count as JSPredicateForm but should not end up in the state)
     public Set<JSTaskLandmark> taskLandmarks;
     Set<JSFactLandmark> factLandmarks;
@@ -115,21 +118,21 @@ public class JSState {
         } */
         //  JSUtil.flagPlanning("<-- ndelete list");
         JSState ns;
-        if(vars.landmarks)
+        if (vars.landmarks)
             ns = new JSState(this.atoms, this.factLandmarks, this.taskLandmarks);
         else
             ns = new JSState(this.atoms);
 
-        for (JSPredicateForm pred : opDelL.predicates){
+        for (JSPredicateForm pred : opDelL.predicates) {
             ns.atoms.remove(pred);
-            if(vars.landmarks)
+            if (vars.landmarks)
                 ns.factLandmarks.removeIf(landmark -> landmark.compare(pred, false));
         }
 
 
         for (JSPredicateForm pred : opAddL.predicates) {
             ns.atoms.add(pred);
-            if(vars.landmarks)
+            if (vars.landmarks)
                 ns.factLandmarks.removeIf(landmark -> landmark.compare(pred, true));
         }
 
@@ -140,14 +143,16 @@ public class JSState {
             if (!opDelL.predicates.contains(el)) {
                 nAddL.predicates.addElement(el);
             }
-            if(vars.landmarks) {
+            if (vars.landmarks) {
                 JSPredicateForm pred = addL.predicates.elementAt(i);
                 ns.factLandmarks.removeIf(landmark -> landmark.compare(pred, true));
             }
 
         }
         nAddL.addElements(opAddL);
-        ns.updateBoolFlags(this, add);
+        if(! (vars.costFunction instanceof NLGCost)){
+            ns.updateBoolFlags(this, add);
+        }
 
 
         for (short i = 0; i < delL.predicates.size(); i++)//creates a new del list
@@ -156,7 +161,7 @@ public class JSState {
             if (!opAddL.predicates.contains(el)) {
                 nDelL.predicates.addElement(el);
             }
-            if(vars.landmarks) {
+            if (vars.landmarks) {
                 JSPredicateForm pred = (JSPredicateForm) delL.predicates.elementAt(i);
                 ns.factLandmarks.removeIf(landmark -> landmark.compare(pred, false));
             }
@@ -172,24 +177,38 @@ public class JSState {
 
     }
 
-    public void updateBoolFlags(JSState oldState, JSListLogicalAtoms addList){
-        if(oldState.wallBuilt){
-            this.wallBuilt = true;
-        } else if (oldState.railingBuilt) {
-            this.railingBuilt = true;
-        } else {
+    public void updateBoolFlags(JSState oldState, JSListLogicalAtoms addList) {
+        this.wallBuilt = oldState.wallBuilt;
+        this.railingBuilt = oldState.railingBuilt;
+        this.stairsBuilt = oldState.stairsBuilt;
+        boolean alltrue = railingBuilt && stairsBuilt && wallBuilt;
+        if (!alltrue) {
             for (int i = 0; i < addList.predicates.size(); i++) {
                 JSPredicateForm pred = (JSPredicateForm) addList.predicates.elementAt(i);
                 if (pred.elementAt(0).equals("wall-at")) {
                     this.wallBuilt = true;
-                    break;
+                    alltrue = railingBuilt && stairsBuilt && wallBuilt;
+                    if (alltrue) {
+                        break;
+                    }
                 }
                 if (pred.elementAt(0).equals("railing-at")) {
                     this.railingBuilt = true;
-                    break;
+                    alltrue = railingBuilt && stairsBuilt && wallBuilt;
+                    if (alltrue) {
+                        break;
+                    }
+                }
+                if (pred.elementAt(0).equals("stairs-at")) {
+                    this.stairsBuilt = true;
+                    alltrue = railingBuilt && stairsBuilt && wallBuilt;
+                    if (alltrue) {
+                        break;
+                    }
                 }
             }
         }
+
     }
 
     public JSSubstitution satisfies(JSListLogicalAtoms conds, JSSubstitution alpha,
@@ -284,12 +303,12 @@ public class JSState {
         return answers;
     }
 
-    public Set<JSPredicateForm> atoms(){
+    public Set<JSPredicateForm> atoms() {
         return this.atoms;
     }
 
-    public void print(){
-        for(JSPredicateForm pred : this.atoms){
+    public void print() {
+        for (JSPredicateForm pred : this.atoms) {
             pred.print();
         }
     }
