@@ -42,3 +42,4 @@ weights-time.json
 # intellij output
 jshop-clean/output.txt
 jshop-clean/cost_comparison.txt
+jshop-clean/NN-data-random.json

@@ -163,6 +163,10 @@ public class NLGCost implements CostFunction {
                 floor.add("[\"" + currentObject + "\"]");
             } else if (currentObject instanceof Row) {
                 row.add("[\"" + currentObject + "\"]");
+            } else if (currentObject instanceof Stairs) {
+                staircase.add("[\"" + currentObject + "\"]");
+            } else if (currentObject instanceof Wall) {
+                wall.add("[\"" + currentObject + "\"]");
             }
         }
         for (JSPredicateForm term : state.state().atoms()) {
@@ -215,6 +219,7 @@ public class NLGCost implements CostFunction {
                     mco = createWall(term);
                     world.add(mco);
                     knownObjects.add(mco.getClass().getSimpleName().toLowerCase());
+                    wall.add("[\"" + mco + "\"]");
                     if (itWall.left) {
                         Triple wallCoord = parseCoordinates(term);
                         if (wallCoord.equals(itWall.right)) {
@@ -260,6 +265,7 @@ public class NLGCost implements CostFunction {
                     mco = createStairs(term);
                     world.add(mco);
                     knownObjects.add(mco.getClass().getSimpleName().toLowerCase());
+                    staircase.add("[\"" + mco + "\"]");
                     if (itStairs.left) {
                         Triple stairsCoord = parseCoordinates(term);
                         if (stairsCoord.equals(itStairs.right)) {
