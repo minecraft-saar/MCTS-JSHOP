@@ -10,8 +10,6 @@ import umd.cs.shop.*;
 
 import java.io.*;
 import java.util.*;
-import java.util.regex.Matcher;
-import java.util.regex.Pattern;
 
 import ai.djl.*;
 import ai.djl.inference.*;
@@ -57,6 +55,7 @@ public class EstimationCost extends NLGCost {
         } catch (IOException e) {
             e.printStackTrace();
         }
+
         Path nnDir = Paths.get(nnPath);
         nn = Model.newInstance("trained_model.zip");
         try {
@@ -217,7 +216,6 @@ public class EstimationCost extends NLGCost {
                 JSONArray blockInBrackets = (JSONArray) blocks.get(i);
                 String block = (String) blockInBrackets.get(0);
                 String[] splitBlock = block.split("-");
-//                System.out.println(splitBlock[0]);
                 int[] coords = new int[3];
                 int[] refCoords = new int[6]; // 1st block index 0-2, 2nd block index 3-5
                 switch (splitBlock[0]) {
@@ -255,8 +253,6 @@ public class EstimationCost extends NLGCost {
                         break;
                     case "row": // TODO probably untested; does not ignore colored blocks since python version doesn't either
                         // reference blocks
-                        System.out.println("Row: ----------");
-                        System.out.println(splitBlock[0]);
                         for (int j = 1; j < 4; j++) {
                             refCoords[j - 1] = Integer.parseInt(splitBlock[j]) - dimMin[j - 1];
                             refCoords[j + 3 - 1] = Integer.parseInt(splitBlock[j + 3]) - dimMin[j - 1];
@@ -265,15 +261,12 @@ public class EstimationCost extends NLGCost {
                         // blocks in between
                         for (int x = refCoords[0]; x < (refCoords[3] + 1); x++) {
                             coordinates.add(new int[]{x, refCoords[1], refCoords[2]});
-                            System.out.println(Arrays.toString(new int[]{x, refCoords[1], refCoords[2]}));
                         }
-                        System.out.println("----------");
                         break;
                     case "Block":
                         for (int j = 1; j < 4; j++) {
                             coords[j - 1] = Integer.parseInt(splitBlock[j]) - dimMin[j - 1];
                         }
-//                    System.out.println(Arrays.toString(coords));
                         coordinates.add(coords);
                         break;
                     case "row-railing": // TODO maybe find another way to deal with this, like changing the data format
@@ -403,6 +396,8 @@ public class EstimationCost extends NLGCost {
                         false);
             }
         }
+        world.addAll(currentObject.getChildren());
+        world.add(currentObject);
         long startTime = System.currentTimeMillis();
         double returnValueNLG = nlgSystem.estimateCostForPlanningSystem(world, currentObject, it);
         long endTime = System.currentTimeMillis();
@@ -414,10 +409,7 @@ public class EstimationCost extends NLGCost {
             e.printStackTrace();
         }
 
-        // call NN python script here
-        //calling nlgsysstem for model:
-//        String model = nlgSystem.getModelforNN(world, currentObject, it);
-        //new way
+        // model
         String model = this.model;  //
         System.out.println(model);
 
@@ -426,15 +418,7 @@ public class EstimationCost extends NLGCost {
         parser.convertIntoVector();
         float[][][][] inputDataNN = parser.getMatrix();
 
-        // prepare world state representation for python argparse TODO remove this eventually
-        Pattern pattern = Pattern.compile("(\"[a-zA-Z_\\-\\d]+)(\")");
-        Matcher matcher = pattern.matcher(model);
-        model = matcher.replaceAll("\\\\$1\\\\$2");
-        model = "[" + model + "]";
-//        System.out.println(model);
-
         // flatten world state matrix in preparation for NDArray
-        // TODO check if all of this works as intended together with translator
         Float[] flattenedInputDataNN = new Float[numChannels * 5 * 3 * 3];
         int currIdx = 0;
         for (float[][][] l1 : inputDataNN) {
@@ -447,14 +431,7 @@ public class EstimationCost extends NLGCost {
                 }
             }
         }
-//        System.out.println(Arrays.toString(flattenedInputDataNN));
 
-        // I guess ProcessBuilder init input can be understood as the line you would put into the command line
-        // TODO the stuff below has not been updated for the new parser args, probably unnecessary anyway
-//        ProcessBuilder pb = new ProcessBuilder("python", "../../cost-estimation/nn/main.py", "-c", "-d " + model, "-l");
-//        pb.directory(new File("../../cost-estimation/nn"));
-//        pb.redirectErrorStream(true);
-//        Process process = null;
         double returnValue = Double.POSITIVE_INFINITY;
         try { // TODO Quelle für diesen java code angeben!!! https://towardsdatascience.com/pytorch-model-in-deep-java-library-a9ca18d8ce51
 //            startTime = System.currentTimeMillis(); //
@@ -471,20 +448,6 @@ public class EstimationCost extends NLGCost {
             System.out.println("An error occurred while estimating the costs using the NN.");
             e.printStackTrace();
         }
-//        try {
-//            process = pb.start();
-//            BufferedReader in = new BufferedReader(new InputStreamReader(process.getInputStream()));
-//            String ret;
-//            while ((ret = in.readLine()) != null) {
-//                System.out.println(ret);
-//                returnValue = Double.parseDouble(ret);
-//            }
-//            int exitCode = process.waitFor();
-//        } catch (IOException e) {
-//            e.printStackTrace();
-//        } catch (InterruptedException e) {
-//            e.printStackTrace();
-//        }
 
 //        System.out.printf("Cost NN: %f%n", returnValue);
         // TODO remove this when done with comparisons
@@ -494,6 +457,8 @@ public class EstimationCost extends NLGCost {
         } catch (IOException e) {
             e.printStackTrace();
         }
+        System.out.println(returnValue);
+        System.out.println(returnValueNLG);
         diffCosts += Math.abs(returnValue - returnValueNLG);
         avgDiffCosts = diffCosts / countInstr;
         System.out.println("AVG COST DIFF: " + avgDiffCosts);
