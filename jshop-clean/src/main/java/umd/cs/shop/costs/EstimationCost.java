@@ -30,7 +30,7 @@ public class EstimationCost extends NLGCost {
     Translator<Float[], Float> translator;
     Predictor<Float[], Float> predictor;
     DataParser parser;
-    Boolean useTarget = false;
+    Boolean useTarget = true;
     Boolean useStructures = false;
     int numChannels;
     NNType nnType;
@@ -140,7 +140,8 @@ public class EstimationCost extends NLGCost {
 
         public DataParser(Boolean use_target, Boolean use_structures, int numChannels) {
             this.parser = new JSONParser();
-            this.dim = new int[]{5, 3, 3};  // TODO make dimensions more flexible through argument in init
+//            this.dim = new int[]{5, 3, 3};  // TODO make dimensions more flexible through argument in init
+            this.dim = new int[]{8, 70, 14};
             this.dimMin = new int[]{6, 66, 6};
             this.use_target = use_target;
             this.use_structures = use_structures;
@@ -251,6 +252,58 @@ public class EstimationCost extends NLGCost {
                         coordinates.remove(0);
                         coordinates.remove(coordinates.size() - 1);
                         break;
+                        // TODO all of the below is untested
+                    /*case "Stairs":
+                        System.out.println(splitBlock);
+                        int[] refCoordsStairs = new int[18];
+
+                        // read reference blocks into list and normalize
+                        for (int j = 3; j < 6; j++) {  // TODO can probably do this more elegantly
+                            // row
+                            refCoordsStairs[j - 3] = Integer.parseInt(splitBlock[j]) - dimMin[j - 3];
+                            refCoordsStairs[j + 3 - 3] = Integer.parseInt(splitBlock[j + 3]) - dimMin[j - 3];
+                            // lower wall
+                            refCoordsStairs[j + 6 - 3] = Integer.parseInt(splitBlock[j + 8]) - dimMin[j - 3];
+                            refCoordsStairs[j + 9 - 3] = Integer.parseInt(splitBlock[j + 11]) - dimMin[j - 3];
+                            // higher wall
+                            refCoordsStairs[j + 12 - 3] = Integer.parseInt(splitBlock[j + 16]) - dimMin[j - 3];
+                            refCoordsStairs[j + 15 - 3] = Integer.parseInt(splitBlock[j + 19]) - dimMin[j - 3];
+                        }
+                        System.out.println(refCoordsStairs);
+
+                        // calculate blocks
+                        for (int n = refCoordsStairs[0]; n < refCoordsStairs[3] + 1; n++) { // row
+                            coordinates.add(new int[]{n, refCoordsStairs[1], refCoordsStairs[2]});
+                        }
+                        for (int x = refCoordsStairs[6]; x < refCoordsStairs[9] + 1; x++) { // lower wall
+                            for (int y = refCoordsStairs[7]; y < refCoordsStairs[10] + 1; y++) {
+                                coordinates.add(new int[]{x, y, refCoordsStairs[8]});
+                            }
+                        }
+                        for (int x = refCoordsStairs[12]; x < refCoordsStairs[15] + 1; x++) { // higher wall
+                            for (int y = refCoordsStairs[13]; y < refCoordsStairs[16] + 1; y++) {
+                                coordinates.add(new int[]{x, y, refCoordsStairs[14]});
+                            }
+                        }
+                        System.out.println(coordinates);
+                        break;
+                    case "wall":
+                        System.out.println(splitBlock);
+                        // get reference blocks
+                        for (int j = 1; j < 4; j++) {
+                            refCoords[j - 1] = Integer.parseInt(splitBlock[j]) - dimMin[j - 1];
+                            refCoords[j + 3 - 1] = Integer.parseInt(splitBlock[j + 3]) - dimMin[j - 1];
+                        }
+                        System.out.println(refCoords);
+
+                        // blocks in between
+                        for (int x = refCoords[0]; x < (refCoords[3] + 1); x++) {
+                            for (int y = refCoords[1]; y < (refCoords[4] + 1); y++) {
+                                coordinates.add(new int[]{x, y, refCoords[2]});
+                            }
+                        }
+                        System.out.println(coordinates);
+                        break;*/
                     case "row": // TODO probably untested; does not ignore colored blocks since python version doesn't either
                         // reference blocks
                         for (int j = 1; j < 4; j++) {
@@ -433,7 +486,7 @@ public class EstimationCost extends NLGCost {
         }
 
         double returnValue = Double.POSITIVE_INFINITY;
-        try { // TODO Quelle für diesen java code angeben!!! https://towardsdatascience.com/pytorch-model-in-deep-java-library-a9ca18d8ce51
+        try {
 //            startTime = System.currentTimeMillis(); //
             returnValue = predictor.predict(flattenedInputDataNN);
 //            endTime = System.currentTimeMillis(); //
