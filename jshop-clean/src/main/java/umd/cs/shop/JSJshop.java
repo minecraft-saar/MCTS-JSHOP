@@ -115,6 +115,15 @@ public final class JSJshop implements Runnable {
     @Option(names = {"-nnp", "--nnPath"}, defaultValue = "../../cost-estimation/nn/", description = "Path to the folder the trained NNs are in")
     String nnPath;
 
+    @Option(names = {"-cmp", "--compare"}, defaultValue = "false", description = "Whether to compare results between NN and NLG system during an NN run")
+    boolean compare;
+
+    @Option(names = {"-tar", "--useTarget"}, defaultValue = "false", description = "Whether to use information of the current target for cost estimation (only for NNs)")
+    boolean useTarget;
+
+    @Option(names = {"-str", "--useStructures"}, defaultValue = "false", description = "Whether to use information of existing structures for cost estimation (only for NNs)")
+    boolean useStructures;
+
     @Override
     public void run() {
         /*JSPlan plan = nlgSearch(mctsruns, timeout);
@@ -141,7 +150,7 @@ public final class JSJshop implements Runnable {
         if (level == CostFunction.InstructionLevel.NONE)
             variables.costFunction = CostFunction.getCostFunction(costFunctionName, variables.domain.getName());
         else
-            variables.costFunction = CostFunction.getCostFunction(costFunctionName, variables.domain.getName(), level, weightsFile, nnType, nnPath);
+            variables.costFunction = CostFunction.getCostFunction(costFunctionName, variables.domain.getName(), level, weightsFile, nnType, nnPath, compare, useTarget, useStructures);
 
         if (landmarks) {
             JSUtil.println("Starting landmark parsing");
@@ -370,7 +379,7 @@ public final class JSJshop implements Runnable {
             this.bbPruningFast = true;
             this.recursiveSimulationBudget = 0;
             this.weightsFile = "";
-            vars.costFunction = CostFunction.getCostFunction(CostFunction.CostFunctionType.STATEDEPENDENT, "house", level, weightsFile, nnType, nnPath);
+            vars.costFunction = CostFunction.getCostFunction(CostFunction.CostFunctionType.STATEDEPENDENT, "house", level, weightsFile, nnType, nnPath, compare, useTarget, useStructures);
 
             mctsSearch(vars);
             if (!vars.planFound) {

@@ -25,16 +25,18 @@ import org.json.simple.parser.ParseException;
 
 public class EstimationCost extends NLGCost {
 
-    MinecraftRealizer nlgSystem; //
     Model nn;
     Translator<Float[], Float> translator;
     Predictor<Float[], Float> predictor;
     DataParser parser;
-    Boolean useTarget = true;
-    Boolean useStructures = false;
+    boolean useTarget;
+    boolean useStructures;
     int numChannels;
     NNType nnType;
 
+    // things needed for cost comparison
+    boolean compare;
+    MinecraftRealizer nlgSystem; //
     public BufferedWriter writerCost; //
     Double diffCosts; //
     Double avgDiffCosts; //
@@ -45,19 +47,15 @@ public class EstimationCost extends NLGCost {
         CNN
     }
 
-    public EstimationCost(CostFunction.InstructionLevel ins, String weightFile, NNType nnType, String nnPath) {
+    public EstimationCost(CostFunction.InstructionLevel ins, String weightFile, NNType nnType, String nnPath, boolean compare, boolean useTarget, boolean useStructures) {
         super(ins, weightFile);
-        nlgSystem = MinecraftRealizer.createRealizer(); //
         this.nnType = nnType;
-        // TODO remove this when done with comparisons
-        try {
-            writerCost = new BufferedWriter(new FileWriter("cost_comparison.txt"));
-        } catch (IOException e) {
-            e.printStackTrace();
-        }
+        this.compare = compare;
+        this.useTarget = useTarget;
+        this.useStructures = useStructures;
 
-        Path nnDir = Paths.get(nnPath);
         nn = Model.newInstance("trained_model.zip");
+        Path nnDir = Paths.get(nnPath);
         try {
             nn.load(nnDir);
         } catch (IOException e) {
@@ -66,23 +64,31 @@ public class EstimationCost extends NLGCost {
             e.printStackTrace();
         }
 
-        // TODO remove this when done with comparisons
-        lowestCost = 10.0;
-        if (weightFile.equals("")) {
-            weightsPresent = false;
-        } else {
-            weightsPresent = true;
+        if (this.compare) {
+            nlgSystem = MinecraftRealizer.createRealizer(); //
             try {
-                weights = WeightEstimator.WeightResult.fromJson(
-                        Files.readString(Paths.get(weightFile)));
-                nlgSystem.setExpectedDurations(weights.weights, false);
+                writerCost = new BufferedWriter(new FileWriter("cost_comparison.txt"));
             } catch (IOException e) {
-                throw new RuntimeException("could not read weights file: " + weightFile);
+                e.printStackTrace();
             }
+
+            lowestCost = 10.0;
+            if (weightFile.equals("")) {
+                weightsPresent = false;
+            } else {
+                weightsPresent = true;
+                try {
+                    weights = WeightEstimator.WeightResult.fromJson(
+                            Files.readString(Paths.get(weightFile)));
+                    nlgSystem.setExpectedDurations(weights.weights, false);
+                } catch (IOException e) {
+                    throw new RuntimeException("could not read weights file: " + weightFile);
+                }
+            }
+            diffCosts = 0D;
+            avgDiffCosts = 0D;
+            countInstr = 0;
         }
-        diffCosts = 0D;
-        avgDiffCosts = 0D;
-        countInstr = 0;
 
         if (useStructures) {
             numChannels = 5;
@@ -94,11 +100,11 @@ public class EstimationCost extends NLGCost {
 
         parser = new DataParser(useTarget, useStructures, numChannels);
 
+        // modeled after: https://docs.djl.ai/jupyter/load_pytorch_model.html
         translator = new Translator<Float[], Float>() {
             @Override
             public NDList processInput(TranslatorContext ctx, Float[] input) {
                 NDManager manager = ctx.getNDManager();
-//                NDArray array = manager.create(new float[] {input});
                 Shape shape = new Shape(numChannels, 5, 3, 3);
                 float[] primitiveFloatArr = new float[input.length];
                 for (int i = 0; i < input.length; i++) {
@@ -140,8 +146,8 @@ public class EstimationCost extends NLGCost {
 
         public DataParser(Boolean use_target, Boolean use_structures, int numChannels) {
             this.parser = new JSONParser();
-//            this.dim = new int[]{5, 3, 3};  // TODO make dimensions more flexible through argument in init
-            this.dim = new int[]{8, 70, 14};
+            this.dim = new int[]{5, 3, 3};  // TODO make dimensions more flexible through argument in init
+//            this.dim = new int[]{8, 70, 14};
             this.dimMin = new int[]{6, 66, 6};
             this.use_target = use_target;
             this.use_structures = use_structures;
@@ -252,7 +258,7 @@ public class EstimationCost extends NLGCost {
                         coordinates.remove(0);
                         coordinates.remove(coordinates.size() - 1);
                         break;
-                        // TODO all of the below is untested
+                    // TODO all of the below is untested
                     /*case "Stairs":
                         System.out.println(splitBlock);
                         int[] refCoordsStairs = new int[18];
@@ -323,13 +329,10 @@ public class EstimationCost extends NLGCost {
                         coordinates.add(coords);
                         break;
                     case "row-railing": // TODO maybe find another way to deal with this, like changing the data format
-                        // TODO also untested since case happens so rarely
+                        // TODO untested? what is this?
                         // notice:
                         // "row":[["row-railing6-68-6-10-68-6"]]
                         // "row":[["row6-66-6-10-66-6"],["row6-66-8-10-66-8"],["row6-68-6-10-68-6"]]
-                        System.out.println("Row-Railing: ----------");
-                        System.out.println(splitBlock[0]);
-
                         for (int j = 2; j < 5; j++) {
                             refCoords[j - 2] = Integer.parseInt(splitBlock[j]) - dimMin[j - 2];
                             refCoords[j + 3 - 2] = Integer.parseInt(splitBlock[j + 3]) - dimMin[j - 2];
@@ -340,7 +343,6 @@ public class EstimationCost extends NLGCost {
                             coordinates.add(new int[]{x, refCoords[1], refCoords[2]});
                             System.out.println(Arrays.toString(new int[]{x, refCoords[1], refCoords[2]}));
                         }
-                        System.out.println("----------");
                         break;
                 }
             }
@@ -378,7 +380,7 @@ public class EstimationCost extends NLGCost {
          */
         private void markBlockPositions(ArrayList<int[]> worldStateCoords, ArrayList<int[]> targetCoords, ArrayList<ArrayList<int[]>> structureCoords) {
             // int arrays are filled with zeros by default
-            worldMatrix = new float[numChannels][5][3][3]; // TODO check if dimensions are correct and if these are really all zeros
+            worldMatrix = new float[numChannels][5][3][3];
 
             // mark currently present blocks
             for (int[] indices : worldStateCoords) {
@@ -425,8 +427,6 @@ public class EstimationCost extends NLGCost {
         MinecraftObject currentObject = createCurrentMinecraftObject(groundedOperator);  // op, groundedOperator
         Set<String> knownObjects = new HashSet<>();
         Pair<Set<MinecraftObject>, Set<MinecraftObject>> pair = createWorldFromState(state, knownObjects, currentObject);
-        Set<MinecraftObject> world = pair.getRight(); //
-        Set<MinecraftObject> it = pair.getLeft(); //
         if (currentObject instanceof IntroductionMessage intro) {
             if (knownObjects.contains(intro.name)) {
                 //make dead end
@@ -436,35 +436,40 @@ public class EstimationCost extends NLGCost {
             }
         }
 
-        // NLG Model for comparision TODO comment out NLG stuff in init again when removing this
-        countInstr++; //
-        String currentObjectType = currentObject.getClass().getSimpleName().toLowerCase();
-        boolean objectFirstOccurence = !knownObjects.contains(currentObjectType);
-        if (objectFirstOccurence && weights != null) {
-            // temporarily set the weight to the first occurence one
-            // ... if we have an estimate for the first occurence
-            if (weights.firstOccurenceWeights.containsKey("i" + currentObjectType)) {
-                nlgSystem.setExpectedDurations(
-                        Map.of("i" + currentObjectType, weights.firstOccurenceWeights.get("i" + currentObjectType)),
-                        false);
+        // NLG Model for comparison
+        double returnValueNLG = 0D;
+        if (this.compare) {
+            Set<MinecraftObject> world = pair.getRight(); //
+            Set<MinecraftObject> it = pair.getLeft(); //
+
+            countInstr++; //
+            String currentObjectType = currentObject.getClass().getSimpleName().toLowerCase();
+            boolean objectFirstOccurence = !knownObjects.contains(currentObjectType);
+            if (objectFirstOccurence && weights != null) {
+                // temporarily set the weight to the first occurence one
+                // ... if we have an estimate for the first occurence
+                if (weights.firstOccurenceWeights.containsKey("i" + currentObjectType)) {
+                    nlgSystem.setExpectedDurations(
+                            Map.of("i" + currentObjectType, weights.firstOccurenceWeights.get("i" + currentObjectType)),
+                            false);
+                }
             }
-        }
-        world.addAll(currentObject.getChildren());
-        world.add(currentObject);
-        long startTime = System.currentTimeMillis();
-        double returnValueNLG = nlgSystem.estimateCostForPlanningSystem(world, currentObject, it);
-        long endTime = System.currentTimeMillis();
-        System.out.printf("Duration getCost NLG: %d%n", (endTime - startTime));
-        System.out.printf("Cost NLG: %f%n", returnValueNLG);
-        try {
-            writerCost.write("Cost NLG: " + returnValueNLG + '\n');
-        } catch (IOException e) {
-            e.printStackTrace();
+            world.addAll(currentObject.getChildren());
+            world.add(currentObject);
+            long startTime = System.currentTimeMillis();
+            returnValueNLG = nlgSystem.estimateCostForPlanningSystem(world, currentObject, it);
+            long endTime = System.currentTimeMillis();
+            System.out.printf("Duration getCost NLG: %d%n", (endTime - startTime));
+            System.out.printf("Cost NLG: %f%n", returnValueNLG);
+            try {
+                writerCost.write("Cost NLG: " + returnValueNLG + '\n');
+            } catch (IOException e) {
+                e.printStackTrace();
+            }
         }
 
         // model
         String model = this.model;  //
-        System.out.println(model);
 
         // process world state data by using a parser
         parser.setNewData(model);
@@ -485,6 +490,7 @@ public class EstimationCost extends NLGCost {
             }
         }
 
+        // estimate cost and reverse scaling
         double returnValue = Double.POSITIVE_INFINITY;
         try {
 //            startTime = System.currentTimeMillis(); //
@@ -503,18 +509,20 @@ public class EstimationCost extends NLGCost {
         }
 
 //        System.out.printf("Cost NN: %f%n", returnValue);
-        // TODO remove this when done with comparisons
-        try {
-            writerCost.write("Cost NN: " + returnValue + '\n');
-            writerCost.write("------------" + '\n');
-        } catch (IOException e) {
-            e.printStackTrace();
+        if (this.compare) {
+            try {
+                writerCost.write("Cost NN: " + returnValue + '\n');
+                writerCost.write("------------" + '\n');
+            } catch (IOException e) {
+                e.printStackTrace();
+            }
+            System.out.println(returnValue);
+            System.out.println(returnValueNLG);
+            diffCosts += Math.abs(returnValue - returnValueNLG);
+            avgDiffCosts = diffCosts / countInstr;
+            System.out.println("AVG COST DIFF: " + avgDiffCosts);
         }
-        System.out.println(returnValue);
-        System.out.println(returnValueNLG);
-        diffCosts += Math.abs(returnValue - returnValueNLG);
-        avgDiffCosts = diffCosts / countInstr;
-        System.out.println("AVG COST DIFF: " + avgDiffCosts);
+
         return returnValue;
     }
 
