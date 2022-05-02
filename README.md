@@ -51,6 +51,7 @@ Additional options specifically for NN:
 * "-cmp" or "--compare": Whether to run the NLG system next to the NN for cost estimation in order to compare the costs of the two
 * "-tar" or "--useTarget": Whether to use information of the current instruction target for the cost estimation
 * "-str" or "--useStructures": Whether to use information of existing structures for the cost estimation
+When using NNs, keep in mind that it may be necessary to change the data scaling in the code according to what the Python script has output for min and max values. The current values are sufficient for all currently available models and data, however.
 
 Currently best config to start planning using the integrated NLG system:
 java -jar $PATH_TO_JAR $PATH_TO_DOMAIN $PATH_TO_PROBLEM -m 1000000 -t 1 -exp 10 -c NLG --level MEDIUM -e deadEnd -wf $PATH_TO_WEIGHT_FILE
