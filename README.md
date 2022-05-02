@@ -30,14 +30,9 @@ java -jar PathToJAR DOMAINFILE PROBLEMFILE -m MCTSRUNS -c COSTFUNCTION -e EXPANS
   + "BASIC": Actions have cost as specified in the domain file.  
   + "STATEDEPENDENT": Uses hand crafted costfunctions for Minecraft, Blocksworld and Rovers domains does not work for other domains.  
   + "NLG": Only usable with Minecraft domain, calls the NLG System for cost estimates.  
+  + "NN": Calls a pre-trained NN for cost estimates.
   
-  If the option "NLG" or "STATEDEPENDENT" is chosen, the abstraction level for Minecraft instructions can be chosen by adding option "--level ABSTRACTION". ABSTARCTION can be "BLOCK", "MEDIUM" or "HIGHLEVEL".  
-  
-* NNTYPE can be:
-  + "Simple": The trained model that will be used is a simple NN.
-  + "CNN": The trained model that will be used is a CNN.
-  
-  This option is only relevant if using an NN to estimate costs. Depending on the structure of the files it may be necessary to also add NNPATH, the path to the folder the trained NN is in, with ``-nnp PATH``.
+  If the option "NLG" or "STATEDEPENDENT" is chosen, the abstraction level for Minecraft instructions can be chosen by adding option "--level ABSTRACTION". ABSTRACTION can be "BLOCK", "MEDIUM" or "HIGHLEVEL".  
 
 Additional options for MCTS, their default is already set according to best performance:  
 * "-p" or "--planFile" Plan will be printed into File with this name, will overwrite anything already in File and create new File if none with that name is present
@@ -50,8 +45,15 @@ Additional options for MCTS, their default is already set according to best perf
 * "-exp REALNUMBER": Set the exploration factor of MCTS to given real number  
 * "--randomSeed NUMBER": Set the seed of the random generator to NUMBER  
 
+Additional options specifically for NN:
+* "-nnt TYPE" or "--nnType TYPE": Which type the pre-trained NN has (it is not possible to use just any NN, it has to be one that was trained by using the specific Python script), currently possible TYPEs are either "SimpleNN" or "CNN"
+* "-nnp PATH" or "--nnPath PATH": Path to the pre-trained NN; The default value assumes it to be in a folder called "cost-estimation" which is located in the same directory as this repository
+* "-cmp" or "--compare": Whether to run the NLG system next to the NN for cost estimation in order to compare the costs of the two
+* "-tar" or "--useTarget": Whether to use information of the current instruction target for the cost estimation
+* "-str" or "--useStructures": Whether to use information of existing structures for the cost estimation
+
 Currently best config to start planning using the integrated NLG system:
 java -jar $PATH_TO_JAR $PATH_TO_DOMAIN $PATH_TO_PROBLEM -m 1000000 -t 1 -exp 10 -c NLG --level MEDIUM -e deadEnd -wf $PATH_TO_WEIGHT_FILE
  
- Alternatively, the best config to start planning using a trained NN is:
- ``java -jar $PATH_TO_JAR $PATH_TO_DOMAIN $PATH_TO_PROBLEM -m 1000000 -t 10000 -exp 10 -c NN --level MEDIUM -e deadEnd -wf $PATH_TO_WEIGHT_FILE -nnt CNN -nnp NNPATH``
+ Alternatively, a possible config to start planning using a trained NN is:
+ ``java -jar $PATH_TO_JAR $PATH_TO_DOMAIN $PATH_TO_PROBLEM -m 1000000 -t 10000 -exp 10 -c NN --level MEDIUM -e deadEnd -wf $PATH_TO_WEIGHT_FILE -nnt CNN -nnp NNPATH -tar -str``
