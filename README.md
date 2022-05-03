@@ -53,6 +53,7 @@ Additional options specifically for NN:
 * "-str" or "--useStructures": Whether to use information of existing structures for the cost estimation
 
 When using NNs, keep in mind that it may be necessary to change the data scaling in the code according to what the Python script has output for min and max values. The current values are sufficient for all currently available models and data, however. This program assumes that cost-estimation is cloned into the same directory as jshop. This means that when jshop is executed in the directory jshop-clean, the contents of cost-estimation are reachable through the relative path ``../../cost-estimation/``. It is important to use the proper argument line options during execution, e.g. fit the options to the options that were used for training the NN.
+Also, depending on which results you expect (fixed vs non-fixed versions), make sure to be using the correct ``bridge.lisp``-file.
 
 Currently best config to start planning using the integrated NLG system:
 java -jar $PATH_TO_JAR $PATH_TO_DOMAIN $PATH_TO_PROBLEM -m 1000000 -t 1 -exp 10 -c NLG --level MEDIUM -e deadEnd -wf $PATH_TO_WEIGHT_FILE
