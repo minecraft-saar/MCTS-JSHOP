@@ -36,11 +36,11 @@ public class EstimationCost extends NLGCost {
 
     // things needed for cost comparison
     boolean compare;
-    MinecraftRealizer nlgSystem; //
-    public BufferedWriter writerCost; //
-    Double diffCosts; //
-    Double avgDiffCosts; //
-    int countInstr; //
+    MinecraftRealizer nlgSystem;
+    public BufferedWriter writerCost;
+    Double diffCosts;
+    Double avgDiffCosts;
+    int countInstr;
 
     public enum NNType {
         Simple,
@@ -54,6 +54,7 @@ public class EstimationCost extends NLGCost {
         this.useTarget = useTarget;
         this.useStructures = useStructures;
 
+        // load pre-trained NN
         nn = Model.newInstance("trained_model.zip");
         Path nnDir = Paths.get(nnPath);
         try {
@@ -64,14 +65,17 @@ public class EstimationCost extends NLGCost {
             e.printStackTrace();
         }
 
+        // prepare everything needed for the comparison between NLG system and NN
         if (this.compare) {
-            nlgSystem = MinecraftRealizer.createRealizer(); //
+            nlgSystem = MinecraftRealizer.createRealizer();
+            // output comparisons into a txt file
             try {
                 writerCost = new BufferedWriter(new FileWriter("cost_comparison.txt"));
             } catch (IOException e) {
                 e.printStackTrace();
             }
 
+            // prepare NLG system
             lowestCost = 10.0;
             if (weightFile.equals("")) {
                 weightsPresent = false;
@@ -85,21 +89,24 @@ public class EstimationCost extends NLGCost {
                     throw new RuntimeException("could not read weights file: " + weightFile);
                 }
             }
+
             diffCosts = 0D;
             avgDiffCosts = 0D;
             countInstr = 0;
         }
 
+        // use options to determine correct data structure for NN
         if (useStructures) {
             numChannels = 5;
         } else if (useTarget && (nnType == NNType.CNN)) {
             numChannels = 2;
         } else if (nnType == NNType.Simple || (nnType == NNType.CNN)) {
             numChannels = 1;
-        } // TODO consider allowing more flexibility with these options, e.g. use structures but no use target...
+        }
 
         parser = new DataParser(useTarget, useStructures, numChannels);
 
+        // translator needed for loading torchscript model
         // modeled after: https://docs.djl.ai/jupyter/load_pytorch_model.html
         translator = new Translator<Float[], Float>() {
             @Override
@@ -132,7 +139,7 @@ public class EstimationCost extends NLGCost {
     }
 
     /**
-     * Parser for the world state information.
+     * Parser for the world state information. Used to prepare the data so that it can be fed to the NN.
      */
     private class DataParser {
         JSONObject data;
@@ -144,10 +151,15 @@ public class EstimationCost extends NLGCost {
         Boolean use_structures;
         int numChannels;
 
+        /**
+         * @param use_target boolean, whether target information should be in data
+         * @param use_structures boolean, whether information on existing structures should be in data
+         * @param numChannels int, number of channels the data should have, depending on NN type and method
+         */
         public DataParser(Boolean use_target, Boolean use_structures, int numChannels) {
             this.parser = new JSONParser();
-            this.dim = new int[]{5, 3, 3};  // TODO make dimensions more flexible through argument in init
-//            this.dim = new int[]{8, 70, 14};
+            this.dim = new int[]{5, 3, 3};
+//            this.dim = new int[]{8, 70, 14}; // for fancy bridge
             this.dimMin = new int[]{6, 66, 6};
             this.use_target = use_target;
             this.use_structures = use_structures;
@@ -193,7 +205,6 @@ public class EstimationCost extends NLGCost {
             if (use_target) {
                 readFromKey("target", targetCoordinates);
             }
-
 
             // read structures
             ArrayList<ArrayList<int[]>> structuresCoordinates = new ArrayList<>();
@@ -258,13 +269,12 @@ public class EstimationCost extends NLGCost {
                         coordinates.remove(0);
                         coordinates.remove(coordinates.size() - 1);
                         break;
-                    // TODO all of the below is untested
-                    /*case "Stairs":
+                    /*case "Stairs": // untested
                         System.out.println(splitBlock);
                         int[] refCoordsStairs = new int[18];
 
                         // read reference blocks into list and normalize
-                        for (int j = 3; j < 6; j++) {  // TODO can probably do this more elegantly
+                        for (int j = 3; j < 6; j++) {
                             // row
                             refCoordsStairs[j - 3] = Integer.parseInt(splitBlock[j]) - dimMin[j - 3];
                             refCoordsStairs[j + 3 - 3] = Integer.parseInt(splitBlock[j + 3]) - dimMin[j - 3];
@@ -293,7 +303,7 @@ public class EstimationCost extends NLGCost {
                         }
                         System.out.println(coordinates);
                         break;
-                    case "wall":
+                    case "wall": // untested
                         System.out.println(splitBlock);
                         // get reference blocks
                         for (int j = 1; j < 4; j++) {
@@ -310,7 +320,7 @@ public class EstimationCost extends NLGCost {
                         }
                         System.out.println(coordinates);
                         break;*/
-                    case "row": // TODO probably untested; does not ignore colored blocks since python version doesn't either
+                    case "row":
                         // reference blocks
                         for (int j = 1; j < 4; j++) {
                             refCoords[j - 1] = Integer.parseInt(splitBlock[j]) - dimMin[j - 1];
@@ -328,8 +338,7 @@ public class EstimationCost extends NLGCost {
                         }
                         coordinates.add(coords);
                         break;
-                    case "row-railing": // TODO maybe find another way to deal with this, like changing the data format
-                        // TODO untested? what is this?
+                    case "row-railing":
                         // notice:
                         // "row":[["row-railing6-68-6-10-68-6"]]
                         // "row":[["row6-66-6-10-66-6"],["row6-66-8-10-66-8"],["row6-68-6-10-68-6"]]
@@ -439,10 +448,10 @@ public class EstimationCost extends NLGCost {
         // NLG Model for comparison
         double returnValueNLG = 0D;
         if (this.compare) {
-            Set<MinecraftObject> world = pair.getRight(); //
-            Set<MinecraftObject> it = pair.getLeft(); //
+            Set<MinecraftObject> world = pair.getRight();
+            Set<MinecraftObject> it = pair.getLeft();
 
-            countInstr++; //
+            countInstr++;
             String currentObjectType = currentObject.getClass().getSimpleName().toLowerCase();
             boolean objectFirstOccurence = !knownObjects.contains(currentObjectType);
             if (objectFirstOccurence && weights != null) {
@@ -462,6 +471,7 @@ public class EstimationCost extends NLGCost {
             System.out.printf("Duration getCost NLG: %d%n", (endTime - startTime));
             System.out.printf("Cost NLG: %f%n", returnValueNLG);
             try {
+                writerCost.write("world: " + model + '\n');
                 writerCost.write("Cost NLG: " + returnValueNLG + '\n');
             } catch (IOException e) {
                 e.printStackTrace();
@@ -469,7 +479,7 @@ public class EstimationCost extends NLGCost {
         }
 
         // model
-        String model = this.model;  //
+        String model = this.model;
 
         // process world state data by using a parser
         parser.setNewData(model);
@@ -493,22 +503,19 @@ public class EstimationCost extends NLGCost {
         // estimate cost and reverse scaling
         double returnValue = Double.POSITIVE_INFINITY;
         try {
-//            startTime = System.currentTimeMillis(); //
             returnValue = predictor.predict(flattenedInputDataNN);
-//            endTime = System.currentTimeMillis(); //
-//            System.out.printf("Duration getCost: %d%n", (endTime - startTime)); //
-            // inverse scaling TODO make sure to mention somewhere that these values need to be set according to what python script says
+            // inverse scaling
             double min = 2690.70126898D;
             double max = 128071.40159593D;
             returnValue = (returnValue - 0D) / (1D - 0D);
             returnValue = returnValue * (max - min) + min;
-            // TODO does this break if the NN somehow where to generate a number bigger than the original range?
         } catch (TranslateException e) {
             System.out.println("An error occurred while estimating the costs using the NN.");
             e.printStackTrace();
         }
 
 //        System.out.printf("Cost NN: %f%n", returnValue);
+        // do comparisons between NLG system and NN
         if (this.compare) {
             try {
                 writerCost.write("Cost NN: " + returnValue + '\n');
