@@ -1,6 +1,6 @@
-# JSHOP Usage:
+# MCTS-JSHOP Usage:
 
-The JSHOP planner has to search modi right now, a blind depth-first search and Monte Carlo Tree Search.
+The MCTS-JSHOP planner has to search modi right now, a blind depth-first search and Monte Carlo Tree Search.
 
 1. Blind depth first search
 
