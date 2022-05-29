@@ -29,7 +29,8 @@ public class EstimationCost extends NLGCost {
     boolean useStructures;
     int numChannels;
     NNType nnType;
-    int[] dim = {5, 3, 3}; // {3, 5, 9}
+    int[] dim;
+    ScenarioType scenarioType;
 
     // things needed for cost comparison
     boolean compare;
@@ -44,16 +45,29 @@ public class EstimationCost extends NLGCost {
         CNN
     }
 
-    public EstimationCost(CostFunction.InstructionLevel ins, String weightFile, NNType nnType, String nnPath, boolean compare, boolean useTarget, boolean useStructures) {
+    public enum ScenarioType {
+        SimpleBridge,
+        FancyBridge
+    }
+
+    public EstimationCost(CostFunction.InstructionLevel ins, String weightFile, NNType nnType, String nnPath, boolean compare, boolean useTarget, boolean useStructures, ScenarioType scenarioType) {
         super(ins, weightFile);
         this.nnType = nnType;
         this.compare = compare;
         this.useTarget = useTarget;
         this.useStructures = useStructures;
+        this.scenarioType = scenarioType;
 
         // load pre-trained NN
-        nn = Model.newInstance("trained_model.zip");
-//        nn = Model.newInstance("trained_model_fancy.zip");
+        if (this.scenarioType == ScenarioType.SimpleBridge) {
+            nn = Model.newInstance("trained_model.zip");
+            this.dim = new int[]{5, 3, 3};
+        } else if (this.scenarioType == ScenarioType.FancyBridge) {
+            nn = Model.newInstance("trained_model_fancy.zip");
+            this.dim = new int[]{3, 5, 9};
+        } else {
+            System.out.println("Careful - Invalid scenario type!");
+        }
         Path nnDir = Paths.get(nnPath);
         try {
             nn.load(nnDir);
@@ -104,7 +118,7 @@ public class EstimationCost extends NLGCost {
             numChannels = 1;
         }
 
-        parser = new DataParser(useTarget, useStructures, numChannels, nnType);
+        parser = new DataParser(useTarget, useStructures, numChannels, nnType, scenarioType);
 
         // translator needed for loading torchscript model
         // modeled after: https://docs.djl.ai/jupyter/load_pytorch_model.html

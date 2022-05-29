@@ -26,21 +26,26 @@ public class DataParser {
     Boolean use_structures;
     int numChannels;
     EstimationCost.NNType nnType;
+    EstimationCost.ScenarioType scenarioType;
 
     /**
-     * @param use_target boolean, whether target information should be in data
+     * @param use_target     boolean, whether target information should be in data
      * @param use_structures boolean, whether information on existing structures should be in data
-     * @param numChannels int, number of channels the data should have, depending on NN type and method
+     * @param numChannels    int, number of channels the data should have, depending on NN type and method
      */
-    public DataParser(Boolean use_target, Boolean use_structures, int numChannels, EstimationCost.NNType nnType) {
+    public DataParser(Boolean use_target, Boolean use_structures, int numChannels, EstimationCost.NNType nnType, EstimationCost.ScenarioType scenarioType) {
         this.parser = new org.json.simple.parser.JSONParser();
+        if (scenarioType == EstimationCost.ScenarioType.SimpleBridge) {
             this.dim = new int[]{5, 3, 3}; // for simple bridge
-//        this.dim = new int[]{3, 5, 9}; // for fancy bridge {8, 70, 14}
+        } else if (scenarioType == EstimationCost.ScenarioType.FancyBridge) {
+            this.dim = new int[]{3, 5, 9}; // for fancy bridge {8, 70, 14}
+        }
         this.dimMin = new int[]{6, 66, 6};
         this.use_target = use_target;
         this.use_structures = use_structures;
         this.numChannels = numChannels;
         this.nnType = nnType;
+        this.scenarioType = scenarioType;
     }
 
     /**
@@ -125,12 +130,15 @@ public class DataParser {
                     coordinates.add(coords2);
 
                     // row
+                    if (this.scenarioType == EstimationCost.ScenarioType.SimpleBridge) {
                         for (int x = coords[2]; x < coords[0] + 5; x++) { // use coord as reference block
                             coordinates.add(new int[]{x, coords[1] + 1, coords[2]});
                         } // simple bridge
-//                    for (int z = coords[2]; z < coords[2] + 5; z++) { // use coord as reference block
-//                        coordinates.add(new int[]{coords[0], coords[1] + 1, z});
-//                    } // fancy bridge
+                    } else if (this.scenarioType == EstimationCost.ScenarioType.FancyBridge) {
+                        for (int z = coords[2]; z < coords[2] + 5; z++) { // use coord as reference block
+                        coordinates.add(new int[]{coords[0], coords[1] + 1, z});
+                        } // fancy bridge
+                    }
                     break;
                 case "floor":
                     // reference blocks
@@ -208,12 +216,15 @@ public class DataParser {
                     }
 
                     // blocks in between
+                    if (this.scenarioType == EstimationCost.ScenarioType.SimpleBridge) {
                         for (int x = refCoords[0]; x < (refCoords[3] + 1); x++) {
                             coordinates.add(new int[]{x, refCoords[1], refCoords[2]});
                         } // simple bridge
-//                    for (int z = refCoords[2]; z < (refCoords[5] + 1); z++) { // TODO untested
-//                        coordinates.add(new int[]{refCoords[0], refCoords[1], z});
-//                    } // fancy bridge
+                    } else if (this.scenarioType == EstimationCost.ScenarioType.FancyBridge) {
+                        for (int z = refCoords[2]; z < (refCoords[5] + 1); z++) { // TODO untested
+                            coordinates.add(new int[]{refCoords[0], refCoords[1], z});
+                        } // fancy bridge
+                    }
                     break;
                 case "Block":
                     for (int j = 1; j < 4; j++) {
