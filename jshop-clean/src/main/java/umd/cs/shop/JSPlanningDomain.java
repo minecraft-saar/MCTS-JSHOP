@@ -112,11 +112,11 @@ public class JSPlanningDomain {
         for (vars.mctsRuns = 1; vars.mctsRuns <= runs; vars.mctsRuns++) {
             long currentTime = System.currentTimeMillis();
             long runningTime = currentTime - vars.startTime;
-//            if (runningTime >= timeout) {
-//                if(vars.print)
-//                    JSUtil.println("Timeout");
-//                break;
-//            }
+            if (runningTime >= timeout) {
+                if(vars.print)
+                    JSUtil.println("Timeout");
+                break;
+            }
 
             if (initial.isFullyExplored()) {
                 JSUtil.println("Solved optimally");
