@@ -40,6 +40,10 @@ public class EstimationCost extends NLGCost {
     Double avgDiffCosts;
     int countInstr;
 
+    // scaling parameters
+    double min = 2690.70126898D;
+    double max = 128071.40159593D;
+
     public enum NNType {
         Simple,
         CNN
@@ -110,9 +114,16 @@ public class EstimationCost extends NLGCost {
         }
 
         // use options to determine correct data structure for NN
+//        if (useStructures) {
+//            numChannels = 5;
+//        } else if (useTarget && (nnType == NNType.CNN)) {
+//            numChannels = 2;
+//        } else if (nnType == NNType.Simple || (nnType == NNType.CNN)) {
+//            numChannels = 1;
+//        }
         if (useStructures) {
             numChannels = 5;
-        } else if (useTarget && (nnType == NNType.CNN)) {
+        } else if (useTarget) {
             numChannels = 2;
         } else if (nnType == NNType.Simple || (nnType == NNType.CNN)) {
             numChannels = 1;
@@ -154,6 +165,8 @@ public class EstimationCost extends NLGCost {
 
     @Override
     public Double getCost(JSTState state, JSOperator op, JSTaskAtom groundedOperator, boolean approx) {
+        System.out.println("--------");
+        long startTime = System.currentTimeMillis();
         if (groundedOperator.get(0).equals("!place-block-hidden") ||
                 groundedOperator.get(0).equals("!remove-it-row") ||
                 groundedOperator.get(0).equals("!remove-it-railing") ||
@@ -193,10 +206,7 @@ public class EstimationCost extends NLGCost {
             }
             world.addAll(currentObject.getChildren());
             world.add(currentObject);
-            long startTime = System.currentTimeMillis();
             returnValueNLG = nlgSystem.estimateCostForPlanningSystem(world, currentObject, it);
-            long endTime = System.currentTimeMillis();
-            System.out.printf("Duration getCost NLG: %d%n", (endTime - startTime));
             System.out.printf("Cost NLG: %f%n", returnValueNLG);
             try {
                 writerCost.write("world: " + model + '\n');
@@ -233,10 +243,8 @@ public class EstimationCost extends NLGCost {
         try {
             returnValue = predictor.predict(flattenedInputDataNN);
             // inverse scaling
-            double min = 2690.70126898D;
-            double max = 128071.40159593D;
             returnValue = (returnValue - 0D) / (1D - 0D);
-            returnValue = returnValue * (max - min) + min;
+            returnValue = returnValue * (this.max - this.min) + this.min;
         } catch (TranslateException e) {
             System.out.println("An error occurred while estimating the costs using the NN.");
             e.printStackTrace();
@@ -261,6 +269,10 @@ public class EstimationCost extends NLGCost {
                 countInstr--;
             }
         }
+
+        long endTime = System.currentTimeMillis();
+        System.out.printf("Duration getCost: %d%n", (endTime - startTime));
+        System.out.println("--------");
 
         return returnValue;
     }

@@ -113,12 +113,7 @@ public class JSTaskAtom extends JSPredicateForm {
                     tState = ts.state().applyOp(op, alpha, ts.addList(), ts.deleteList(),vars);
                     //ns = tState.state();
                     top = op.head();
-                    System.out.println("--------");
-                    long startTime = System.currentTimeMillis();
                     Double cost = vars.costFunction.getCost(ts, op, top.applySubstitutionTA(alpha), vars.useApproximatedCostFunction);
-                    long endTime = System.currentTimeMillis();
-                    System.out.printf("Duration getCost: %d%n", (endTime - startTime));
-                    System.out.println("--------");
                     pl.addWithCost(top.applySubstitutionTA(alpha), cost);
                     if(cost.isNaN()){
                         pl.assignFailure();

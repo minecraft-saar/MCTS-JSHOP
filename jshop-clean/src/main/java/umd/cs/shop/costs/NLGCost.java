@@ -30,7 +30,7 @@ public class NLGCost implements CostFunction {
         lowestCost = 10.0;
         if (writeNNData) {
             try {
-                File yourFile = new File("E:\\Bachelor_Arbeit\\jshop-cost-estimation\\jshop-clean\\NN-data-fancy-random-2.json");
+                File yourFile = new File("E:\\Bachelor_Arbeit\\jshop-cost-estimation\\jshop-clean\\NN-data-test-for-negative-costs.json");
                 yourFile.createNewFile(); // if file already exists will do nothing
                 NNData = new FileWriter(yourFile);
                 NNData.write("{");
@@ -68,6 +68,8 @@ public class NLGCost implements CostFunction {
 
     @Override
     public Double getCost(JSTState state, JSOperator op, JSTaskAtom groundedOperator, boolean approx) {
+        System.out.println("--------");
+        long startTime = System.currentTimeMillis();
         if (groundedOperator.get(0).equals("!place-block-hidden") ||
                 groundedOperator.get(0).equals("!remove-it-row") ||
                 groundedOperator.get(0).equals("!remove-it-railing") ||
@@ -130,6 +132,11 @@ public class NLGCost implements CostFunction {
                         false);
             }
         }
+
+        long endTime = System.currentTimeMillis();
+        System.out.printf("Duration getCost: %d%n", (endTime - startTime));
+        System.out.println("--------");
+
         return returnValue;
     }
 

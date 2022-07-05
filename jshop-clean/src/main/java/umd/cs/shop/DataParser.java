@@ -1,5 +1,6 @@
 package umd.cs.shop;
 
+import com.google.gson.JsonObject;
 import org.json.simple.JSONArray;
 import org.json.simple.JSONObject;
 import org.json.simple.parser.ParseException;
@@ -80,12 +81,12 @@ public class DataParser {
     public void convertIntoVector() {
         // read world state
         ArrayList<int[]> blockCoordinates = new ArrayList<>();
-        readFromKey("block", blockCoordinates);
+        readFromKey("block", blockCoordinates, "");
 
         // read target
         ArrayList<int[]> targetCoordinates = new ArrayList<>();
         if (use_target) {
-            readFromKey("target", targetCoordinates);
+            readFromKey("target", targetCoordinates, "");
         }
 
         // read structures
@@ -109,15 +110,23 @@ public class DataParser {
      *
      * @param key         json key such as "target"
      * @param coordinates empty arraylist into which the coordinates should be put
+     * @param target target og the current instruction, should be empty if currently something besides structures is being read
      */
-    private void readFromKey(String key, ArrayList<int[]> coordinates) {
-        JSONArray blocks = (JSONArray) data.get(key);
+    private void readFromKey(String key, ArrayList<int[]> coordinates, String target) {
+        JSONArray blocks = (JSONArray) data.get(key); // get list of json objects belonging to given key
+        // iterate through all json objects in the list
         for (int i = 0; i < blocks.size(); i++) {
             JSONArray blockInBrackets = (JSONArray) blocks.get(i);
-            String block = (String) blockInBrackets.get(0);
+            String block = (String) blockInBrackets.get(0); // get type of current object
+            // skip this object if it is also the current target
+//            if (target.equals(block)) {
+//                continue;
+//            }
+            // split object in order to find coordinates
             String[] splitBlock = block.split("-");
             int[] coords = new int[3];
             int[] refCoords = new int[6]; // 1st block index 0-2, 2nd block index 3-5
+            // find reference coordinates and calculate the rest based on which type the object is
             switch (splitBlock[0]) {
                 case "Railing":
                     // support blocks
@@ -258,14 +267,19 @@ public class DataParser {
      * @param coordinates empty arraylist of arraylists into which the coordinates should be put
      */
     private void readSpecialStructures(ArrayList<ArrayList<int[]>> coordinates) {
+        // get current object in order to structures that are equal
+        JSONArray targetList = (JSONArray) data.get("target");
+        JSONArray targetInBrackets = (JSONArray) targetList.get(0);
+        String target = (String) targetInBrackets.get(0);
+        // parse coordinates of different structures
         if (data.containsKey("row")) {
-            readFromKey("row", coordinates.get(0));
+            readFromKey("row", coordinates.get(0), target);
         }
         if (data.containsKey("floor")) {
-            readFromKey("floor", coordinates.get(1));
+            readFromKey("floor", coordinates.get(1), target);
         }
         if (data.containsKey("railing")) {
-            readFromKey("railing", coordinates.get(2));
+            readFromKey("railing", coordinates.get(2), target);
         }
     }
 
@@ -294,18 +308,25 @@ public class DataParser {
         ArrayList<Integer> test_idx = new ArrayList<>();
         try {
             if (use_target) {
-                if (nnType == EstimationCost.NNType.CNN) {
-                    for (int[] indices : targetCoords) {
-                        test_idx.add(indices[0]);
-                        test_idx.add(indices[1]);
-                        test_idx.add(indices[2]);
-                        worldMatrix[1][indices[0]][indices[1]][indices[2]] = 1F;
-                        test_idx.clear();
-                    }
-                } else if (nnType == EstimationCost.NNType.Simple) {
-                    for (int[] indices : targetCoords) {
-                        worldMatrix[0][indices[0]][indices[1]][indices[2]] = 0.5F;
-                    }
+//                if (nnType == EstimationCost.NNType.CNN) {
+//                    for (int[] indices : targetCoords) {
+//                        test_idx.add(indices[0]);
+//                        test_idx.add(indices[1]);
+//                        test_idx.add(indices[2]);
+//                        worldMatrix[1][indices[0]][indices[1]][indices[2]] = 1F;
+//                        test_idx.clear();
+//                    }
+//                } else if (nnType == EstimationCost.NNType.Simple) {
+//                    for (int[] indices : targetCoords) {
+//                        worldMatrix[0][indices[0]][indices[1]][indices[2]] = 0.5F;
+//                    }
+//                }
+                for (int[] indices : targetCoords) {
+                    test_idx.add(indices[0]);
+                    test_idx.add(indices[1]);
+                    test_idx.add(indices[2]);
+                    worldMatrix[1][indices[0]][indices[1]][indices[2]] = 1F;
+                    test_idx.clear();
                 }
             }
         } catch (ArrayIndexOutOfBoundsException e) {
