@@ -167,6 +167,7 @@ public class EstimationCost extends NLGCost {
     public Double getCost(JSTState state, JSOperator op, JSTaskAtom groundedOperator, boolean approx) {
         System.out.println("--------");
         long startTime = System.currentTimeMillis();
+        long checkTime1 = System.nanoTime();
         if (groundedOperator.get(0).equals("!place-block-hidden") ||
                 groundedOperator.get(0).equals("!remove-it-row") ||
                 groundedOperator.get(0).equals("!remove-it-railing") ||
@@ -174,7 +175,13 @@ public class EstimationCost extends NLGCost {
                 groundedOperator.get(0).equals("!remove-it-wall")) {
             return 0.0;
         }
+        long endCheck1 = System.nanoTime();
+        // -------------------------------------------------------------------------------------------------------------
+        long checkTime2 = System.nanoTime();
         MinecraftObject currentObject = createCurrentMinecraftObject(groundedOperator);  // op, groundedOperator
+        long endCheck2 = System.nanoTime();
+        // -------------------------------------------------------------------------------------------------------------
+        long checkTime3 = System.nanoTime();
         Set<String> knownObjects = new HashSet<>();
         Pair<Set<MinecraftObject>, Set<MinecraftObject>> pair = createWorldFromState(state, knownObjects, currentObject);
         if (currentObject instanceof IntroductionMessage intro) {
@@ -185,6 +192,8 @@ public class EstimationCost extends NLGCost {
                 return 0.000001;
             }
         }
+        long endCheck3 = System.nanoTime();
+        // -------------------------------------------------------------------------------------------------------------
 
         // NLG Model for comparison
         double returnValueNLG = 0D;
@@ -217,14 +226,18 @@ public class EstimationCost extends NLGCost {
         }
 
         // model
+        long checkTime4 = System.nanoTime();
         String model = this.model;
 
         // process world state data by using a parser
         parser.setNewData(model);
         parser.convertIntoVector();
         float[][][][] inputDataNN = parser.getMatrix();
+        long endCheck4 = System.nanoTime();
+        // -------------------------------------------------------------------------------------------------------------
 
         // flatten world state matrix in preparation for NDArray
+        long checkTime5 = System.nanoTime();
         Float[] flattenedInputDataNN = new Float[numChannels * dim[0] * dim[1] * dim[2]];
         int currIdx = 0;
         for (float[][][] l1 : inputDataNN) {
@@ -237,8 +250,11 @@ public class EstimationCost extends NLGCost {
                 }
             }
         }
+        long endCheck5 = System.nanoTime();
+        // -------------------------------------------------------------------------------------------------------------
 
         // estimate cost and reverse scaling
+        long checkTime6 = System.nanoTime();
         double returnValue = Double.POSITIVE_INFINITY;
         try {
             returnValue = predictor.predict(flattenedInputDataNN);
@@ -249,6 +265,8 @@ public class EstimationCost extends NLGCost {
             System.out.println("An error occurred while estimating the costs using the NN.");
             e.printStackTrace();
         }
+        long endCheck6 = System.nanoTime();
+        // -------------------------------------------------------------------------------------------------------------
 
 //        System.out.printf("Cost NN: %f%n", returnValue);
         // do comparisons between NLG system and NN
@@ -271,6 +289,12 @@ public class EstimationCost extends NLGCost {
         }
 
         long endTime = System.currentTimeMillis();
+        System.out.printf("Duration Check1: %d%n", (endCheck1 - checkTime1));
+        System.out.printf("Duration Check2: %d%n", (endCheck2 - checkTime2));
+        System.out.printf("Duration Check3: %d%n", (endCheck3 - checkTime3));
+        System.out.printf("Duration Check4: %d%n", (endCheck4 - checkTime4));
+        System.out.printf("Duration Check5: %d%n", (endCheck5 - checkTime5));
+        System.out.printf("Duration Check6: %d%n", (endCheck6 - checkTime6));
         System.out.printf("Duration getCost: %d%n", (endTime - startTime));
         System.out.println("--------");
 
