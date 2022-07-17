@@ -549,9 +549,7 @@ public final class JSJshop implements Runnable {
             return true;
         }
 
-        public BufferedReader getBufferedReader (String dir, String file){
-            return getBufferedReader(dir, file);
-        }
+        //public BufferedReader getBufferedReader (String dir, String file){ return getBufferedReader(dir, file);}
 
         public void processToken (StreamTokenizer tokenizer){
             if (tokenizer.ttype == JSJshopVars.leftPar) {

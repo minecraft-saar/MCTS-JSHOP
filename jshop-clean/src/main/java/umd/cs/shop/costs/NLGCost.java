@@ -12,6 +12,7 @@ import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Paths;
 import java.util.*;
+import java.util.stream.Collectors;
 
 public class NLGCost implements CostFunction {
 
@@ -28,17 +29,6 @@ public class NLGCost implements CostFunction {
         instructionLevel = ins;
         nlgSystem = MinecraftRealizer.createRealizer();
         lowestCost = 10.0;
-        if (writeNNData) {
-            try {
-                File yourFile = new File("E:\\Bachelor_Arbeit\\jshop-cost-estimation\\jshop-clean\\NN-data-test-for-negative-costs.json");
-                yourFile.createNewFile(); // if file already exists will do nothing
-                NNData = new FileWriter(yourFile);
-                NNData.write("{");
-            } catch (IOException e) {
-                System.out.println("An error occurred while opening NN-data file");
-                e.printStackTrace();
-            }
-        }
         if (weightFile.equals("")) {
             weightsPresent = false;
         } else if (weightFile.equals("random")) {
@@ -54,6 +44,18 @@ public class NLGCost implements CostFunction {
             }
         }
         JSUtil.println(nlgSystem.getWeightsAsJson());
+
+        if (writeNNData) {
+            try {
+                File yourFile = new File("E:\\Bachelor_Arbeit\\jshop-cost-estimation\\jshop-clean\\NN-data-test-for-negative-costs.json");
+                yourFile.createNewFile(); // if file already exists will do nothing
+                NNData = new FileWriter(yourFile);
+                NNData.write("{");
+            } catch (IOException e) {
+                System.out.println("An error occurred while opening NN-data file");
+                e.printStackTrace();
+            }
+        }
     }
 
     public void closeFile() {
@@ -84,7 +86,7 @@ public class NLGCost implements CostFunction {
         Set<MinecraftObject> it = pair.getLeft();
         if (currentObject instanceof IntroductionMessage intro) {
             if (knownObjects.contains(intro.name)) {
-//                //make unattractive
+                //make unattractive
                 return 80000.0;
             } else {
                 return 0.000001;
@@ -285,7 +287,6 @@ public class NLGCost implements CostFunction {
                 }
             }
         }
-//<<<<<<< HEAD
         model = "{\"block\":";
         model = model + blocks + ",";
         if (!row.isEmpty()) {
@@ -488,6 +489,7 @@ public class NLGCost implements CostFunction {
 
 
     public MinecraftObject createCurrentMinecraftObject(JSTaskAtom groundedOperator) {
+        //MinecraftObject result = null;
         int x1, y1, z1; // , x2, y2, z2, length, width, height, dir;
         String operator_name = groundedOperator.get(0).toString();
 
