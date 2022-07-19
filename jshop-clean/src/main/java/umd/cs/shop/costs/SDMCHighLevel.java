@@ -23,6 +23,8 @@ public class SDMCHighLevel implements CostFunction{
             case "!build-floor-finished":
             case "!build-floor-starting":
                 return 0.0;
+            case "!use_block_type":
+                return 20.0;
             case "!place-block":
                return 100000.0;
             case "!build-row":
@@ -38,7 +40,7 @@ public class SDMCHighLevel implements CostFunction{
             case "!remove":
                 return 5.0;
             default:
-                System.err.println("Unrecognized action name: " + operatorName);
+                System.err.println("Unrecognized action name: " + operatorName + " in cost function HighLevel.");
                 System.exit(-1);
                 return 0.0;
         }

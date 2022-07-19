@@ -13,21 +13,21 @@ public class SDMCBlock implements CostFunction {
 
         switch (operatorName) {
             case "!place-block":
-                String block_type = groundedOperator.get(1).toString();
-                int x = (int) Double.parseDouble(groundedOperator.get(2).toString().replace("[", "").replace("]", ""));
-                int y = (int) Double.parseDouble(groundedOperator.get(3).toString().replace("[", "").replace("]", ""));
-                int z = (int) Double.parseDouble(groundedOperator.get(4).toString().replace("[", "").replace("]", ""));
+                int x = (int) Double.parseDouble(groundedOperator.get(1).toString().replace("[", "").replace("]", ""));
+                int y = (int) Double.parseDouble(groundedOperator.get(2).toString().replace("[", "").replace("]", ""));
+                int z = (int) Double.parseDouble(groundedOperator.get(3).toString().replace("[", "").replace("]", ""));
 
-                int lx = (int) Double.parseDouble(groundedOperator.get(5).toString().replace("[", "").replace("]", ""));
-                int ly = (int) Double.parseDouble(groundedOperator.get(6).toString().replace("[", "").replace("]", ""));
-                int lz = (int) Double.parseDouble(groundedOperator.get(7).toString().replace("[", "").replace("]", ""));
+                int lx = (int) Double.parseDouble(groundedOperator.get(4).toString().replace("[", "").replace("]", ""));
+                int ly = (int) Double.parseDouble(groundedOperator.get(5).toString().replace("[", "").replace("]", ""));
+                int lz = (int) Double.parseDouble(groundedOperator.get(6).toString().replace("[", "").replace("]", ""));
 
                 if (Math.pow(lx - x, 2) + Math.pow(ly - y, 2) + Math.pow(lz - z, 2) <= 1) {
                     return 0.5;
                 } else {
                     return 2.0;
                 }
-
+            case "!use_block_type":
+                return 0.0;
             case "!build-wall-starting":
                 return 0.0;
             case "!build-wall-finished":

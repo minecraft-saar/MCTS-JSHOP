@@ -24,6 +24,7 @@ public class SDMCMedium implements CostFunction {
                 case "!build-railing-starting":
                 case "!build-floor-finished":
                 case "!build-floor-starting":
+                case "!use_block_type":
                     return 0.0;
                 case "!build-row":
                     return 1.0;
@@ -40,7 +41,7 @@ public class SDMCMedium implements CostFunction {
                 case "!place-door":
                     return 2.0;
                 default:
-                    System.err.println("Unrecognized action name: " + operatorName);
+                    System.err.println("Unrecognized action name: " + operatorName + " in cost function Medium.");
                     System.exit(-1);
                     return 0.0;
             }

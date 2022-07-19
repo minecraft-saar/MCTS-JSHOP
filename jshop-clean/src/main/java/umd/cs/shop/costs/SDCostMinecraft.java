@@ -49,6 +49,8 @@ public class SDCostMinecraft implements CostFunction {
             case "!build-floor-finished":
             case "!build-floor-starting":
                 return 0.0;
+            case "!use_block_type":
+                return 10.0;
             case "!build-row":
                 return 4;
             case "!build-column":
@@ -62,7 +64,7 @@ public class SDCostMinecraft implements CostFunction {
             case "!remove":
                 return 5;
             default:
-                System.err.println("Unrecognized action name: " + operator_name);
+                System.err.println("Unrecognized action name: " + operator_name + " in CostMinecraft.");
                 System.exit(-1);
                 return 0;
         }
