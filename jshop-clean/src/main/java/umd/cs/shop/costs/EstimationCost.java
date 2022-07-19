@@ -213,24 +213,21 @@ public class EstimationCost extends NLGCost {
                             false);
                 }
             }
-            world.addAll(currentObject.getChildren());
-            world.add(currentObject);
+//            world.addAll(currentObject.getChildren());
+//            world.add(currentObject);
             returnValueNLG = nlgSystem.estimateCostForPlanningSystem(world, currentObject, it);
             System.out.printf("Cost NLG: %f%n", returnValueNLG);
             try {
-                writerCost.write("world: " + model + '\n');
+                writerCost.write("world: " + this.model + '\n');
                 writerCost.write("Cost NLG: " + returnValueNLG + '\n');
             } catch (IOException e) {
                 e.printStackTrace();
             }
         }
 
-        // model
-        long checkTime4 = System.nanoTime();
-        String model = this.model;
-
         // process world state data by using a parser
-        parser.setNewData(model);
+        long checkTime4 = System.nanoTime();
+        parser.setNewData(this.model);
         parser.convertIntoVector();
         float[][][][] inputDataNN = parser.getMatrix();
         long endCheck4 = System.nanoTime();

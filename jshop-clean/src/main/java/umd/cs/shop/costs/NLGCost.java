@@ -47,7 +47,7 @@ public class NLGCost implements CostFunction {
 
         if (writeNNData) {
             try {
-                File yourFile = new File("E:\\Bachelor_Arbeit\\jshop-cost-estimation\\jshop-clean\\NN-data-test-for-negative-costs.json");
+                File yourFile = new File("E:\\Bachelor_Arbeit\\jshop-cost-estimation\\jshop-clean\\NN-data-after-removing-duplicate-bug.json");
                 yourFile.createNewFile(); // if file already exists will do nothing
                 NNData = new FileWriter(yourFile);
                 NNData.write("{");
@@ -103,8 +103,8 @@ public class NLGCost implements CostFunction {
                         false);
             }
         }
-        world.addAll(currentObject.getChildren());
-        world.add(currentObject);
+//        world.addAll(currentObject.getChildren());
+//        world.add(currentObject);
         double returnValue = nlgSystem.estimateCostForPlanningSystem(world, currentObject, it);
 
         if (writeNNData) {

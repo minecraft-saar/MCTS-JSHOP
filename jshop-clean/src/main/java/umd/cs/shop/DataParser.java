@@ -11,8 +11,14 @@ import org.json.simple.JSONArray;
 import org.json.simple.parser.JSONParser;
 import org.json.simple.parser.ParseException;
 
+import java.io.BufferedWriter;
+import java.io.FileWriter;
+import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.List;
+import java.util.function.Predicate;
+import java.util.stream.Collectors;
 
 /**
  * Parser for the world state information. Used to prepare the data so that it can be fed to the NN.
@@ -28,6 +34,7 @@ public class DataParser {
     int numChannels;
     EstimationCost.NNType nnType;
     EstimationCost.ScenarioType scenarioType;
+    int[][] coloredBlocks;
 
     /**
      * @param use_target     boolean, whether target information should be in data
@@ -47,6 +54,7 @@ public class DataParser {
         this.numChannels = numChannels;
         this.nnType = nnType;
         this.scenarioType = scenarioType;
+        this.coloredBlocks = new int[][]{{0, 0, 0}, {4, 0, 2}};
     }
 
     /**
@@ -110,7 +118,7 @@ public class DataParser {
      *
      * @param key         json key such as "target"
      * @param coordinates empty arraylist into which the coordinates should be put
-     * @param target target og the current instruction, should be empty if currently something besides structures is being read
+     * @param target target of the current instruction, should be empty if currently something besides structures is being read
      */
     private void readFromKey(String key, ArrayList<int[]> coordinates, String target) {
         JSONArray blocks = (JSONArray) data.get(key); // get list of json objects belonging to given key
@@ -162,11 +170,12 @@ public class DataParser {
                             coordinates.add(new int[]{x, refCoords[1], z});
                         }
                     }
-                    // remove first and last block since those are the reference blocks
-                    coordinates.remove(0);
-                    coordinates.remove(coordinates.size() - 1);
+
+                    // remove first and last block since those are the reference blocks TODO use filters instead
+//                    coordinates.remove(0);
+//                    coordinates.remove(coordinates.size() - 1);
                     break;
-                case "Stairs": // untested
+                case "Stairs": // untested, TODO filter colored block
                     System.out.println(splitBlock);
                     int[] refCoordsStairs = new int[18];
 
@@ -200,7 +209,7 @@ public class DataParser {
                     }
                     System.out.println(coordinates);
                     break;
-                case "wall": // untested
+                case "wall": // untested, TODO filter colored block
                     System.out.println(splitBlock);
                     // get reference blocks
                     for (int j = 1; j < 4; j++) {
@@ -230,7 +239,7 @@ public class DataParser {
                             coordinates.add(new int[]{x, refCoords[1], refCoords[2]});
                         } // simple bridge
                     } else if (this.scenarioType == EstimationCost.ScenarioType.FancyBridge) {
-                        for (int z = refCoords[2]; z < (refCoords[5] + 1); z++) { // TODO untested
+                        for (int z = refCoords[2]; z < (refCoords[5] + 1); z++) { // TODO untested, filter colored blocks
                             coordinates.add(new int[]{refCoords[0], refCoords[1], z});
                         } // fancy bridge
                     }
@@ -267,7 +276,7 @@ public class DataParser {
      * @param coordinates empty arraylist of arraylists into which the coordinates should be put
      */
     private void readSpecialStructures(ArrayList<ArrayList<int[]>> coordinates) {
-        // get current object in order to structures that are equal
+        // get current object in order to skip? structures that are equal
         JSONArray targetList = (JSONArray) data.get("target");
         JSONArray targetInBrackets = (JSONArray) targetList.get(0);
         String target = (String) targetInBrackets.get(0);
@@ -299,6 +308,19 @@ public class DataParser {
         // int arrays are filled with zeros by default
         worldMatrix = new float[numChannels][dim[0]][dim[1]][dim[2]];
 
+        // filter out colored blocks
+        for (int[] cb : this.coloredBlocks) {
+            // define necessary predicates for current colored block
+            Predicate<int[]> filter_pred = ints -> !Arrays.equals(cb, ints);
+
+            // use streams to filter colored blocks
+            worldStateCoords = worldStateCoords.stream().filter(filter_pred).collect(Collectors.toCollection(ArrayList::new));
+            targetCoords = targetCoords.stream().filter(filter_pred).collect(Collectors.toCollection(ArrayList::new));
+            structureCoords.set(0, structureCoords.get(0).stream().filter(filter_pred).collect(Collectors.toCollection(ArrayList::new)));
+            structureCoords.set(1, structureCoords.get(1).stream().filter(filter_pred).collect(Collectors.toCollection(ArrayList::new)));
+            structureCoords.set(2, structureCoords.get(2).stream().filter(filter_pred).collect(Collectors.toCollection(ArrayList::new)));
+        }
+
         // mark currently present blocks
         for (int[] indices : worldStateCoords) {
             worldMatrix[0][indices[0]][indices[1]][indices[2]] = 1F;
@@ -308,19 +330,6 @@ public class DataParser {
         ArrayList<Integer> test_idx = new ArrayList<>();
         try {
             if (use_target) {
-//                if (nnType == EstimationCost.NNType.CNN) {
-//                    for (int[] indices : targetCoords) {
-//                        test_idx.add(indices[0]);
-//                        test_idx.add(indices[1]);
-//                        test_idx.add(indices[2]);
-//                        worldMatrix[1][indices[0]][indices[1]][indices[2]] = 1F;
-//                        test_idx.clear();
-//                    }
-//                } else if (nnType == EstimationCost.NNType.Simple) {
-//                    for (int[] indices : targetCoords) {
-//                        worldMatrix[0][indices[0]][indices[1]][indices[2]] = 0.5F;
-//                    }
-//                }
                 for (int[] indices : targetCoords) {
                     test_idx.add(indices[0]);
                     test_idx.add(indices[1]);
