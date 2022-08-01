@@ -22,7 +22,7 @@ public class NLGCost implements CostFunction {
     boolean weightsPresent;
     Double lowestCost;
     public FileWriter NNData;
-    public boolean writeNNData = false; // this was true before, just throws an error if I don't change it to false
+    public boolean writeNNData = true; // this was true before, just throws an error if I don't change it to false
     String model = "";
 
     public NLGCost(CostFunction.InstructionLevel ins, String weightFile) {
