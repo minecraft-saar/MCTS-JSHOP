@@ -45,18 +45,23 @@ Additional options for MCTS, their default is already set according to best perf
 * "-exp REALNUMBER": Set the exploration factor of MCTS to given real number  
 * "--randomSeed NUMBER": Set the seed of the random generator to NUMBER  
 
+Currently best config to start planning using the integrated NLG system:
+java -jar $PATH_TO_JAR $PATH_TO_DOMAIN $PATH_TO_PROBLEM -m 1000000 -t 1 -exp 10 -c NLG --level MEDIUM -e deadEnd -wf $PATH_TO_WEIGHT_FILE
+
+# NN Usage
+
+Do not forget to use the NN argument for COSTFUNCTION if you wish to use this (``-c NN``)!
+
 Additional options specifically for NN:
 * "-nnt TYPE" or "--nnType TYPE": Which type the pre-trained NN has (it is not possible to use just any NN, it has to be one that was trained by using the specific Python script), currently possible TYPEs are either "SimpleNN" or "CNN"
-* "-nnp PATH" or "--nnPath PATH": Path to the pre-trained NN; The default value assumes it to be in a folder called "cost-estimation" which is located in the same directory as this repository
+* "-nnp PATH" or "--nnPath PATH": Path to the pre-trained NN; The default value uses a pretrained model located at src/main/java/umd/cs/shop/costs/models/trained_model.zip.
 * "-cmp" or "--compare": Whether to run the NLG system next to the NN for cost estimation in order to compare the costs of the two
 * "-tar" or "--useTarget": Whether to use information of the current instruction target for the cost estimation
 * "-str" or "--useStructures": Whether to use information of existing structures for the cost estimation
 
-When using NNs, keep in mind that it may be necessary to change the data scaling in the code according to what the Python script has output for min and max values. The current values are sufficient for all currently available models and data, however. This program assumes that cost-estimation is cloned into the same directory as jshop. This means that when jshop is executed in the directory jshop-clean, the contents of cost-estimation are reachable through the relative path ``../../cost-estimation/``. It is important to use the proper argument line options during execution, e.g. fit the options to the options that were used for training the NN.
-Also, depending on which results you expect (fixed vs non-fixed versions), make sure to be using the correct ``bridge.lisp``-file.
+When using NNs, keep in mind that it may be necessary to change the data scaling in the code according to what the Python script has output for min and max values. The current values are sufficient for all currently available models and data, however. Also, depending on which results you expect (fixed vs non-fixed versions), make sure to be using the correct ``bridge.lisp``-file.
 
-Currently best config to start planning using the integrated NLG system:
-java -jar $PATH_TO_JAR $PATH_TO_DOMAIN $PATH_TO_PROBLEM -m 1000000 -t 1 -exp 10 -c NLG --level MEDIUM -e deadEnd -wf $PATH_TO_WEIGHT_FILE
+If you wish to train and use your own models, please refer to: https://github.com/minecraft-saar/cost-estimation
  
- Alternatively, a possible config to start planning using a trained NN is:
+A good possible config to start planning using a trained NN is:
  ``java -jar $PATH_TO_JAR $PATH_TO_DOMAIN $PATH_TO_PROBLEM -m 1000000 -t 10000 -exp 10 -c NN --level MEDIUM -e deadEnd -wf $PATH_TO_WEIGHT_FILE -nnt CNN -nnp NNPATH -tar -str``
