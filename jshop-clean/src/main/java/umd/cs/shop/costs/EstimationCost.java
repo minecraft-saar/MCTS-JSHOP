@@ -21,18 +21,21 @@ import java.nio.file.*;
 
 public class EstimationCost extends NLGCost {
 
+    // related to DJL model loading
     Model nn;
     Translator<Float[], Float> translator;
     Predictor<Float[], Float> predictor;
+
+    // parser-related
     DataParser parser;
     boolean useTarget;
     boolean useStructures;
     int numChannels;
-    NNType nnType;
+    NNType nnType;  // this option currently is not used at all
     int[] dim;
     ScenarioType scenarioType;
 
-    // things needed for cost comparison
+    // related to cost comparison
     boolean compare;
     MinecraftRealizer nlgSystem;
     public BufferedWriter writerCost;
@@ -44,16 +47,35 @@ public class EstimationCost extends NLGCost {
     double min = 2690.70126898D;
     double max = 128071.40159593D;
 
+    /**
+     * Types of NNs (Simple, CNN); currently not used anymore
+     */
     public enum NNType {
         Simple,
         CNN
     }
 
+    /**
+     * Types of scenarios, so things that are being built (small bridge, fancy bridge)
+     */
     public enum ScenarioType {
         SimpleBridge,
         FancyBridge
     }
 
+    /**
+     * A CostFunction that uses an NN instead of the NLG System to estimate costs instead of calculating them.
+     * Inherits from NLGCost and thus, only the initialization and getCost() are changed.
+     *
+     * @param ins instruction level, needed by NLGSystem base
+     * @param weightFile weight file, needed by NLGSystem base
+     * @param nnType type of model that should be used
+     * @param nnPath path to the pre-trained model
+     * @param compare whether the NN results should be directly compared to NLG system results
+     * @param useTarget whether target information is used for the NN
+     * @param useStructures whether information on structures is used for the NN
+     * @param scenarioType type of scenario that is the target of the instructions
+     */
     public EstimationCost(CostFunction.InstructionLevel ins, String weightFile, NNType nnType, String nnPath, boolean compare, boolean useTarget, boolean useStructures, ScenarioType scenarioType) {
         super(ins, weightFile);
         this.nnType = nnType;
@@ -63,15 +85,16 @@ public class EstimationCost extends NLGCost {
         this.scenarioType = scenarioType;
 
         // load pre-trained NN
-        if (this.scenarioType == ScenarioType.SimpleBridge) {
+        if (this.scenarioType == ScenarioType.SimpleBridge) { // model for simple bridge scenario
             nn = Model.newInstance("simpleBridge");
             this.dim = new int[]{5, 3, 3};
-        } else if (this.scenarioType == ScenarioType.FancyBridge) {
+        } else if (this.scenarioType == ScenarioType.FancyBridge) { // model for fancy bridge scenario
             nn = Model.newInstance("fancyBridge");
             this.dim = new int[]{3, 5, 9};
         } else {
             System.out.println("Careful - Invalid scenario type!");
         }
+        // load pre-trained model
         Path nnDir = Paths.get(nnPath);
         try {
             nn.load(nnDir);
@@ -108,19 +131,13 @@ public class EstimationCost extends NLGCost {
                 }
             }
 
+            // initialize variables that are used to track differences between NN and NLG system
             diffCosts = 0D;
             avgDiffCosts = 0D;
             countInstr = 0;
         }
 
-        // use options to determine correct data structure for NN
-//        if (useStructures) {
-//            numChannels = 5;
-//        } else if (useTarget && (nnType == NNType.CNN)) {
-//            numChannels = 2;
-//        } else if (nnType == NNType.Simple || (nnType == NNType.CNN)) {
-//            numChannels = 1;
-//        }
+        // based on given options, determine how many channels are needed for the data
         if (useStructures) {
             numChannels = 5;
         } else if (useTarget) {
@@ -163,6 +180,15 @@ public class EstimationCost extends NLGCost {
         predictor = nn.newPredictor(translator);
     }
 
+    /**
+     * Estimate the cost for a specific world state and instruction.
+     *
+     * @param state ???
+     * @param op ???
+     * @param groundedOperator ???
+     * @param approx ???
+     * @return estimated cost
+     */
     @Override
     public Double getCost(JSTState state, JSOperator op, JSTaskAtom groundedOperator, boolean approx) {
         System.out.println("--------");
@@ -213,9 +239,11 @@ public class EstimationCost extends NLGCost {
                             false);
                 }
             }
+            // remove the two lines below to fix the structures bug of the NLG system
 //            world.addAll(currentObject.getChildren());
 //            world.add(currentObject);
             returnValueNLG = nlgSystem.estimateCostForPlanningSystem(world, currentObject, it);
+            // print out results (both directly and into a file)
             System.out.printf("Cost NLG: %f%n", returnValueNLG);
             try {
                 writerCost.write("world: " + this.model + '\n');
@@ -250,18 +278,18 @@ public class EstimationCost extends NLGCost {
         long endCheck5 = System.nanoTime();
         // -------------------------------------------------------------------------------------------------------------
 
-        // estimate cost and reverse scaling
+        // estimate cost
         long checkTime6 = System.nanoTime();
         double returnValue = Double.POSITIVE_INFINITY;
         try {
             returnValue = predictor.predict(flattenedInputDataNN);
-            // inverse scaling
-            returnValue = (returnValue - 0D) / (1D - 0D);
-            returnValue = returnValue * (this.max - this.min) + this.min;
         } catch (TranslateException e) {
             System.out.println("An error occurred while estimating the costs using the NN.");
             e.printStackTrace();
         }
+        // reverse scaling
+        returnValue = (returnValue - 0D) / (1D - 0D);
+        returnValue = returnValue * (this.max - this.min) + this.min;
         long endCheck6 = System.nanoTime();
         // -------------------------------------------------------------------------------------------------------------
 
@@ -276,7 +304,7 @@ public class EstimationCost extends NLGCost {
             }
             System.out.println(returnValue);
             System.out.println(returnValueNLG);
-            if (returnValueNLG < 1000000000000.0D) {
+            if (returnValueNLG < 1000000000000.0D) { // calculate and print out average cost differences
                 diffCosts += Math.abs(returnValue - returnValueNLG);
                 avgDiffCosts = diffCosts / countInstr;
                 System.out.println("AVG COST DIFF: " + avgDiffCosts);

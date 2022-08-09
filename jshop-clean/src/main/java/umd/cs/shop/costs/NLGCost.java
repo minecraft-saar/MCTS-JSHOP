@@ -103,6 +103,7 @@ public class NLGCost implements CostFunction {
                         false);
             }
         }
+        // remove the two lines below to fix the structures bug of the NLG system
 //        world.addAll(currentObject.getChildren());
 //        world.add(currentObject);
         double returnValue = nlgSystem.estimateCostForPlanningSystem(world, currentObject, it);
