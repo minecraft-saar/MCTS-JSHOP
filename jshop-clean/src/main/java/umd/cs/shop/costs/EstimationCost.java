@@ -64,10 +64,10 @@ public class EstimationCost extends NLGCost {
 
         // load pre-trained NN
         if (this.scenarioType == ScenarioType.SimpleBridge) {
-            nn = Model.newInstance("trained_model.zip");
+            nn = Model.newInstance("simpleBridge");
             this.dim = new int[]{5, 3, 3};
         } else if (this.scenarioType == ScenarioType.FancyBridge) {
-            nn = Model.newInstance("trained_model_fancy.zip");
+            nn = Model.newInstance("fancyBridge");
             this.dim = new int[]{3, 5, 9};
         } else {
             System.out.println("Careful - Invalid scenario type!");
@@ -286,13 +286,13 @@ public class EstimationCost extends NLGCost {
         }
 
         long endTime = System.currentTimeMillis();
-        System.out.printf("Duration Check1: %d%n", (endCheck1 - checkTime1));
-        System.out.printf("Duration Check2: %d%n", (endCheck2 - checkTime2));
-        System.out.printf("Duration Check3: %d%n", (endCheck3 - checkTime3));
-        System.out.printf("Duration Check4: %d%n", (endCheck4 - checkTime4));
-        System.out.printf("Duration Check5: %d%n", (endCheck5 - checkTime5));
-        System.out.printf("Duration Check6: %d%n", (endCheck6 - checkTime6));
-        System.out.printf("Duration getCost: %d%n", (endTime - startTime));
+//        System.out.printf("Duration Check1: %d%n", (endCheck1 - checkTime1));
+//        System.out.printf("Duration Check2: %d%n", (endCheck2 - checkTime2));
+//        System.out.printf("Duration Check3: %d%n", (endCheck3 - checkTime3));
+//        System.out.printf("Duration Check4: %d%n", (endCheck4 - checkTime4));
+//        System.out.printf("Duration Check5: %d%n", (endCheck5 - checkTime5));
+//        System.out.printf("Duration Check6: %d%n", (endCheck6 - checkTime6));
+//        System.out.printf("Duration getCost: %d%n", (endTime - startTime));
         System.out.println("--------");
 
         return returnValue;

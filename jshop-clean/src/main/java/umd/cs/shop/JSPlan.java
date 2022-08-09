@@ -54,16 +54,32 @@ public class JSPlan extends JSTasks {
         planCost += pl.planCost;
     }
 
-    public void printPlan() {
+    public void printPlan(FileWriter planWriter) {
         JSTaskAtom t;
         JSUtil.print(" ( \n");
+        try {
+            planWriter.write(" ( \n");
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
         for (short i = 0; i < this.predicates.size(); i++) {
             t = (JSTaskAtom) this.predicates.elementAt(i);
             t.print();
             // Added in May 2
             JSUtil.print(" " + (String) this.costs.elementAt(i) + " \n"); // newline for better usability with simple architect
+            try {
+                planWriter.write(t.toStr().toString());
+                planWriter.write(" " + (String) this.costs.elementAt(i) + " \n");
+            } catch (IOException e) {
+                e.printStackTrace();
+            }
         }
         JSUtil.println(" ) ");
+        try {
+            planWriter.write(" ) ");
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
     }
 
     public void printPlanToFile (String planFile) {

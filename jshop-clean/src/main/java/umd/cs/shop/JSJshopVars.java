@@ -2,6 +2,9 @@ package umd.cs.shop;
 
 import umd.cs.shop.costs.CostFunction;
 
+import java.io.File;
+import java.io.FileWriter;
+import java.io.IOException;
 import java.util.Random;
 import java.util.Vector;
 
@@ -60,9 +63,17 @@ public class JSJshopVars {
         this.print = print;
         this.landmarks = landmarks;
         this.planFile = planFile;
+//        File newPlanFile = new File(this.planFile);
+        File newPlanFile = new File("NN_plans.plan");
+        try {
+            this.planWriter = new FileWriter(newPlanFile, true);
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
     }
 
     String planFile;
+    public FileWriter planWriter;
     long startTime;
     int treeDepth;
     int mctsRuns;
@@ -89,14 +100,14 @@ public class JSJshopVars {
         //Get current best reward if it exists
         Double foundCost = plan.planCost();
         long currentTime = System.currentTimeMillis();
-        //bestPlans.addElement(plan);
-        //JSUtil.println("Found a plan of cost " + foundCost + " in run " + mctsRuns + " after " + (currentTime - startTime) + " ms at depth " + depth);
-        //plan.printPlan();
+        bestPlans.addElement(plan);
+        JSUtil.println("Found a plan of cost " + foundCost + " in run " + mctsRuns + " after " + (currentTime - startTime) + " ms at depth " + depth);
+        plan.printPlan(this.planWriter);
         if (!planFound) {
             planFound = true;
             if(print)
                 JSUtil.println("Found first plan of cost " + foundCost + " in run " + mctsRuns + " after " + (currentTime - startTime) + " ms at depth " + depth);
-                plan.printPlan();
+                plan.printPlan(this.planWriter);
             bestCost = foundCost;
             this.bestPlans.addElement(plan);
         } else if (foundCost.compareTo(bestCost) < 0) {
@@ -104,7 +115,7 @@ public class JSJshopVars {
             bestCost = foundCost;
             if(print)
                 JSUtil.println("Found better plan of cost " + foundCost + " in run " + mctsRuns + " after " + (currentTime - startTime) + " ms at depth " + depth);
-                plan.printPlan();
+                plan.printPlan(this.planWriter);
         }
     }
 

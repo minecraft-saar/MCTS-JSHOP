@@ -112,7 +112,7 @@ public final class JSJshop implements Runnable {
     @Option(names = {"-nnt", "--nnType"}, defaultValue = "CNN", description = "Whether the trained NN is a simple one or a CNN")
     EstimationCost.NNType nnType;
 
-    @Option(names = {"-nnp", "--nnPath"}, defaultValue = "../../cost-estimation/nn/", description = "Path to the folder the trained NNs are in")
+    @Option(names = {"-nnp", "--nnPath"}, defaultValue = "src/main/java/umd/cs/shop/costs/models/trained_model.zip", description = "Path to the trained NN model")
     String nnPath;
 
     @Option(names = {"-cmp", "--compare"}, defaultValue = "false", description = "Whether to compare results between NN and NLG system during an NN run")
@@ -268,7 +268,7 @@ public final class JSJshop implements Runnable {
                 JSUtil.println("Reward for Given Plan: " + vars.bestPlans.lastElement().planCost());
                 JSUtil.println("********* PLAN *******");
                 if (vars.planFile.equals("NoFile.plan")) {
-                    vars.bestPlans.lastElement().printPlan();
+                    vars.bestPlans.lastElement().printPlan(vars.planWriter);
                 } else {
                     vars.bestPlans.lastElement().printPlanToFile(vars.planFile);
                 }
@@ -325,7 +325,7 @@ public final class JSJshop implements Runnable {
                     }
                     pair = (JSPairPlanTSListNodes) allPlans.elementAt(bestplanIndex);
                     JSUtil.println("Best Plan with cost " + bestPlanValue + ": ");
-                    pair.planS().plan().printPlan();
+                    pair.planS().plan().printPlan(vars.planWriter);
                 }
             }
         }

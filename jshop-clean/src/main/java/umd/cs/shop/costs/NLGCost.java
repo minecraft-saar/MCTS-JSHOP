@@ -165,21 +165,21 @@ public class NLGCost implements CostFunction {
         LinkedList<String> railing = new LinkedList<>();
         LinkedList<String> wall = new LinkedList<>();
         LinkedList<String> staircase = new LinkedList<>();
-        if (!(currentObject instanceof IntroductionMessage)) {
-            if (currentObject instanceof Block) {
-                blocks.add("[\"" + currentObject + "\"]");
-            } else if (currentObject instanceof Railing) {
-                railing.add("[\"" + currentObject + "\"]");
-            } else if (currentObject instanceof Floor) {
-                floor.add("[\"" + currentObject + "\"]");
-            } else if (currentObject instanceof Row) {
-                row.add("[\"" + currentObject + "\"]");
-            } else if (currentObject instanceof Stairs) {
-                staircase.add("[\"" + currentObject + "\"]");
-            } else if (currentObject instanceof Wall) {
-                wall.add("[\"" + currentObject + "\"]");
-            }
-        }
+//        if (!(currentObject instanceof IntroductionMessage)) {
+//            if (currentObject instanceof Block) {
+//                blocks.add("[\"" + currentObject + "\"]");
+//            } else if (currentObject instanceof Railing) {
+//                railing.add("[\"" + currentObject + "\"]");
+//            } else if (currentObject instanceof Floor) {
+//                floor.add("[\"" + currentObject + "\"]");
+//            } else if (currentObject instanceof Row) {
+//                row.add("[\"" + currentObject + "\"]");
+//            } else if (currentObject instanceof Stairs) {
+//                staircase.add("[\"" + currentObject + "\"]");
+//            } else if (currentObject instanceof Wall) {
+//                wall.add("[\"" + currentObject + "\"]");
+//            }
+//        }
         for (JSPredicateForm term : state.state().atoms()) {
             String name = (String) term.elementAt(0);
             MinecraftObject mco;
