@@ -6,6 +6,7 @@ import de.saar.coli.minecraft.MinecraftRealizer;
 import de.saar.minecraft.analysis.WeightEstimator;
 import umd.cs.shop.*;
 
+import javax.swing.*;
 import java.io.File;
 import java.io.FileWriter;
 import java.io.IOException;
@@ -47,7 +48,7 @@ public class NLGCost implements CostFunction {
 
         if (writeNNData) {
             try {
-                File yourFile = new File("E:\\Bachelor_Arbeit\\jshop-cost-estimation\\jshop-clean\\NN-data-after-removing-duplicate-bug.json");
+                File yourFile = new File("E:\\Bachelor_Arbeit\\jshop-cost-estimation\\jshop-clean\\new_format_test.json");
                 yourFile.createNewFile(); // if file already exists will do nothing
                 NNData = new FileWriter(yourFile);
                 NNData.write("{");
@@ -231,7 +232,7 @@ public class NLGCost implements CostFunction {
                     mco = createWall(term);
                     world.add(mco);
                     knownObjects.add(mco.getClass().getSimpleName().toLowerCase());
-                    wall.add("[\"" + mco + "\"]");
+                    this.formatForJSON(wall, mco);
                     if (itWall.left) {
                         Triple wallCoord = parseCoordinates(term);
                         if (wallCoord.equals(itWall.right)) {
@@ -244,7 +245,7 @@ public class NLGCost implements CostFunction {
                     mco = createRow(term);
                     world.add(mco);
                     knownObjects.add(mco.getClass().getSimpleName().toLowerCase());
-                    row.add("[\"" + mco + "\"]");
+                  this.formatForJSON(row, mco);
                     if (itRow.left) {
                         Triple rowCoord = parseCoordinates(term);
                         if (rowCoord.equals(itRow.right)) {
@@ -257,7 +258,7 @@ public class NLGCost implements CostFunction {
                     mco = createRailing(term);
                     world.add(mco);
                     knownObjects.add(mco.getClass().getSimpleName().toLowerCase());
-                    railing.add("[\"" + mco + "\"]");
+                    this.formatForJSON(railing, mco);
                     if (itRailing.left) {
                         Triple railingCoord = parseCoordinates(term);
                         if (railingCoord.equals(itRailing.right)) {
@@ -271,13 +272,13 @@ public class NLGCost implements CostFunction {
                     world.add(mco);
                     it.add(mco); //Floor is a special case right now, because we can only have one the it never changes
                     knownObjects.add(mco.getClass().getSimpleName().toLowerCase());
-                    floor.add("[\"" + mco + "\"]");
+                    this.formatForJSON(floor, mco);
                 }
                 case "stairs-at" -> {
                     mco = createStairs(term);
                     world.add(mco);
                     knownObjects.add(mco.getClass().getSimpleName().toLowerCase());
-                    staircase.add("[\"" + mco + "\"]");
+                    this.formatForJSON(staircase, mco);
                     if (itStairs.left) {
                         Triple stairsCoord = parseCoordinates(term);
                         if (stairsCoord.equals(itStairs.right)) {
@@ -305,12 +306,43 @@ public class NLGCost implements CostFunction {
         if (!staircase.isEmpty()) {
             model = model + "\"staircase\":" + staircase + ",";
         }
-        model = model + "\"target\":[[\"" + currentObject.toString() + "\"]]}";
+        model = model + "\"target\":" + this.formatTargetForJSON(currentObject) + "}";
+//        model = model + "\"target\":[[\"" + currentObject.toString() + "\"]]}"; TODO
         if (!foundItWall || !foundItRailing || !foundItRow || !foundItStairs) {
             JSUtil.println("could not find an it-object");
             System.exit(-1);
         }
         return new Pair<>(it, world);
+    }
+
+    /**
+     * Small helper function that correctly formats an object and its children (blocks) for usage in the json file.
+     *
+     * @param objectList list for current specific object that stores everything for the json file
+     * @param mco MinecraftObject of the current object
+     */
+    void formatForJSON(LinkedList<String> objectList, MinecraftObject mco) {
+        objectList.add("[{\"object\":[\"" + mco +"\"], \"children\":[");
+        for (Block b : mco.getBlocks()) {
+            objectList.set(objectList.size() - 1, objectList.getLast() + "[\"" + b + "\"],");
+        }
+        objectList.set(objectList.size() - 1, objectList.getLast().substring(0, objectList.getLast().length() - 1));
+        objectList.set(objectList.size() - 1, objectList.getLast() + "]}]");
+    }
+
+    /**
+     * Small helper function that correctly formats a target object and its children (blocks) for usage in the json file.
+     *
+     * @param currentObject MinecraftObject of the current target object
+     */
+    String formatTargetForJSON(MinecraftObject currentObject) {
+        String targetJSON = "[[{\"object\":[\"" + currentObject +"\"], \"children\":[";
+        for (Block b : currentObject.getBlocks()) {
+            targetJSON += "[\"" + b + "\"],";
+        }
+        targetJSON = targetJSON.substring(0, targetJSON.length() - 1);
+        targetJSON += "]}]]";
+        return targetJSON;
     }
 
     public MinecraftObject createFloor(JSPredicateForm term) {
