@@ -40,6 +40,8 @@ public class DataParser {
      * @param use_target     boolean, whether target information should be in data
      * @param use_structures boolean, whether information on existing structures should be in data
      * @param numChannels    int, number of channels the data should have, depending on NN type and method
+     * @param nnType         type of the NN that the data is parser for (Simple/CNN)
+     * @param scenarioType   type of the used scenario (SimpleBridge/FancyBridge)
      */
     public DataParser(Boolean use_target, Boolean use_structures, int numChannels, EstimationCost.NNType nnType, EstimationCost.ScenarioType scenarioType) {
         this.parser = new org.json.simple.parser.JSONParser();
@@ -89,12 +91,12 @@ public class DataParser {
     public void convertIntoVector() {
         // read world state
         ArrayList<int[]> blockCoordinates = new ArrayList<>();
-        readFromKey("block", blockCoordinates, "");
+        readFromKey("block", blockCoordinates);
 
         // read target
         ArrayList<int[]> targetCoordinates = new ArrayList<>();
         if (use_target) {
-            readFromKey("target", targetCoordinates, "");
+            readFromKey("target", targetCoordinates);
         }
 
         // read structures
@@ -118,9 +120,8 @@ public class DataParser {
      *
      * @param key         json key such as "target"
      * @param coordinates empty arraylist into which the coordinates should be put
-     * @param target target of the current instruction, should be empty if currently something besides structures is being read
      */
-    private void readFromKey(String key, ArrayList<int[]> coordinates, String target) {
+    public void readFromKey(String key, ArrayList<int[]> coordinates) {
         JSONArray blocks = (JSONArray) data.get(key); // get list of json objects belonging to given key
         // iterate through all json objects in the list
         for (int i = 0; i < blocks.size(); i++) {
@@ -148,7 +149,7 @@ public class DataParser {
 
                     // row
                     if (this.scenarioType == EstimationCost.ScenarioType.SimpleBridge) {
-                        for (int x = coords[2]; x < coords[0] + 5; x++) { // use coord as reference block
+                        for (int x = coords[0]; x < coords[0] + 5; x++) { // use coord as reference block
                             coordinates.add(new int[]{x, coords[1] + 1, coords[2]});
                         } // simple bridge
                     } else if (this.scenarioType == EstimationCost.ScenarioType.FancyBridge) {
@@ -275,20 +276,16 @@ public class DataParser {
      *
      * @param coordinates empty arraylist of arraylists into which the coordinates should be put
      */
-    private void readSpecialStructures(ArrayList<ArrayList<int[]>> coordinates) {
-        // get current object in order to skip? structures that are equal
-        JSONArray targetList = (JSONArray) data.get("target");
-        JSONArray targetInBrackets = (JSONArray) targetList.get(0);
-        String target = (String) targetInBrackets.get(0);
+    public void readSpecialStructures(ArrayList<ArrayList<int[]>> coordinates) {
         // parse coordinates of different structures
         if (data.containsKey("row")) {
-            readFromKey("row", coordinates.get(0), target);
+            readFromKey("row", coordinates.get(0));
         }
         if (data.containsKey("floor")) {
-            readFromKey("floor", coordinates.get(1), target);
+            readFromKey("floor", coordinates.get(1));
         }
         if (data.containsKey("railing")) {
-            readFromKey("railing", coordinates.get(2), target);
+            readFromKey("railing", coordinates.get(2));
         }
     }
 
@@ -304,7 +301,7 @@ public class DataParser {
      * @param structureCoords  coordinate list made of three sublists, each listing coordinates for their respective
      *                         structure type
      */
-    private void markBlockPositions(ArrayList<int[]> worldStateCoords, ArrayList<int[]> targetCoords, ArrayList<ArrayList<int[]>> structureCoords) {
+    public void markBlockPositions(ArrayList<int[]> worldStateCoords, ArrayList<int[]> targetCoords, ArrayList<ArrayList<int[]>> structureCoords) {
         // int arrays are filled with zeros by default
         worldMatrix = new float[numChannels][dim[0]][dim[1]][dim[2]];
 
