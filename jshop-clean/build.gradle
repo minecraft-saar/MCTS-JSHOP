@@ -60,6 +60,8 @@ dependencies {
 	implementation group: 'com.github.minecraft-saar', name: 'minecraft-nlg', version: '290ce47c6f139bcc22925078edaa33b2588006e2'
     implementation group: 'com.github.minecraft-saar', name: 'weight-estimator', version: 'b2813b71152d2ad126f3fcdf404b4046e5b42176'
     implementation group: 'ai.djl.pytorch', name: 'pytorch-engine', version: '0.15.0'
+    implementation 'org.junit.jupiter:junit-jupiter:5.7.0'
+    implementation 'org.junit.jupiter:junit-jupiter:5.7.0'
     runtimeOnly group: 'ai.djl.pytorch', name: 'pytorch-native-auto', version: '1.9.1'
     testImplementation group: 'org.slf4j', name: 'slf4j-simple', version: '1.7.36'
     implementation group: 'org.apache.clerezza.ext', name: 'org.json.simple', version: '0.4'

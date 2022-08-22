@@ -8,6 +8,7 @@ import de.saar.coli.minecraft.relationextractor.MinecraftObject;
 import de.saar.minecraft.analysis.WeightEstimator;
 import umd.cs.shop.*;
 import umd.cs.shop.DataParser;
+import umd.cs.shop.DataParserNeutral;
 
 import java.io.*;
 import java.util.*;
@@ -27,6 +28,7 @@ public class EstimationCost extends NLGCost {
     Predictor<Float[], Float> predictor;
 
     // parser-related
+//    DataParserNeutral parser;
     DataParser parser;
     boolean useTarget;
     boolean useStructures;
@@ -146,6 +148,7 @@ public class EstimationCost extends NLGCost {
             numChannels = 1;
         }
 
+//        parser = new DataParserNeutral(useTarget, useStructures, numChannels, nnType, scenarioType);
         parser = new DataParser(useTarget, useStructures, numChannels, nnType, scenarioType);
 
         // translator needed for loading torchscript model
@@ -213,7 +216,7 @@ public class EstimationCost extends NLGCost {
         if (currentObject instanceof IntroductionMessage intro) {
             if (knownObjects.contains(intro.name)) {
                 //make dead end
-                return 30000.0;
+                return 30000.0; // why is this number different from the one in NLGCost? when did that happen?
             } else {
                 return 0.000001;
             }
