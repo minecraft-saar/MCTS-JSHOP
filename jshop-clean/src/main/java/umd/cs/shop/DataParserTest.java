@@ -92,7 +92,11 @@ class DataParserTest {
                 for (int yAxis = 0; yAxis < worldMatrix[1][0].length; yAxis++) {
                     for (int zAxis = 0; zAxis < worldMatrix[1][0][0].length; zAxis++) {
                         if (worldMatrix[i][xAxis][yAxis][zAxis] != 0.0F) {
-                            world[xAxis][yAxis][zAxis] = structureNames[i];
+                            if (world[xAxis][yAxis][zAxis] == "B") {
+                                world[xAxis][yAxis][zAxis] = structureNames[i];
+                            } else {
+                                world[xAxis][yAxis][zAxis] += structureNames[i];
+                            }
                         }
                     }
                 }
@@ -162,7 +166,11 @@ class DataParserTest {
                 for (int yAxis = 0; yAxis < worldMatrix[1][0].length; yAxis++) {
                     for (int zAxis = 0; zAxis < worldMatrix[1][0][0].length; zAxis++) {
                         if (worldMatrix[i][xAxis][yAxis][zAxis] != 0.0F) {
-                            world[xAxis][yAxis][zAxis] = structureNames[i];
+                            if (world[xAxis][yAxis][zAxis] == "B") {
+                                world[xAxis][yAxis][zAxis] = structureNames[i];
+                            } else {
+                                world[xAxis][yAxis][zAxis] += structureNames[i];
+                            }
                         }
                     }
                 }
