@@ -3,7 +3,7 @@ package umd.cs.shop;
 import org.junit.jupiter.api.Test;
 import umd.cs.shop.costs.EstimationCost;
 
-import java.io.IOException;
+import java.io.*;
 import java.nio.file.Files;
 import java.nio.file.Path;
 
@@ -92,13 +92,50 @@ class DataParserTest {
      */
     @Test
     void testCompareParsers() {
-        String worldStateOld = visualizeParser(this.parserToTest);
-        String worldStateNew = visualizeParser(this.neutralParserToTest);
+        try {
+            // prepare file and readers
+            File oldFile = new File("test_old_complete.json");
+            File newFile = new File("test_neutral_complete.json");
+            FileReader oldReader = new FileReader(oldFile);
+            FileReader newReader = new FileReader(newFile);
+            BufferedReader oldBufferedReader = new BufferedReader(oldReader);
+            BufferedReader newBufferedReader = new BufferedReader(newReader);
+            String oldLine;
+            String newLine;
 
-        // compare the two
-        assert worldStateOld.equals(worldStateNew);
+            // read every line separately, assumes files are of equal length (if they weren't this comparison would be pointless anyway)
+            while((oldLine = oldBufferedReader.readLine()) != null) {
+                newLine = newBufferedReader.readLine();
+
+                // remove comma at end of line
+                oldLine = oldLine.substring(0, oldLine.length() - 1);
+                newLine = newLine.substring(0, newLine.length() - 1);
+
+                this.parserToTest.setNewData(oldLine);
+                this.neutralParserToTest.setNewData(newLine);
+
+                // get visualization
+                String worldStateOld = visualizeParser(this.parserToTest);
+                String worldStateNew = visualizeParser(this.neutralParserToTest);
+
+                // compare the two
+                assert worldStateOld.equals(worldStateNew);
+            }
+
+            oldReader.close();
+            newReader.close();
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
     }
 
+    /**
+     * Visualizes the parsed world state of a given parser.
+     * Keep in mind that the matrix does not have the same order as the minecraft world itself, so imagine flipping the matrix horizontally (I'm sorry.)
+     *
+     * @param parser, either DataParser or NewDataParser, parser that is visualized
+     * @return String depicting the world state in a somewhat readable form
+     */
     String visualizeParser(DataParser parser) {
         parser.convertIntoVector();
         float[][][][] worldMatrix = parser.getMatrix();
