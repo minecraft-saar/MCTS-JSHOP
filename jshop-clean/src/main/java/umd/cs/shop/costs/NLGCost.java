@@ -48,7 +48,7 @@ public class NLGCost implements CostFunction {
 
         if (writeNNData) {
             try {
-                File yourFile = new File("E:\\Bachelor_Arbeit\\jshop-cost-estimation\\jshop-clean\\new_format_test.json");
+                File yourFile = new File("E:\\Bachelor_Arbeit\\jshop-cost-estimation\\jshop-clean\\fancy_bridge_data_neutral_format.json");
                 yourFile.createNewFile(); // if file already exists will do nothing
                 NNData = new FileWriter(yourFile);
                 NNData.write("{");
@@ -232,8 +232,8 @@ public class NLGCost implements CostFunction {
                     mco = createWall(term);
                     world.add(mco);
                     knownObjects.add(mco.getClass().getSimpleName().toLowerCase());
-//                    this.formatForJSON(wall, mco);
-                    wall.add("[\"" + mco + "\"]");
+                    this.formatForJSON(wall, mco);
+//                    wall.add("[\"" + mco + "\"]");
                     if (itWall.left) {
                         Triple wallCoord = parseCoordinates(term);
                         if (wallCoord.equals(itWall.right)) {
@@ -246,8 +246,8 @@ public class NLGCost implements CostFunction {
                     mco = createRow(term);
                     world.add(mco);
                     knownObjects.add(mco.getClass().getSimpleName().toLowerCase());
-//                  this.formatForJSON(row, mco);
-                    row.add("[\"" + mco + "\"]");
+                  this.formatForJSON(row, mco);
+//                    row.add("[\"" + mco + "\"]");
                     if (itRow.left) {
                         Triple rowCoord = parseCoordinates(term);
                         if (rowCoord.equals(itRow.right)) {
@@ -260,8 +260,8 @@ public class NLGCost implements CostFunction {
                     mco = createRailing(term);
                     world.add(mco);
                     knownObjects.add(mco.getClass().getSimpleName().toLowerCase());
-//                    this.formatForJSON(railing, mco);
-                    railing.add("[\"" + mco + "\"]");
+                    this.formatForJSON(railing, mco);
+//                    railing.add("[\"" + mco + "\"]");
                     if (itRailing.left) {
                         Triple railingCoord = parseCoordinates(term);
                         if (railingCoord.equals(itRailing.right)) {
@@ -275,15 +275,15 @@ public class NLGCost implements CostFunction {
                     world.add(mco);
                     it.add(mco); //Floor is a special case right now, because we can only have one the it never changes
                     knownObjects.add(mco.getClass().getSimpleName().toLowerCase());
-//                    this.formatForJSON(floor, mco);
-                    floor.add("[\"" + mco + "\"]");
+                    this.formatForJSON(floor, mco);
+//                    floor.add("[\"" + mco + "\"]");
                 }
                 case "stairs-at" -> {
                     mco = createStairs(term);
                     world.add(mco);
                     knownObjects.add(mco.getClass().getSimpleName().toLowerCase());
-//                    this.formatForJSON(staircase, mco);
-                    staircase.add("[\"" + mco + "\"]");
+                    this.formatForJSON(staircase, mco);
+//                    staircase.add("[\"" + mco + "\"]");
                     if (itStairs.left) {
                         Triple stairsCoord = parseCoordinates(term);
                         if (stairsCoord.equals(itStairs.right)) {
@@ -311,8 +311,8 @@ public class NLGCost implements CostFunction {
         if (!staircase.isEmpty()) {
             model = model + "\"staircase\":" + staircase + ",";
         }
-//        model = model + "\"target\":" + this.formatTargetForJSON(currentObject) + "}";
-        model = model + "\"target\":[[\"" + currentObject.toString() + "\"]]}";
+        model = model + "\"target\":" + this.formatTargetForJSON(currentObject) + "}";
+//        model = model + "\"target\":[[\"" + currentObject.toString() + "\"]]}";
         if (!foundItWall || !foundItRailing || !foundItRow || !foundItStairs) {
             JSUtil.println("could not find an it-object");
             System.exit(-1);

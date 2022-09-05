@@ -147,9 +147,12 @@ public class EstimationCost extends NLGCost {
         } else if (nnType == NNType.Simple || (nnType == NNType.CNN)) {
             numChannels = 1;
         }
+        if (this.scenarioType == ScenarioType.FancyBridge) {
+            numChannels = 7;
+        } // TODO make num channels more flexible
 
-//        parser = new DataParserNeutral(useTarget, useStructures, numChannels, nnType, scenarioType);
-        parser = new DataParser(useTarget, useStructures, numChannels, nnType, scenarioType);
+        parser = new DataParserNeutral(useTarget, useStructures, numChannels, nnType, scenarioType);
+//        parser = new DataParser(useTarget, useStructures, numChannels, nnType, scenarioType);
 
         // translator needed for loading torchscript model
         // modeled after: https://docs.djl.ai/jupyter/load_pytorch_model.html
