@@ -11,7 +11,7 @@ With the option "-d" the output can be made more verbose with 1 being the lowest
 
 2. Monte Carlo Tree Search 
 
-java -jar PathToJAR DOMAINFILE PROBLEMFILE -m MCTSRUNS -c COSTFUNCTION -e EXPANSIONPOLICY [-b] [--recursiveSimulation NUMBER] [-nnt NNTYPE] [-nnp NNPATH]
+java -jar PathToJAR DOMAINFILE PROBLEMFILE -m MCTSRUNS -c COSTFUNCTION -e EXPANSIONPOLICY [-b] [--recursiveSimulation NUMBER]
 
 * MCTSRUNS can be any positive integer. 
 
