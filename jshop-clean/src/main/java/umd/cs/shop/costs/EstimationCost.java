@@ -75,7 +75,7 @@ public class EstimationCost extends NLGCost {
         this.useStructures = useStructures;
         this.scenarioType = scenarioType;
 
-        // load pre-trained NN
+        // prepare NN and dimensions for this scenario
         if (this.scenarioType == ScenarioType.SimpleBridge) { // model for simple bridge scenario
             nn = Model.newInstance("simpleBridge");
             this.dim = new int[]{5, 3, 3};
@@ -89,9 +89,7 @@ public class EstimationCost extends NLGCost {
         Path nnDir = Paths.get(nnPath);
         try {
             nn.load(nnDir);
-        } catch (IOException e) {
-            e.printStackTrace();
-        } catch (MalformedModelException e) {
+        } catch (IOException | MalformedModelException e) {
             e.printStackTrace();
         }
 
