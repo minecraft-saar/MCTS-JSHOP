@@ -53,7 +53,7 @@ java -jar $PATH_TO_JAR $PATH_TO_DOMAIN $PATH_TO_PROBLEM -m 1000000 -t 1 -exp 10 
 Do not forget to use the NN argument for COSTFUNCTION if you wish to use this (``-c NN``)!
 
 Additional options specifically for NN:
-* "-nnt TYPE" or "--nnType TYPE": Which type the pre-trained NN has (it is not possible to use just any NN, it has to be one that was trained by using the specific Python script), currently possible TYPEs are either "SimpleNN" or "CNN"
+* "-nc INT" or "--numStructs INT": How many special structures the scenario has
 * "-nnp PATH" or "--nnPath PATH": Path to the pre-trained NN; The default value uses a pretrained model located at src/main/java/umd/cs/shop/costs/models/trained_model.zip.
 * "-cmp" or "--compare": Whether to run the NLG system next to the NN for cost estimation in order to compare the costs of the two
 * "-tar" or "--useTarget": Whether to use information of the current instruction target for the cost estimation
@@ -65,4 +65,4 @@ When using NNs, keep in mind that it may be necessary to change the data scaling
 If you wish to train and use your own models, please refer to: https://github.com/minecraft-saar/cost-estimation
  
 A good possible config to start planning using a trained NN is:
- ``java -jar $PATH_TO_JAR $PATH_TO_DOMAIN $PATH_TO_PROBLEM -m 1000000 -t 10000 -exp 10 -c NN --level MEDIUM -e deadEnd -wf $PATH_TO_WEIGHT_FILE -nnt CNN -nnp NNPATH -tar -str``
+ ``java -jar $PATH_TO_JAR $PATH_TO_DOMAIN $PATH_TO_PROBLEM -m 1000000 -t 10000 -exp 10 -c NN --level MEDIUM -e deadEnd -wf $PATH_TO_WEIGHT_FILE -nnp NNPATH -tar -str``
