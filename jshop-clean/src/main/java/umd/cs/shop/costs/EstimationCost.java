@@ -28,12 +28,10 @@ public class EstimationCost extends NLGCost {
     Predictor<Float[], Float> predictor;
 
     // parser-related
-//    DataParserNeutral parser;
     DataParser parser;
     boolean useTarget;
     boolean useStructures;
     int numChannels;
-    NNType nnType;  // this option currently is not used at all
     int[] dim;
     ScenarioType scenarioType;
 
@@ -50,14 +48,6 @@ public class EstimationCost extends NLGCost {
     double max = 128071.40159593D;
 
     /**
-     * Types of NNs (Simple, CNN); currently not used anymore
-     */
-    public enum NNType {
-        Simple,
-        CNN
-    }
-
-    /**
      * Types of scenarios, so things that are being built (small bridge, fancy bridge)
      */
     public enum ScenarioType {
@@ -71,16 +61,15 @@ public class EstimationCost extends NLGCost {
      *
      * @param ins instruction level, needed by NLGSystem base
      * @param weightFile weight file, needed by NLGSystem base
-     * @param nnType type of model that should be used
+     * @param numStructs number of special structures that appear in this scenario
      * @param nnPath path to the pre-trained model
      * @param compare whether the NN results should be directly compared to NLG system results
      * @param useTarget whether target information is used for the NN
      * @param useStructures whether information on structures is used for the NN
      * @param scenarioType type of scenario that is the target of the instructions
      */
-    public EstimationCost(CostFunction.InstructionLevel ins, String weightFile, NNType nnType, String nnPath, boolean compare, boolean useTarget, boolean useStructures, ScenarioType scenarioType) {
+    public EstimationCost(CostFunction.InstructionLevel ins, String weightFile, int numStructs, String nnPath, boolean compare, boolean useTarget, boolean useStructures, ScenarioType scenarioType) {
         super(ins, weightFile);
-        this.nnType = nnType;
         this.compare = compare;
         this.useTarget = useTarget;
         this.useStructures = useStructures;
@@ -141,18 +130,15 @@ public class EstimationCost extends NLGCost {
 
         // based on given options, determine how many channels are needed for the data
         if (useStructures) {
-            numChannels = 5;
+            numChannels = 2 + numStructs;
         } else if (useTarget) {
             numChannels = 2;
-        } else if (nnType == NNType.Simple || (nnType == NNType.CNN)) {
+        } else {
             numChannels = 1;
         }
-        if (this.scenarioType == ScenarioType.FancyBridge) {
-            numChannels = 7;
-        } // TODO make num channels more flexible
 
-        parser = new DataParserNeutral(useTarget, useStructures, numChannels, nnType, scenarioType);
-//        parser = new DataParser(useTarget, useStructures, numChannels, nnType, scenarioType);
+        parser = new DataParserNeutral(useTarget, useStructures, numChannels, scenarioType);
+//        parser = new DataParser(useTarget, useStructures, numChannels, scenarioType);
 
         // translator needed for loading torchscript model
         // modeled after: https://docs.djl.ai/jupyter/load_pytorch_model.html

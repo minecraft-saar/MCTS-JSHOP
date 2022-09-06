@@ -22,11 +22,10 @@ class DataParserTest {
         Boolean use_target = true;
         Boolean use_structures = true;
         int numChannels = 5;
-        EstimationCost.NNType nnType = EstimationCost.NNType.CNN;
         EstimationCost.ScenarioType scenarioType = EstimationCost.ScenarioType.SimpleBridge;
 
         // neutral parser
-        this.neutralParserToTest = new DataParserNeutral(use_target, use_structures, numChannels, nnType, scenarioType);
+        this.neutralParserToTest = new DataParserNeutral(use_target, use_structures, numChannels, scenarioType);
         try {
             this.neutralData = Files.readString(Path.of("test_neutral.json"));
         } catch (IOException e) {
@@ -35,7 +34,7 @@ class DataParserTest {
         this.neutralParserToTest.setNewData(this.neutralData);
 
         // parser
-        this.parserToTest = new DataParser(use_target, use_structures, numChannels, nnType, scenarioType);
+        this.parserToTest = new DataParser(use_target, use_structures, numChannels, scenarioType);
         try {
             this.data = Files.readString(Path.of("test_old.json"));
         } catch (IOException e) {

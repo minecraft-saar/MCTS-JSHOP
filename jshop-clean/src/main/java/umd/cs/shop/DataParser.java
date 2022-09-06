@@ -32,7 +32,6 @@ public class DataParser {
     Boolean use_target;
     Boolean use_structures;
     int numChannels;
-    EstimationCost.NNType nnType;
     EstimationCost.ScenarioType scenarioType;
     int[][] coloredBlocks;
 
@@ -40,10 +39,9 @@ public class DataParser {
      * @param use_target     boolean, whether target information should be in data
      * @param use_structures boolean, whether information on existing structures should be in data
      * @param numChannels    int, number of channels the data should have, depending on NN type and method
-     * @param nnType         type of the NN that the data is parser for (Simple/CNN)
      * @param scenarioType   type of the used scenario (SimpleBridge/FancyBridge)
      */
-    public DataParser(Boolean use_target, Boolean use_structures, int numChannels, EstimationCost.NNType nnType, EstimationCost.ScenarioType scenarioType) {
+    public DataParser(Boolean use_target, Boolean use_structures, int numChannels, EstimationCost.ScenarioType scenarioType) {
         this.parser = new org.json.simple.parser.JSONParser();
         if (scenarioType == EstimationCost.ScenarioType.SimpleBridge) {
             this.dim = new int[]{5, 3, 3}; // for simple bridge
@@ -54,7 +52,6 @@ public class DataParser {
         this.use_target = use_target;
         this.use_structures = use_structures;
         this.numChannels = numChannels;
-        this.nnType = nnType;
         this.scenarioType = scenarioType;
         this.coloredBlocks = new int[][]{{0, 0, 0}, {4, 0, 2}};
     }

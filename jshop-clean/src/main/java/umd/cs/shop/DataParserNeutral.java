@@ -17,11 +17,10 @@ public class DataParserNeutral extends DataParser {
      * @param use_target     boolean, whether target information should be in data
      * @param use_structures boolean, whether information on existing structures should be in data
      * @param numChannels    int, number of channels the data should have, depending on NN type and method
-     * @param nnType         type of the NN that the data is parser for (Simple/CNN)
      * @param scenarioType   type of the used scenario (SimpleBridge/FancyBridge)
      */
-    public DataParserNeutral(Boolean use_target, Boolean use_structures, int numChannels, EstimationCost.NNType nnType, EstimationCost.ScenarioType scenarioType) {
-        super(use_target, use_structures, numChannels, nnType, scenarioType);
+    public DataParserNeutral(Boolean use_target, Boolean use_structures, int numChannels, EstimationCost.ScenarioType scenarioType) {
+        super(use_target, use_structures, numChannels, scenarioType);
 
         // structures and colored blocks for different scenario types, add new ones here
         if (scenarioType == EstimationCost.ScenarioType.SimpleBridge) {
