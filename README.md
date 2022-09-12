@@ -53,14 +53,19 @@ java -jar $PATH_TO_JAR $PATH_TO_DOMAIN $PATH_TO_PROBLEM -m 1000000 -t 1 -exp 10 
 Do not forget to use the NN argument for COSTFUNCTION if you wish to use this (``-c NN``)!
 
 Additional options specifically for NN:
-* "-nc INT" or "--numStructs INT": How many special structures the scenario has
-* "-nnp PATH" or "--nnPath PATH": Path to the pre-trained NN; The default value uses a pretrained model located at src/main/java/umd/cs/shop/costs/models/trained_model.zip.
-* "-cmp" or "--compare": Whether to run the NLG system next to the NN for cost estimation in order to compare the costs of the two
-* "-tar" or "--useTarget": Whether to use information of the current instruction target for the cost estimation
-* "-str" or "--useStructures": Whether to use information of existing structures for the cost estimation
-* "-st" or "--scenarioType": What kind of scenario is being used
+* "-nc INT" or "--numStructs INT": How many special structures the scenario has. Default is 3.
+* "-nnp NNPATH" or "--nnPath NNPATH": Path to the pre-trained NN; The default value uses a pretrained model located at src/main/java/umd/cs/shop/costs/models/trained_model.zip.
+* "-scp SCALERPATH" or "--scalerPath SCALERPATH": Path to a json file containing parameters for the scaler. Should contain the same values that were used for training the used model. The default file is located at src/main/java/umd/cs/shop/costs/models/scaler.json.
+* "-cmp" or "--compare": Whether to run the NLG system next to the NN for cost estimation in order to compare the costs of the two. Default is false (no comparison).
+* "-tar" or "--useTarget": Whether to use information of the current instruction target for the cost estimation. Default is false (no target usage).
+* "-str" or "--useStructures": Whether to use information of existing structures for the cost estimation. Default is false (no structures usage).
+* "-st" or "--scenarioType": What kind of scenario is being used. Default is "SimpleBridge".
 
-When using NNs, keep in mind that it may be necessary to change the data scaling in the code according to what the Python script has output for min and max values. The current values are sufficient for all currently available models and data, however. Also, depending on which results you expect (fixed vs non-fixed versions), make sure to be using the correct ``bridge.lisp``-file.
+When using NNs, keep in mind that it may be necessary to change the data scaling according to what the Python script has output for min and max values.
+For that, either create a new json file containing the parameters, or change the values in the default file.
+The values should always fit the values that were used for the training of the corresponding NN model.
+For more information on how to adapt to new scenarios, check the wiki.
+Also, depending on which results you expect (fixed vs non-fixed versions), make sure to be using the correct ``bridge.lisp``-file.
 
 If you wish to train and use your own models, please refer to: https://github.com/minecraft-saar/cost-estimation
  
