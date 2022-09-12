@@ -26,7 +26,6 @@ public class NLGCost implements CostFunction {
     public FileWriter NNData;
     public boolean writeNNData = true; // this was true before, just throws an error if I don't change it to false
     String model = "";
-    public BufferedWriter writerBugCheck; // check for negative and infinite
 
     public NLGCost(CostFunction.InstructionLevel ins, String weightFile) {
         instructionLevel = ins;
@@ -54,7 +53,6 @@ public class NLGCost implements CostFunction {
                 yourFile.createNewFile(); // if file already exists will do nothing
                 NNData = new FileWriter(yourFile);
                 NNData.write("{");
-                writerBugCheck = new BufferedWriter(new FileWriter("check_for_bugs_fancy.txt")); // check for negative and infinite
             } catch (IOException e) {
                 System.out.println("An error occurred while opening NN-data file");
                 e.printStackTrace();
@@ -143,25 +141,6 @@ public class NLGCost implements CostFunction {
         long endTime = System.currentTimeMillis();
         System.out.printf("Duration getCost: %d%n", (endTime - startTime));
         System.out.println("--------");
-
-        // check NLG return value for infinity or negative values
-        if (returnValue < 0) {
-            try {
-                writerBugCheck.write("NLG return is negative!" + '\n');
-                writerBugCheck.write("world: " + this.model + '\n');
-                writerBugCheck.write("cost: " + returnValue + '\n');
-            } catch (IOException e) {
-                e.printStackTrace();
-            }
-        } else if (returnValue > 1000000000000.0D) {
-            try {
-                writerBugCheck.write("NLG return is infinite!" + '\n');
-                writerBugCheck.write("world: " + this.model + '\n');
-                writerBugCheck.write("cost: " + returnValue + '\n');
-            } catch (IOException e) {
-                e.printStackTrace();
-            }
-        }
 
         return returnValue;
     }
