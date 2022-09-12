@@ -65,4 +65,5 @@ When using NNs, keep in mind that it may be necessary to change the data scaling
 If you wish to train and use your own models, please refer to: https://github.com/minecraft-saar/cost-estimation
  
 A good possible config to start planning using a trained NN is:
- ``java -jar $PATH_TO_JAR $PATH_TO_DOMAIN $PATH_TO_PROBLEM -m 1000000 -t 10000 -exp 10 -c NN --level MEDIUM -e deadEnd -wf $PATH_TO_WEIGHT_FILE -nnp NNPATH -tar -str``
+ ``java -jar $PATH_TO_JAR $PATH_TO_DOMAIN $PATH_TO_PROBLEM -m 1000000 -t 18000000 -exp 10 -c NN --level MEDIUM -e deadEnd -wf $PATH_TO_WEIGHT_FILE -nnp NNPATH -tar -str``
+ (The high value for timeout is just a general setting for good measure, otherwise the program may take too long when running NLG and NN at once for comparison.)
