@@ -115,6 +115,9 @@ public final class JSJshop implements Runnable {
     @Option(names = {"-nnp", "--nnPath"}, defaultValue = "src/main/java/umd/cs/shop/costs/models/trained_model.zip", description = "Path to the trained NN model")
     String nnPath;
 
+    @Option(names = {"-scp", "--scalerPath"}, defaultValue = "src/main/java/umd/cs/shop/costs/models/scaler.json", description = "Path to scaler configuration values")
+    String scalerPath;
+
     @Option(names = {"-cmp", "--compare"}, defaultValue = "false", description = "Whether to compare results between NN and NLG system during an NN run")
     boolean compare;
 
@@ -153,7 +156,7 @@ public final class JSJshop implements Runnable {
         if (level == CostFunction.InstructionLevel.NONE)
             variables.costFunction = CostFunction.getCostFunction(costFunctionName, variables.domain.getName());
         else
-            variables.costFunction = CostFunction.getCostFunction(costFunctionName, variables.domain.getName(), level, weightsFile, numStructs, nnPath, compare, useTarget, useStructures, scenarioType);
+            variables.costFunction = CostFunction.getCostFunction(costFunctionName, variables.domain.getName(), level, weightsFile, numStructs, nnPath, compare, useTarget, useStructures, scenarioType, scalerPath);
 
         if (landmarks) {
             JSUtil.println("Starting landmark parsing");
@@ -382,7 +385,7 @@ public final class JSJshop implements Runnable {
             this.bbPruningFast = true;
             this.recursiveSimulationBudget = 0;
             this.weightsFile = "";
-            vars.costFunction = CostFunction.getCostFunction(CostFunction.CostFunctionType.STATEDEPENDENT, "house", level, weightsFile, numStructs, nnPath, compare, useTarget, useStructures, scenarioType);
+            vars.costFunction = CostFunction.getCostFunction(CostFunction.CostFunctionType.STATEDEPENDENT, "house", level, weightsFile, numStructs, nnPath, compare, useTarget, useStructures, scenarioType, scalerPath);
 
             mctsSearch(vars);
             if (!vars.planFound) {

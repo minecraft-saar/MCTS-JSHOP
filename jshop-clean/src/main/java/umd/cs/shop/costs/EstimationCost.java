@@ -6,6 +6,9 @@ import de.saar.coli.minecraft.MinecraftRealizer;
 import de.saar.coli.minecraft.relationextractor.IntroductionMessage;
 import de.saar.coli.minecraft.relationextractor.MinecraftObject;
 import de.saar.minecraft.analysis.WeightEstimator;
+import org.json.simple.JSONObject;
+import org.json.simple.parser.JSONParser;
+import org.json.simple.parser.ParseException;
 import umd.cs.shop.*;
 import umd.cs.shop.DataParser;
 import umd.cs.shop.DataParserNeutral;
@@ -44,8 +47,8 @@ public class EstimationCost extends NLGCost {
     int countInstr;
 
     // scaling parameters
-    double min = 2690.70126898D;
-    double max = 128071.40159593D;
+    double min;
+    double max;
 
     /**
      * Types of scenarios, so things that are being built (small bridge, fancy bridge)
@@ -67,8 +70,9 @@ public class EstimationCost extends NLGCost {
      * @param useTarget whether target information is used for the NN
      * @param useStructures whether information on structures is used for the NN
      * @param scenarioType type of scenario that is the target of the instructions
+     * @param scalerPath string path to a file containing min and max values for the scaler
      */
-    public EstimationCost(CostFunction.InstructionLevel ins, String weightFile, int numStructs, String nnPath, boolean compare, boolean useTarget, boolean useStructures, ScenarioType scenarioType) {
+    public EstimationCost(CostFunction.InstructionLevel ins, String weightFile, int numStructs, String nnPath, boolean compare, boolean useTarget, boolean useStructures, ScenarioType scenarioType, String scalerPath) {
         super(ins, weightFile);
         this.compare = compare;
         this.useTarget = useTarget;
@@ -91,6 +95,17 @@ public class EstimationCost extends NLGCost {
             nn.load(nnDir);
         } catch (IOException | MalformedModelException e) {
             e.printStackTrace();
+        }
+
+        // read scaler parameters from file
+        try {
+            JSONParser scalerParser = new JSONParser();
+            Object obj = scalerParser.parse(new FileReader(scalerPath));
+            JSONObject scalerObject = (JSONObject)obj;
+            this.min = (double)scalerObject.get("min");
+            this.max = (double)scalerObject.get("max");
+        } catch (IOException | ParseException e) {
+            throw new RuntimeException(e);
         }
 
         // prepare everything needed for the comparison between NLG system and NN
