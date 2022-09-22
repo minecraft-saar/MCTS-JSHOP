@@ -54,32 +54,51 @@ public class JSPlan extends JSTasks {
         planCost += pl.planCost;
     }
 
-    public void printPlan(FileWriter planWriter) {
+    public void printPlan(JSJshopVars vars) {
         JSTaskAtom t;
         JSUtil.print(" ( \n");
-        try {
-            planWriter.write(" ( \n");
-        } catch (IOException e) {
-            e.printStackTrace();
-        }
-        for (short i = 0; i < this.predicates.size(); i++) {
-            t = (JSTaskAtom) this.predicates.elementAt(i);
-            t.print();
-            // Added in May 2
-            JSUtil.print(" " + (String) this.costs.elementAt(i) + " \n"); // newline for better usability with simple architect
+        if(vars.printAllPlans){
             try {
-                planWriter.write(t.toStr().toString());
-                planWriter.write(" " + (String) this.costs.elementAt(i) + " \n");
+                vars.planWriter.write(" ( \n");
             } catch (IOException e) {
                 e.printStackTrace();
             }
         }
-        JSUtil.println(" ) ");
-        try {
-            planWriter.write(" ) ");
-        } catch (IOException e) {
-            e.printStackTrace();
+
+        for (short i = 0; i < this.predicates.size(); i++) {
+            t = (JSTaskAtom) this.predicates.elementAt(i);
+            JSUtil.print(t.toStr().toString());
+            // Added in May 2
+            JSUtil.print(" " + (String) this.costs.elementAt(i) + " \n"); // newline for better usability with simple architect
+            if (vars.printAllPlans) {
+                try {
+                    vars.planWriter.write(t.toStr().toString());
+                    vars.planWriter.write(" " + (String) this.costs.elementAt(i) + " \n");
+                } catch (IOException e) {
+                    e.printStackTrace();
+                }
+            }
         }
+        JSUtil.println(" ) ");
+        if(vars.printAllPlans){
+            try {
+                vars.planWriter.write(" ) \n");
+            } catch (IOException e) {
+                e.printStackTrace();
+            }
+        }
+    }
+    public void printPlanCommandLine() {
+        JSTaskAtom t;
+        JSUtil.print(" ( \n");
+
+        for (short i = 0; i < this.predicates.size(); i++) {
+            t = (JSTaskAtom) this.predicates.elementAt(i);
+            JSUtil.print(t.toStr().toString());
+            // Added in May 2
+            JSUtil.print(" " + (String) this.costs.elementAt(i) + " \n"); // newline for better usability with simple architect
+        }
+        JSUtil.println(" ) ");
     }
 
     public void printPlanToFile (String planFile) {

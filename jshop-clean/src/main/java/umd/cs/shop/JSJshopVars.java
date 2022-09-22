@@ -19,7 +19,7 @@ public class JSJshopVars {
     //static boolean flagPlanning = false;// if true flags will appear
     // when planning the file
     static int flagLevel = 0; // the higher the more verbose the output
-    boolean allPlans = false;
+    boolean findAllPlans = false;
 
     /* Table for the parser */
     static final int leftPar = 0x0028;  //(
@@ -50,11 +50,11 @@ public class JSJshopVars {
     // in the following methods in JSUtil:
     // stringTokenizer/1, initParseTable/1 and printTokenizer/1
 
-    JSJshopVars(boolean bbPruning, boolean approx, boolean random, boolean print, boolean landmarks, String planFile){
+    JSJshopVars(boolean bbPruning, boolean approx, boolean random, boolean print, boolean landmarks, String planFile, String allPlansFile) {
         this.bbPruning = bbPruning;
         this.useApproximatedCostFunction = approx;
         this.random = random;
-        this.bestPlans = new Vector<>();
+        this.allPlans = new Vector<>();
         this.planFound = false;
         this.bestCost = Double.POSITIVE_INFINITY;
         this.treeDepth = 0;
@@ -64,11 +64,15 @@ public class JSJshopVars {
         this.landmarks = landmarks;
         this.planFile = planFile;
 //        File newPlanFile = new File(this.planFile);
-        File newPlanFile = new File("NN_plans.plan");
-        try {
-            this.planWriter = new FileWriter(newPlanFile, true);
-        } catch (IOException e) {
-            e.printStackTrace();
+        this.printAllPlans = !allPlansFile.equals("NoFile2.plan");
+        if (this.printAllPlans) {
+
+            File newPlanFile = new File(allPlansFile);
+            try {
+                this.planWriter = new FileWriter(newPlanFile);
+            } catch (IOException e) {
+                e.printStackTrace();
+            }
         }
     }
 
@@ -81,13 +85,15 @@ public class JSJshopVars {
 
     double bestCost;
 
+    boolean printAllPlans;
     boolean planFound;
     boolean random;
     boolean useApproximatedCostFunction;
     boolean bbPruning;
     boolean landmarks;
 
-    Vector<JSPlan> bestPlans;
+    Vector<JSPlan> allPlans;
+    JSPlan bestPlan;
     CostFunction costFunction;
     MCTSPolicy policy;
     MCTSExpand expansionPolicy;
@@ -96,30 +102,36 @@ public class JSJshopVars {
     Random randomGenerator;
     JSPlanningDomain domain;
 
-    void foundPlan(JSPlan plan, int depth){
+    void foundPlan(JSPlan plan, int depth) {
         //Get current best reward if it exists
         Double foundCost = plan.planCost();
         long currentTime = System.currentTimeMillis();
-        bestPlans.addElement(plan);
-        JSUtil.println("Found a plan of cost " + foundCost + " in run " + mctsRuns + " after " + (currentTime - startTime) + " ms at depth " + depth);
-        plan.printPlan(this.planWriter);
+        if (printAllPlans) {
+            allPlans.addElement(plan);
+            JSUtil.println("Found a plan of cost " + foundCost + " in run " + mctsRuns + " after " + (currentTime - startTime) + " ms at depth " + depth);
+            plan.printPlan(this);
+        }
         if (!planFound) {
             planFound = true;
-            if(print)
+            bestPlan = plan;
+            if (print){
                 JSUtil.println("Found first plan of cost " + foundCost + " in run " + mctsRuns + " after " + (currentTime - startTime) + " ms at depth " + depth);
-                plan.printPlan(this.planWriter);
+                plan.printPlan(this);
+            }
             bestCost = foundCost;
-            this.bestPlans.addElement(plan);
+            this.allPlans.addElement(plan);
         } else if (foundCost.compareTo(bestCost) < 0) {
-            this.bestPlans.addElement(plan);
+            this.allPlans.addElement(plan);
             bestCost = foundCost;
-            if(print)
+            bestPlan = plan;
+            if (print){
                 JSUtil.println("Found better plan of cost " + foundCost + " in run " + mctsRuns + " after " + (currentTime - startTime) + " ms at depth " + depth);
-                plan.printPlan(this.planWriter);
+                plan.printPlan(this);
+            }
         }
     }
 
-    public void initRandGen(int randomSeed){
+    public void initRandGen(int randomSeed) {
         this.randomGenerator = new Random(randomSeed);
     }
 
@@ -132,5 +144,7 @@ public class JSJshopVars {
     //static void SetFlagLevel(int val) {this.flagLevel = val;}
 
 
-    public boolean bb_pruning(double planCost) {   return this.bbPruning && planCost >= bestCost;}
+    public boolean bb_pruning(double planCost) {
+        return this.bbPruning && planCost >= bestCost;
+    }
 }

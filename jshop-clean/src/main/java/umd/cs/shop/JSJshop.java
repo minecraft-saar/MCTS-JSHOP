@@ -1,9 +1,6 @@
 package umd.cs.shop;
 
-import javax.swing.*;
 import java.io.*;
-import java.net.MalformedURLException;
-import java.net.URL;
 import java.util.HashSet;
 import java.util.Set;
 import java.util.Vector;
@@ -106,8 +103,11 @@ public final class JSJshop implements Runnable {
     @Option(names = {"-wf", "--weightsFile"}, defaultValue = "", description = "Json File for NLG weights")
     String weightsFile;
 
-    @Option(names = {"-p", "--planFile"}, defaultValue = "NoFile.plan", description = "Output File containing Plan")
+    @Option(names = {"-p", "--bestPlan"}, defaultValue = "NoFile.plan", description = "Output File containing best Plan")
     String planFile;
+
+    @Option(names = {"--allPlans"}, defaultValue = "NoFile2.plan", description = "Output File containing all Plans")
+    String allPlansFile;
 
     @Option(names = {"-nc", "--numStructs"}, defaultValue = "3", description = "How many special structures the scenario has")
     int numStructs;
@@ -136,7 +136,7 @@ public final class JSJshop implements Runnable {
         if(plan != null){
             return;
         }*/
-        JSJshopVars variables = new JSJshopVars(bbPruning, useApproximatedCostFunction, random, true, landmarks, planFile);
+        JSJshopVars variables = new JSJshopVars(bbPruning, useApproximatedCostFunction, random, true, landmarks, planFile, allPlansFile);
         JSUtil.println(variables.planFile);
         variables.startTime = System.currentTimeMillis();
         variables.initRandGen(this.randomSeed);
@@ -267,13 +267,21 @@ public final class JSJshop implements Runnable {
                 JSUtil.println("0 plans found");
             } else {
                 JSUtil.println("Plan found:");
+                if(vars.printAllPlans){
+                    try{
+                    vars.planWriter.close();
+                    } catch (IOException e){
+                        System.out.println("An error occurred while closing write all plans file");
+                        e.printStackTrace();
+                    }
+                }
                 //JSUtil.println("Solution in Tree: " + JSJshopVars.bestPlans.lastElement().isInTree());
-                JSUtil.println("Reward for Given Plan: " + vars.bestPlans.lastElement().planCost());
+                JSUtil.println("Reward for Best Plan: " + vars.bestPlan.planCost());
                 JSUtil.println("********* PLAN *******");
                 if (vars.planFile.equals("NoFile.plan")) {
-                    vars.bestPlans.lastElement().printPlan(vars.planWriter);
+                    vars.bestPlan.printPlanCommandLine();
                 } else {
-                    vars.bestPlans.lastElement().printPlanToFile(vars.planFile);
+                    vars.bestPlan.printPlanToFile(vars.planFile);
                 }
 
                 //for (JSPlan plan : vars.bestPlans) {
@@ -286,7 +294,7 @@ public final class JSJshop implements Runnable {
     }
 
     public void standardSearch(JSJshopVars vars) {
-        vars.allPlans = allPlans;
+        vars.findAllPlans = allPlans;
         JSJshopVars.flagLevel = detail;
         JSPairPlanTSListNodes pair;
         Vector<JSPairPlanTSListNodes> allPlans;
@@ -295,7 +303,7 @@ public final class JSJshop implements Runnable {
 
             prob = probSet.elementAt(k);
             JSUtil.println("Solving Problem :" + prob.Name());
-            allPlans = vars.domain.solveAll(prob, vars.allPlans, vars);
+            allPlans = vars.domain.solveAll(prob, vars.findAllPlans, vars);
             final long totalTime = System.currentTimeMillis();
             JSUtil.println("Total Time: " + (totalTime - vars.startTime));
             if (allPlans.isEmpty()) {
@@ -328,7 +336,7 @@ public final class JSJshop implements Runnable {
                     }
                     pair = (JSPairPlanTSListNodes) allPlans.elementAt(bestplanIndex);
                     JSUtil.println("Best Plan with cost " + bestPlanValue + ": ");
-                    pair.planS().plan().printPlan(vars.planWriter);
+                    pair.planS().plan().printPlanCommandLine();
                 }
             }
         }
@@ -370,7 +378,7 @@ public final class JSJshop implements Runnable {
             if (!parseSuccess) {
                 JSUtil.println("Problem File not parsed correctly");
             }
-            JSJshopVars vars = new JSJshopVars(false, true, false, false, false, "");
+            JSJshopVars vars = new JSJshopVars(false, true, false, false, false, "", "NoFile2.plan");
             vars.initRandGen(42);
             this.domain.axioms.setVars(vars);
             vars.domain = this.domain;
@@ -391,7 +399,7 @@ public final class JSJshop implements Runnable {
             if (!vars.planFound) {
                 return new JSPlan();
             }
-            return vars.bestPlans.lastElement();
+            return vars.bestPlan;
         }
 
         public InputStream transformWorld (InputStream world, String problem){
