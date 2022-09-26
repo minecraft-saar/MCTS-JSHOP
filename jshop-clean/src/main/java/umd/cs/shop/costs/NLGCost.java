@@ -72,8 +72,6 @@ public class NLGCost implements CostFunction {
 
     @Override
     public Double getCost(JSTState state, JSOperator op, JSTaskAtom groundedOperator, boolean approx) {
-        System.out.println("--------");
-        long startTime = System.currentTimeMillis();
         if (groundedOperator.get(0).equals("!place-block-hidden") ||
                 groundedOperator.get(0).equals("!remove-it-row") ||
                 groundedOperator.get(0).equals("!remove-it-railing") ||
@@ -137,10 +135,6 @@ public class NLGCost implements CostFunction {
                         false);
             }
         }
-
-        long endTime = System.currentTimeMillis();
-        System.out.printf("Duration getCost: %d%n", (endTime - startTime));
-        System.out.println("--------");
 
         return returnValue;
     }
