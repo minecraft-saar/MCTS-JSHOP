@@ -35,7 +35,8 @@ java -jar PathToJAR DOMAINFILE PROBLEMFILE -m MCTSRUNS -c COSTFUNCTION -e EXPANS
   If the option "NLG" or "STATEDEPENDENT" is chosen, the abstraction level for Minecraft instructions can be chosen by adding option "--level ABSTRACTION". ABSTRACTION can be "BLOCK", "MEDIUM" or "HIGHLEVEL".  
 
 Additional options for MCTS, their default is already set according to best performance:  
-* "-p" or "--planFile" Plan will be printed into File with this name, will overwrite anything already in File and create new File if none with that name is present
+* "-p FILENAME" or "--planFile FILENAME" Best plan will be printed into file with name FILENAME, will overwrite anything already in File and create new File if none with that name is present
+* "--allPlans FILENAME" All found plans will be printed into file with name FILENAME, will overwrite anything already in File and create new File if none with that name is present
 * "--noRec": Disables the collapsing of MCTS Search Nodes. Really bad for performance  
 * "--noRandom": The first MCTS run will not include any randomness and follow the method ordering given in the domain  
 * "--printTree": Prints a .dot style output of the MCTS search tree  
