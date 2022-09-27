@@ -237,14 +237,6 @@ public class EstimationCost extends NLGCost {
 //            world.addAll(currentObject.getChildren());
 //            world.add(currentObject);
             returnValueNLG = nlgSystem.estimateCostForPlanningSystem(world, currentObject, it);
-            // print out results (both directly and into a file)
-            System.out.printf("Cost NLG: %f%n", returnValueNLG);
-            try {
-                writerCost.write("world: " + this.model + '\n');
-                writerCost.write("Cost NLG: " + returnValueNLG + '\n');
-            } catch (IOException e) {
-                e.printStackTrace();
-            }
         }
 
         // process world state data by using a parser
@@ -279,23 +271,23 @@ public class EstimationCost extends NLGCost {
         returnValue = returnValue * (this.max - this.min) + this.min;
 
 //        System.out.printf("Cost NN: %f%n", returnValue);
-        // do comparisons between NLG system and NN
-        if (this.compare) {
-            try {
+        // do comparisons between NLG system and NN and print them into file
+        try {
+            if (this.compare) {
+                writerCost.write("world: " + this.model + '\n');
+                writerCost.write("Cost NLG: " + returnValueNLG + '\n');
                 writerCost.write("Cost NN: " + returnValue + '\n');
+                if (returnValueNLG < 1000000000000.0D) { // calculate and print out average cost differences
+                    diffCosts += Math.abs(returnValue - returnValueNLG);
+                    avgDiffCosts = diffCosts / countInstr;
+                    writerCost.write("AVG COST DIFF: " + avgDiffCosts + '\n');
+                } else {  // ignore comparision if NLG prediction is infinity
+                    countInstr--;
+                }
                 writerCost.write("------------" + '\n');
-            } catch (IOException e) {
-                e.printStackTrace();
             }
-            System.out.println(returnValue);
-            System.out.println(returnValueNLG);
-            if (returnValueNLG < 1000000000000.0D) { // calculate and print out average cost differences
-                diffCosts += Math.abs(returnValue - returnValueNLG);
-                avgDiffCosts = diffCosts / countInstr;
-                System.out.println("AVG COST DIFF: " + avgDiffCosts);
-            } else {  // ignore comparision if NLG prediction is infinity
-                countInstr--;
-            }
+        } catch (IOException e) {
+            e.printStackTrace();
         }
 
         return returnValue;
