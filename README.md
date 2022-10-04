@@ -57,7 +57,7 @@ Additional options specifically for NN:
 * "-nc INT" or "--numStructs INT": How many special structures the scenario has. Default is 3.
 * "-nnp NNPATH" or "--nnPath NNPATH": Path to the pre-trained NN; The default value uses a pretrained model located at src/main/java/umd/cs/shop/costs/models/trained_model.zip.
 * "-scp SCALERPATH" or "--scalerPath SCALERPATH": Path to a json file containing parameters for the scaler. Should contain the same values that were used for training the used model. The default file is located at src/main/java/umd/cs/shop/costs/models/scaler.json.
-* "-cmp" or "--compare": Whether to run the NLG system next to the NN for cost estimation in order to compare the costs of the two. Default is false (no comparison).
+* "-cmp" or "--compare": Whether to run the NLG system next to the NN for cost estimation in order to compare the costs of the two. The results will be printed into  the file ``cost_comparison.txt`` inside of the ``jshop-clean`` folder. Default is false (no comparison).
 * "-tar" or "--useTarget": Whether to use information of the current instruction target for the cost estimation. Default is false (no target usage).
 * "-str" or "--useStructures": Whether to use information of existing structures for the cost estimation. Default is false (no structures usage).
 * "-st" or "--scenarioType": What kind of scenario is being used. Default is "SimpleBridge".
