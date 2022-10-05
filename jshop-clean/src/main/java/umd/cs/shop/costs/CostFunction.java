@@ -52,12 +52,12 @@ public interface CostFunction {
         return null;
     }
 
-    public static CostFunction getCostFunction(CostFunctionType costFunctionName, String domainName, InstructionLevel level, String weightFile, int numStructs, String nnPath, Boolean compare, Boolean useTarget, Boolean useStructures, EstimationCost.ScenarioType scenarioType, String scalerPath) {
+    public static CostFunction getCostFunction(CostFunctionType costFunctionName, String domainName, InstructionLevel level, String weightFile, String nnPath, Boolean compare, Boolean useTarget, Boolean useStructures, EstimationCost.ScenarioType scenarioType, String scalerPath) {
         if(costFunctionName == CostFunctionType.NLG){
             return new NLGCost(level, weightFile);
         }
         else if (costFunctionName == CostFunctionType.NN) {
-            return new EstimationCost(level, weightFile, numStructs, nnPath, compare, useTarget, useStructures, scenarioType, scalerPath);
+            return new EstimationCost(level, weightFile, nnPath, compare, useTarget, useStructures, scenarioType, scalerPath);
         }
         switch (level) {
             case BLOCK:

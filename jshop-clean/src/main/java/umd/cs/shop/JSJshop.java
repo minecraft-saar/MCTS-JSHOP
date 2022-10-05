@@ -109,9 +109,6 @@ public final class JSJshop implements Runnable {
     @Option(names = {"--allPlans"}, defaultValue = "NoFile2.plan", description = "Output File containing all Plans")
     String allPlansFile;
 
-    @Option(names = {"-nc", "--numStructs"}, defaultValue = "3", description = "How many special structures the scenario has")
-    int numStructs;
-
     @Option(names = {"-nnp", "--nnPath"}, defaultValue = "src/main/java/umd/cs/shop/costs/models/trained_model.zip", description = "Path to the trained NN model")
     String nnPath;
 
@@ -156,7 +153,7 @@ public final class JSJshop implements Runnable {
         if (level == CostFunction.InstructionLevel.NONE)
             variables.costFunction = CostFunction.getCostFunction(costFunctionName, variables.domain.getName());
         else
-            variables.costFunction = CostFunction.getCostFunction(costFunctionName, variables.domain.getName(), level, weightsFile, numStructs, nnPath, compare, useTarget, useStructures, scenarioType, scalerPath);
+            variables.costFunction = CostFunction.getCostFunction(costFunctionName, variables.domain.getName(), level, weightsFile, nnPath, compare, useTarget, useStructures, scenarioType, scalerPath);
 
         if (landmarks) {
             JSUtil.println("Starting landmark parsing");
@@ -393,7 +390,7 @@ public final class JSJshop implements Runnable {
             this.bbPruningFast = true;
             this.recursiveSimulationBudget = 0;
             this.weightsFile = "";
-            vars.costFunction = CostFunction.getCostFunction(CostFunction.CostFunctionType.STATEDEPENDENT, "house", level, weightsFile, numStructs, nnPath, compare, useTarget, useStructures, scenarioType, scalerPath);
+            vars.costFunction = CostFunction.getCostFunction(CostFunction.CostFunctionType.STATEDEPENDENT, "house", level, weightsFile, nnPath, compare, useTarget, useStructures, scenarioType, scalerPath);
 
             mctsSearch(vars);
             if (!vars.planFound) {

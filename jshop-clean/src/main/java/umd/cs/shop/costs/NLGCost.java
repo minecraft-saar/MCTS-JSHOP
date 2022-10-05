@@ -49,7 +49,7 @@ public class NLGCost implements CostFunction {
 
         if (writeNNData) {
             try {
-                File yourFile = new File("E:\\Bachelor_Arbeit\\jshop-cost-estimation\\jshop-clean\\fancy_bridge_data_neutral_format.json");
+                File yourFile = new File("E:\\Bachelor_Arbeit\\jshop-cost-estimation\\jshop-clean\\fancy_bridge_NN_data_neutral_format.json");
                 yourFile.createNewFile(); // if file already exists will do nothing
                 NNData = new FileWriter(yourFile);
                 NNData.write("{");

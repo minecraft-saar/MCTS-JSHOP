@@ -34,6 +34,7 @@ public class EstimationCost extends NLGCost {
     DataParser parser;
     boolean useTarget;
     boolean useStructures;
+    int numStructs;
     int numChannels;
     int[] dim;
     ScenarioType scenarioType;
@@ -64,7 +65,6 @@ public class EstimationCost extends NLGCost {
      *
      * @param ins instruction level, needed by NLGSystem base
      * @param weightFile weight file, needed by NLGSystem base
-     * @param numStructs number of special structures that appear in this scenario
      * @param nnPath path to the pre-trained model
      * @param compare whether the NN results should be directly compared to NLG system results
      * @param useTarget whether target information is used for the NN
@@ -72,7 +72,7 @@ public class EstimationCost extends NLGCost {
      * @param scenarioType type of scenario that is the target of the instructions
      * @param scalerPath string path to a file containing min and max values for the scaler
      */
-    public EstimationCost(CostFunction.InstructionLevel ins, String weightFile, int numStructs, String nnPath, boolean compare, boolean useTarget, boolean useStructures, ScenarioType scenarioType, String scalerPath) {
+    public EstimationCost(CostFunction.InstructionLevel ins, String weightFile, String nnPath, boolean compare, boolean useTarget, boolean useStructures, ScenarioType scenarioType, String scalerPath) {
         super(ins, weightFile);
         this.compare = compare;
         this.useTarget = useTarget;
@@ -83,9 +83,11 @@ public class EstimationCost extends NLGCost {
         if (this.scenarioType == ScenarioType.SimpleBridge) { // model for simple bridge scenario
             nn = Model.newInstance("simpleBridge");
             this.dim = new int[]{5, 3, 3};
+            this.numStructs = 3;
         } else if (this.scenarioType == ScenarioType.FancyBridge) { // model for fancy bridge scenario
             nn = Model.newInstance("fancyBridge");
             this.dim = new int[]{3, 5, 9};
+            this.numStructs = 5;
         } else {
             System.out.println("Careful - Invalid scenario type!");
         }
@@ -143,7 +145,7 @@ public class EstimationCost extends NLGCost {
 
         // based on given options, determine how many channels are needed for the data
         if (useStructures) {
-            numChannels = 2 + numStructs;
+            numChannels = 2 + this.numStructs;
         } else if (useTarget) {
             numChannels = 2;
         } else {
@@ -270,7 +272,6 @@ public class EstimationCost extends NLGCost {
         returnValue = (returnValue - 0D) / (1D - 0D);
         returnValue = returnValue * (this.max - this.min) + this.min;
 
-//        System.out.printf("Cost NN: %f%n", returnValue);
         // do comparisons between NLG system and NN and print them into file
         try {
             if (this.compare) {

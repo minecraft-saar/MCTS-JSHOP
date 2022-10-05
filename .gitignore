@@ -43,3 +43,7 @@ weights-time.json
 jshop-clean/output.txt
 jshop-clean/cost_comparison.txt
 jshop-clean/NN-data-random.json
+
+# other program output
+allPlans.txt
+NN_plans.plan
