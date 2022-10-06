@@ -45,6 +45,7 @@ Additional options for MCTS, their default is already set according to best perf
 * "-bf": Use branch and bound pruning and fastSimulations  
 * "-exp REALNUMBER": Set the exploration factor of MCTS to given real number  
 * "--randomSeed NUMBER": Set the seed of the random generator to NUMBER  
+* "-t NUMBER" or "--timeout NUMBER": sets a time limit in milliseconds after which the program is ended if still running. For simple scenarios such as the simple bridge it is fine to just set it as high as it needs to be to never be relevant, but for more complex scenarios such as fancy bridge it can make sense to set a real one such as 30 minutes (1800000 ms), since it has troubles ending otherwise.
 
 Currently best config to start planning using the integrated NLG system:
 java -jar $PATH_TO_JAR $PATH_TO_DOMAIN $PATH_TO_PROBLEM -m 1000000 -t 1 -exp 10 -c NLG --level MEDIUM -e deadEnd -wf $PATH_TO_WEIGHT_FILE
